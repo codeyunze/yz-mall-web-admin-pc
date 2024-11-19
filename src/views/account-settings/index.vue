@@ -162,7 +162,7 @@ getMine().then(res => {
         clear: both;
         content: "";
         background: var(--el-color-primary);
-        border-radius: 3px;
+        border-radius: 8px;
       }
     }
   }

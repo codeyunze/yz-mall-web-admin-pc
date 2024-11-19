@@ -96,7 +96,7 @@ const cardLogoClass = computed(() => [
   margin-bottom: 12px;
   overflow: hidden;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 8px;
 
   &_detail {
     flex: 1;

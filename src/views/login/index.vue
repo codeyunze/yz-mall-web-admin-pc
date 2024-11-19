@@ -53,7 +53,13 @@ const { initStorage } = useLayout();
 initStorage();
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
-const { title, getDropdownItemStyle, getDropdownItemClass } = useNav();
+const {
+  title,
+  getDropdownItemStyle,
+  getDropdownItemClass,
+  icpRecord,
+  publicNetworkRecord
+} = useNav();
 const { locale, translationCh, translationEn } = useTranslationLang();
 
 const ruleForm = reactive({
@@ -340,6 +346,27 @@ watch(loginDay, value => {
         target="_blank"
       >
         &nbsp;{{ title }}
+      </a>
+      <img
+        alt="备案图标"
+        src="/public/national-emblem-icon.png"
+        height="20"
+        width="18"
+        style="margin: 0 5px 0 20px"
+      />
+      <a
+        href="https://beian.mps.gov.cn/#/query/webSearch"
+        rel="noreferrer"
+        target="_blank"
+      >
+        {{ publicNetworkRecord }}
+      </a>
+      <a
+        href="https://beian.miit.gov.cn/"
+        target="_blank"
+        style="margin-left: 20px"
+      >
+        {{ icpRecord }}
       </a>
     </div>
   </div>

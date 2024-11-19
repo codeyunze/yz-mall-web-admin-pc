@@ -5,7 +5,8 @@ const TITLE = getConfig("Title");
 </script>
 
 <template>
-  <footer
+  <div />
+  <!--<footer
     class="layout-footer text-[rgba(0,0,0,0.6)] dark:text-[rgba(220,220,242,0.8)]"
   >
     Copyright © 2020-present
@@ -16,7 +17,7 @@ const TITLE = getConfig("Title");
     >
       &nbsp;{{ TITLE }}
     </a>
-  </footer>
+  </footer>-->
 </template>
 
 <style lang="scss" scoped>

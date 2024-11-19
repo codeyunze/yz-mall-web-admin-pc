@@ -89,6 +89,14 @@ export function useNav() {
     return $config.Title;
   });
 
+  const icpRecord = computed(() => {
+    return $config.ICPRecord;
+  });
+
+  const publicNetworkRecord = computed(() => {
+    return $config.PublicNetworkRecord;
+  });
+
   /** 动态title */
   function changeTitle(meta: routeMetaType) {
     const Title = getConfig().Title;
@@ -149,6 +157,8 @@ export function useNav() {
 
   return {
     title,
+    icpRecord,
+    publicNetworkRecord,
     device,
     layout,
     logout,
