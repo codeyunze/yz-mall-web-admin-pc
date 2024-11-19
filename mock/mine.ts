@@ -8,7 +8,7 @@ export default defineFakeRoute([
     method: "get",
     response: () => {
       return {
-        success: true,
+        code: 0,
         data: {
           avatar: "https://avatars.githubusercontent.com/u/44761321",
           username: "admin",
@@ -46,12 +46,10 @@ export default defineFakeRoute([
         }
       ];
       return {
-        success: true,
+        code: number,
         data: {
-          list,
-          total: list.length, // 总条目数
-          pageSize: 10, // 每页显示条目个数
-          currentPage: 1 // 当前页数
+          items: list,
+          total: list.length // 总条目数
         }
       };
     }

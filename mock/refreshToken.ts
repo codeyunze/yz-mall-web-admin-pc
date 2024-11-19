@@ -3,12 +3,13 @@ import { defineFakeRoute } from "vite-plugin-fake-server/client";
 // 模拟刷新token接口
 export default defineFakeRoute([
   {
-    url: "/refresh-token",
+    url: "/refreshToken",
     method: "post",
     response: ({ body }) => {
       if (body.refreshToken) {
         return {
-          success: true,
+          code: 0,
+          msg: "访问令牌更新成功",
           data: {
             accessToken: "eyJhbGciOiJIUzUxMiJ9.newAdmin",
             refreshToken: "eyJhbGciOiJIUzUxMiJ9.newAdminRefresh",

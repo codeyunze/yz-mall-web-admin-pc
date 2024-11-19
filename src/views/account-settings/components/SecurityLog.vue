@@ -56,10 +56,8 @@ const columns: TableColumnList = [
 async function onSearch() {
   loading.value = true;
   const { data } = await getMineLogs();
-  dataList.value = data.list;
+  dataList.value = data.items;
   pagination.total = data.total;
-  pagination.pageSize = data.pageSize;
-  pagination.currentPage = data.currentPage;
 
   setTimeout(() => {
     loading.value = false;

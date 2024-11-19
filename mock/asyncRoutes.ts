@@ -17,6 +17,15 @@ const systemManagementRouter = {
   },
   children: [
     {
+      path: "/system/user/info",
+      name: "SystemUserPage",
+      meta: {
+        icon: "ep:user-filled",
+        title: "menus.pureUser",
+        roles: ["admin"]
+      }
+    },
+    {
       path: "/system/user/index",
       name: "SystemUser",
       meta: {

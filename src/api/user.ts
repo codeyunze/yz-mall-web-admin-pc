@@ -1,7 +1,9 @@
 import { http } from "@/utils/http";
+// import { baseUrlApi } from "./utils";
 
 export type UserResult = {
-  success: boolean;
+  code: number;
+  msg: string;
   data: {
     /** 头像 */
     avatar: string;
@@ -23,7 +25,8 @@ export type UserResult = {
 };
 
 export type RefreshTokenResult = {
-  success: boolean;
+  code: number;
+  msg: string;
   data: {
     /** `token` */
     accessToken: string;
@@ -50,21 +53,26 @@ export type UserInfo = {
 };
 
 export type UserInfoResult = {
-  success: boolean;
+  code: number;
   data: UserInfo;
 };
 
 type ResultTable = {
-  success: boolean;
+  code: number;
   data?: {
     /** 列表数据 */
-    list: Array<any>;
+    items: Array<any>;
     /** 总条目数 */
     total?: number;
-    /** 每页显示条目个数 */
-    pageSize?: number;
-    /** 当前页数 */
-    currentPage?: number;
+  };
+};
+
+export type UserInfoResultTable = {
+  code: number;
+  msg: string;
+  data: {
+    items: Array<any>;
+    total: number;
   };
 };
 
@@ -75,7 +83,7 @@ export const getLogin = (data?: object) => {
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
-  return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
+  return http.request<RefreshTokenResult>("post", "/refreshToken", { data });
 };
 
 /** 账户设置-个人信息 */
@@ -86,4 +94,11 @@ export const getMine = (data?: object) => {
 /** 账户设置-个人安全日志 */
 export const getMineLogs = (data?: object) => {
   return http.request<ResultTable>("get", "/mine-logs", { data });
+};
+
+/** 分页查询用户信息 */
+export const pageUserInfo = (data?: object) => {
+  return http.request<UserInfoResultTable>("post", "/sys/user/page", {
+    data
+  });
 };
