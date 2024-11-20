@@ -273,7 +273,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   async function onSearch() {
     loading.value = true;
     const { data } = await getUserList(toRaw(form));
-    dataList.value = data.list;
+    dataList.value = data.items;
     pagination.total = data.total;
 
     setTimeout(() => {

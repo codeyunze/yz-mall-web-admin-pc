@@ -53,7 +53,7 @@ export default defineFakeRoute([
         success: true,
         code: 0,
         data: {
-          list,
+          items: list,
           total: list.length, // 总条目数
           pageSize: 10, // 每页显示条目个数
           currentPage: 1 // 当前页数
@@ -102,7 +102,7 @@ export default defineFakeRoute([
   },
   // 角色管理
   {
-    url: "/role",
+    url: "/sys/role/page",
     method: "post",
     response: ({ body }) => {
       let list = [
@@ -138,7 +138,7 @@ export default defineFakeRoute([
         code: 0,
         success: true,
         data: {
-          list,
+          items: list,
           total: list.length // 总条目数
         }
       };

@@ -98,17 +98,17 @@ onMounted(() => {
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
     >
-      <el-form-item label="角色名称：" prop="name">
+      <el-form-item label="角色名称：" prop="roleName">
         <el-input
-          v-model="form.name"
+          v-model="form.roleName"
           placeholder="请输入角色名称"
           clearable
           class="!w-[180px]"
         />
       </el-form-item>
-      <el-form-item label="角色标识：" prop="code">
+      <el-form-item label="角色标识：" prop="roleCode">
         <el-input
-          v-model="form.code"
+          v-model="form.roleCode"
           placeholder="请输入角色标识"
           clearable
           class="!w-[180px]"

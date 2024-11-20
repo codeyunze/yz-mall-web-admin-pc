@@ -1,15 +1,19 @@
 import { http } from "@/utils/http";
+import { baseUrlApi } from "./utils";
 
 type Result = {
+  code: number;
   success: boolean;
   data?: Array<any>;
+  msg: string;
 };
 
 type ResultTable = {
   code: number;
   data?: {
-    /** 列表数据 */
     list: Array<any>;
+    /** 列表数据 */
+    items: Array<any>;
     /** 总条目数 */
     total?: number;
   };
@@ -32,7 +36,16 @@ export const getRoleIds = (data?: object) => {
 
 /** 获取系统管理-角色管理列表 */
 export const getRoleList = (data?: object) => {
-  return http.request<ResultTable>("post", "/role", { data });
+  return http.request<ResultTable>("post", baseUrlApi("/sys/role/page"), {
+    data
+  });
+};
+
+/** 系统管理-角色管理-角色更新 */
+export const updateRoleById = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/role/update"), {
+    data
+  });
 };
 
 /** 获取系统管理-菜单管理列表 */

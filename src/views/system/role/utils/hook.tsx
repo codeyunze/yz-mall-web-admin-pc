@@ -9,13 +9,19 @@ import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
 import type { PaginationProps } from "@pureadmin/table";
 import { getKeyList, deviceDetection } from "@pureadmin/utils";
-import { getRoleList, getRoleMenu, getRoleMenuIds } from "@/api/system";
+import {
+  getRoleList,
+  getRoleMenu,
+  getRoleMenuIds,
+  updateRoleById
+} from "@/api/system";
 import { type Ref, reactive, ref, onMounted, h, toRaw, watch } from "vue";
 
 export function useRole(treeRef: Ref) {
   const form = reactive({
-    name: "",
-    code: "",
+    id: "",
+    roleName: "",
+    roleCode: "",
     status: ""
   });
   const curRow = ref();
@@ -154,8 +160,13 @@ export function useRole(treeRef: Ref) {
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getRoleList(toRaw(form));
-    dataList.value = data.list;
+    const queryFilter = {
+      size: pagination.pageSize,
+      current: pagination.currentPage,
+      filter: form
+    };
+    const { data } = await getRoleList(toRaw(queryFilter));
+    dataList.value = data.items;
     pagination.total = data.total;
 
     setTimeout(() => {
@@ -174,6 +185,7 @@ export function useRole(treeRef: Ref) {
       title: `${title}角色`,
       props: {
         formInline: {
+          id: row?.id ?? "",
           roleName: row?.roleName ?? "",
           roleCode: row?.roleCode ?? "",
           remark: row?.remark ?? ""
@@ -204,7 +216,10 @@ export function useRole(treeRef: Ref) {
               chores();
             } else {
               // 实际开发先调用修改接口，再进行下面操作
-              chores();
+              console.log("更新", curData);
+              updateRoleById(curData).then(() => {
+                chores();
+              });
             }
           }
         });
@@ -219,7 +234,9 @@ export function useRole(treeRef: Ref) {
       curRow.value = row;
       isShow.value = true;
       const { data } = await getRoleMenuIds({ id });
+      console.log("角色菜单", JSON.stringify(data));
       treeRef.value.setCheckedKeys(data);
+      console.log(JSON.stringify(treeRef.value));
     } else {
       curRow.value = null;
       isShow.value = false;
