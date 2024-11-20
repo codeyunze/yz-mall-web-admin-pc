@@ -207,8 +207,6 @@ export function useRole(tableRef: Ref) {
     const { data } = await getSystemLogsList(toRaw(form));
     dataList.value = data.list;
     pagination.total = data.total;
-    pagination.pageSize = data.pageSize;
-    pagination.currentPage = data.currentPage;
 
     setTimeout(() => {
       loading.value = false;

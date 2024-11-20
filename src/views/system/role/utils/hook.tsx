@@ -49,11 +49,11 @@ export function useRole(treeRef: Ref) {
     },
     {
       label: "角色名称",
-      prop: "name"
+      prop: "roleName"
     },
     {
       label: "角色标识",
-      prop: "code"
+      prop: "roleCode"
     },
     {
       label: "状态",
@@ -92,15 +92,6 @@ export function useRole(treeRef: Ref) {
       slot: "operation"
     }
   ];
-  // const buttonClass = computed(() => {
-  //   return [
-  //     "!h-[20px]",
-  //     "reset-margin",
-  //     "!text-gray-500",
-  //     "dark:!text-white",
-  //     "dark:hover:!text-primary"
-  //   ];
-  // });
 
   function onChange({ row, index }) {
     ElMessageBox.confirm(
@@ -166,8 +157,6 @@ export function useRole(treeRef: Ref) {
     const { data } = await getRoleList(toRaw(form));
     dataList.value = data.list;
     pagination.total = data.total;
-    pagination.pageSize = data.pageSize;
-    pagination.currentPage = data.currentPage;
 
     setTimeout(() => {
       loading.value = false;
@@ -185,8 +174,8 @@ export function useRole(treeRef: Ref) {
       title: `${title}角色`,
       props: {
         formInline: {
-          name: row?.name ?? "",
-          code: row?.code ?? "",
+          roleName: row?.roleName ?? "",
+          roleCode: row?.roleCode ?? "",
           remark: row?.remark ?? ""
         }
       },
@@ -200,7 +189,7 @@ export function useRole(treeRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了角色名称为${curData.name}的这条数据`, {
+          message(`您${title}了角色名称为${curData.roleName}的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框

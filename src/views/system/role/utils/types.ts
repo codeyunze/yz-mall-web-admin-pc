@@ -2,9 +2,9 @@
 
 interface FormItemProps {
   /** 角色名称 */
-  name: string;
+  roleName: string;
   /** 角色编号 */
-  code: string;
+  roleCode: string;
   /** 备注 */
   remark: string;
 }

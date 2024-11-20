@@ -51,6 +51,7 @@ export default defineFakeRoute([
       if (body.deptId) list = list.filter(item => item.dept.id === body.deptId);
       return {
         success: true,
+        code: 0,
         data: {
           list,
           total: list.length, // 总条目数
@@ -106,20 +107,24 @@ export default defineFakeRoute([
     response: ({ body }) => {
       let list = [
         {
-          createTime: 1605456000000, // 时间戳（毫秒ms）
+          createTime: "2024-11-17 18:41:25", // 时间戳（毫秒ms）
           updateTime: 1684512000000,
           id: 1,
           name: "超级管理员",
           code: "admin",
+          roleCode: "admin",
+          roleName: "超级管理员",
           status: 1, // 状态 1 启用 0 停用
           remark: "超级管理员拥有最高权限"
         },
         {
-          createTime: 1605456000000,
+          createTime: "2024-11-17 19:05:37",
           updateTime: 1684512000000,
           id: 2,
           name: "普通角色",
           code: "common",
+          roleCode: "common",
+          roleName: "普通角色",
           status: 1,
           remark: "普通角色拥有部分权限"
         }
@@ -130,12 +135,11 @@ export default defineFakeRoute([
       );
       if (body.code) list = list.filter(item => item.code === body.code);
       return {
+        code: 0,
         success: true,
         data: {
           list,
-          total: list.length, // 总条目数
-          pageSize: 10, // 每页显示条目个数
-          currentPage: 1 // 当前页数
+          total: list.length // 总条目数
         }
       };
     }
