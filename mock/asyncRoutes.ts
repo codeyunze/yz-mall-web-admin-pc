@@ -335,6 +335,7 @@ export default defineFakeRoute([
     method: "get",
     response: () => {
       return {
+        code: 0,
         success: true,
         data: [
           systemManagementRouter,

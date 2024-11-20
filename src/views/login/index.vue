@@ -79,7 +79,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           password: ruleForm.password
         })
         .then(res => {
-          if (res.code === 0) {
+          if (res.success) {
             // 获取后端路由
             return initRouter().then(() => {
               disabled.value = true;

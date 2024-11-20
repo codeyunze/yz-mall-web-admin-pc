@@ -9,6 +9,7 @@ export default defineFakeRoute([
       if (body.refreshToken) {
         return {
           code: 0,
+          success: true,
           msg: "访问令牌更新成功",
           data: {
             accessToken: "eyJhbGciOiJIUzUxMiJ9.newAdmin",
@@ -19,7 +20,8 @@ export default defineFakeRoute([
         };
       } else {
         return {
-          success: false,
+          code: 1,
+          msg: "访问令牌更新失败",
           data: {}
         };
       }

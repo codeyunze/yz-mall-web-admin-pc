@@ -2,6 +2,51 @@ import { defineFakeRoute } from "vite-plugin-fake-server/client";
 import { faker } from "@faker-js/faker/locale/zh_CN";
 
 export default defineFakeRoute([
+  {
+    url: "/sys/user/page",
+    method: "post",
+    response: () => {
+      let list = [
+        {
+          id: "1858113817985785856",
+          phone: "15346646668",
+          email: null,
+          password: "123456",
+          balance: 2.01,
+          createTime: "2024-11-17 19:43:51",
+          invalid: 0
+        },
+        {
+          id: "1858121948841132032",
+          phone: "15346646669",
+          email: "834363368@qq.com",
+          password: "234567",
+          balance: 5.01,
+          createTime: "2024-11-17 20:16:09",
+          invalid: 0
+        },
+        {
+          id: "1858121948841132066",
+          phone: "15346646671",
+          email: "834363s12@outlook.com",
+          password: "234567",
+          balance: 5.91,
+          createTime: "2024-11-17 21:16:24",
+          invalid: 1
+        }
+      ];
+      // list = list.filter(item => item.email.includes(body?.email));
+
+      return {
+        code: 0,
+        success: true,
+        data: {
+          items: list,
+          total: list.length // 总条目数
+        }
+      };
+    }
+  },
   // 账户设置-个人信息
   {
     url: "/mine",
@@ -9,6 +54,7 @@ export default defineFakeRoute([
     response: () => {
       return {
         code: 0,
+        success: true,
         data: {
           avatar: "https://avatars.githubusercontent.com/u/44761321",
           username: "admin",
@@ -47,6 +93,7 @@ export default defineFakeRoute([
       ];
       return {
         code: 0,
+        success: true,
         data: {
           items: list,
           total: list.length // 总条目数

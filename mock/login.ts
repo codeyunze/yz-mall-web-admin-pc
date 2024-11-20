@@ -9,6 +9,7 @@ export default defineFakeRoute([
       if (body.username === "admin") {
         return {
           code: 0,
+          success: true,
           msg: "成功",
           data: {
             avatar: "https://avatars.githubusercontent.com/u/56632502",
@@ -20,12 +21,14 @@ export default defineFakeRoute([
             permissions: ["*:*:*"],
             accessToken: "6b9730d6f65945de98a2f4745c30cc54",
             refreshToken: "4414a9cffa274db089b6083da2bfc0d2",
-            expires: "2024-11-19 21:25:01"
+            expires: "2035/11/19 21:25:01"
           }
         };
       } else {
         return {
+          code: 0,
           success: true,
+          msg: "成功",
           data: {
             avatar: "https://avatars.githubusercontent.com/u/52823142",
             username: "common",

@@ -7,6 +7,7 @@ import type {
 import { pageUserInfo } from "@/api/user";
 import { ref, onMounted, reactive } from "vue";
 import { delay } from "@pureadmin/utils";
+export { default as dayjs } from "dayjs";
 
 export function useColumns() {
   const loading = ref(true);
@@ -29,9 +30,10 @@ export function useColumns() {
     }
   ];
   const form = reactive({
-    phone: "",
-    email: "",
-    createTime: ""
+    phone: null,
+    email: null,
+    startTimeFilter: null,
+    endTimeFilter: null
   });
   const dataList = ref([]);
   /** 分页配置 */

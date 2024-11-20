@@ -3,6 +3,7 @@ import { http } from "@/utils/http";
 
 export type UserResult = {
   code: number;
+  success: boolean;
   msg: string;
   data: {
     /** 头像 */
@@ -26,6 +27,7 @@ export type UserResult = {
 
 export type RefreshTokenResult = {
   code: number;
+  success: boolean;
   msg: string;
   data: {
     /** `token` */
@@ -54,11 +56,13 @@ export type UserInfo = {
 
 export type UserInfoResult = {
   code: number;
+  success: boolean;
   data: UserInfo;
 };
 
 type ResultTable = {
   code: number;
+  success: boolean;
   data?: {
     /** 列表数据 */
     items: Array<any>;
@@ -69,6 +73,7 @@ type ResultTable = {
 
 export type UserInfoResultTable = {
   code: number;
+  success: boolean;
   msg: string;
   data: {
     items: Array<any>;
