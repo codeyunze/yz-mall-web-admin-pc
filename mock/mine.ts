@@ -46,7 +46,7 @@ export default defineFakeRoute([
         }
       ];
       return {
-        code: number,
+        code: 0,
         data: {
           items: list,
           total: list.length // 总条目数
