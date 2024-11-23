@@ -19,6 +19,7 @@ import {
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
+    id: 0,
     menuType: 0,
     higherMenuOptions: [],
     parentId: 0,
@@ -26,7 +27,7 @@ const props = withDefaults(defineProps<FormProps>(), {
     name: "",
     path: "",
     component: "",
-    rank: 99,
+    sort: 99,
     redirect: "",
     icon: "",
     extraIcon: "",
@@ -35,12 +36,12 @@ const props = withDefaults(defineProps<FormProps>(), {
     activePath: "",
     auths: "",
     frameSrc: "",
-    frameLoading: true,
-    keepAlive: false,
-    hiddenTag: false,
-    fixedTag: false,
-    showLink: true,
-    showParent: false
+    frameLoading: 1,
+    keepAlive: 0,
+    hiddenTag: 0,
+    fixedTag: 0,
+    showLink: 1,
+    showParent: 0
   })
 });
 
@@ -141,7 +142,7 @@ defineExpose({ getRef });
       <re-col :value="12" :xs="24" :sm="24">
         <el-form-item label="菜单排序">
           <el-input-number
-            v-model="newFormInline.rank"
+            v-model="newFormInline.sort"
             class="!w-full"
             :min="1"
             :max="9999"

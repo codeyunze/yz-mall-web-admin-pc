@@ -9,6 +9,8 @@ interface FormItemProps {
   roleCode: string;
   /** 备注 */
   remark: string;
+  /** 所属组织 */
+  orgId: number;
 }
 interface FormProps {
   formInline: FormItemProps;

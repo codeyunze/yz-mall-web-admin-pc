@@ -8,7 +8,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     id: "",
     roleName: "",
     roleCode: "",
-    remark: ""
+    remark: "",
+    orgId: -1
   })
 });
 

@@ -75,7 +75,8 @@ const {
   // handleDatabase,
   handleSizeChange,
   handleCurrentChange,
-  handleSelectionChange
+  handleSelectionChange,
+  displayOperationButton
 } = useRole(treeRef);
 
 onMounted(() => {
@@ -184,6 +185,7 @@ onMounted(() => {
           >
             <template #operation="{ row }">
               <el-button
+                v-if="displayOperationButton(row)"
                 class="reset-margin"
                 link
                 type="primary"
@@ -199,6 +201,7 @@ onMounted(() => {
               >
                 <template #reference>
                   <el-button
+                    v-if="displayOperationButton(row)"
                     class="reset-margin"
                     link
                     type="primary"

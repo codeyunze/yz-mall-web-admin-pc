@@ -53,6 +53,26 @@ export const getMenuList = (data?: object) => {
   return http.request<Result>("post", "/menu", { data });
 };
 
+/** 获取系统管理-菜单管理列表 */
+export const getAllMenuList = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/menu/list"), { data });
+};
+
+/** 系统管理-更新菜单 */
+export const updateMenuById = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/menu/update"), { data });
+};
+
+/** 系统管理-新增菜单 */
+export const addMenu = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/menu/add"), { data });
+};
+
+/** 系统管理-删除菜单 */
+export const deleteMenuById = (data?: object) => {
+  return http.request<Result>("delete", baseUrlApi(`/sys/menu/delete/${data}`));
+};
+
 /** 获取系统管理-部门管理列表 */
 export const getDeptList = (data?: object) => {
   return http.request<Result>("post", "/dept", { data });

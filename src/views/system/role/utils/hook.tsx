@@ -100,11 +100,18 @@ export function useRole(treeRef: Ref) {
   ];
 
   function onChange({ row, index }) {
+    if (row.roleCode === "admin") {
+      message(`超级管理员角色不能停用`, {
+        type: "warning"
+      });
+      row.status === 0 ? (row.status = 1) : (row.status = 0);
+      return;
+    }
     ElMessageBox.confirm(
       `确认要<strong>${
         row.status === 0 ? "停用" : "启用"
       }</strong><strong style='color:var(--el-color-primary)'>${
-        row.name
+        row.roleName
       }</strong>吗?`,
       "系统提示",
       {
@@ -158,6 +165,10 @@ export function useRole(treeRef: Ref) {
     console.log("handleSelectionChange", val);
   }
 
+  function displayOperationButton(row) {
+    return row.roleCode !== "admin";
+  }
+
   async function onSearch() {
     loading.value = true;
     const queryFilter = {
@@ -188,7 +199,8 @@ export function useRole(treeRef: Ref) {
           id: row?.id ?? "",
           roleName: row?.roleName ?? "",
           roleCode: row?.roleCode ?? "",
-          remark: row?.remark ?? ""
+          remark: row?.remark ?? "",
+          orgId: row?.orgId ?? -1
         }
       },
       width: "40%",
@@ -319,6 +331,7 @@ export function useRole(treeRef: Ref) {
     // handleDatabase,
     handleSizeChange,
     handleCurrentChange,
-    handleSelectionChange
+    handleSelectionChange,
+    displayOperationButton
   };
 }
