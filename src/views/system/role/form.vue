@@ -30,7 +30,7 @@ defineExpose({ getRef });
     :rules="formRules"
     label-width="82px"
   >
-    <el-form-item label="角色名称" prop="name">
+    <el-form-item label="角色名称" prop="roleName">
       <el-input
         v-model="newFormInline.roleName"
         clearable
@@ -38,7 +38,7 @@ defineExpose({ getRef });
       />
     </el-form-item>
 
-    <el-form-item label="角色标识" prop="code">
+    <el-form-item label="角色标识" prop="roleCode">
       <el-input
         v-model="newFormInline.roleCode"
         clearable

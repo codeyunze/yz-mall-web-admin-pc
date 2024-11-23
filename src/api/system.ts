@@ -41,11 +41,28 @@ export const getRoleList = (data?: object) => {
   });
 };
 
-/** 系统管理-角色管理-角色更新 */
+/** 系统管理-角色管理-更新角色 */
 export const updateRoleById = (data?: object) => {
   return http.request<Result>("post", baseUrlApi("/sys/role/update"), {
     data
   });
+};
+
+/** 系统管理-角色管理-新增角色 */
+export const addRole = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/role/add"), {
+    data
+  });
+};
+
+/** 系统管理-角色管理-切换角色状态 */
+export const switchRoleStatus = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi(`/sys/role/switch/${data}`));
+};
+
+/** 系统管理-角色管理-删除角色 */
+export const deleteRoleById = (data?: object) => {
+  return http.request<Result>("delete", baseUrlApi(`/sys/role/delete/${data}`));
 };
 
 /** 获取系统管理-菜单管理列表 */
