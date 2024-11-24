@@ -12,7 +12,7 @@ import UnExpandIcon from "./svg/unexpand.svg?component";
 
 interface Tree {
   id: number;
-  name: string;
+  orgName: string;
   highlight?: boolean;
   children?: Tree[];
 }
@@ -31,7 +31,7 @@ const highlightMap = ref({});
 const { proxy } = getCurrentInstance();
 const defaultProps = {
   children: "children",
-  label: "name"
+  label: "orgName"
 };
 const buttonClass = computed(() => {
   return [
@@ -46,7 +46,7 @@ const buttonClass = computed(() => {
 
 const filterNode = (value: string, data: Tree) => {
   if (!value) return true;
-  return data.name.includes(value);
+  return data.orgName.includes(value);
 };
 
 function nodeClick(value) {

@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker/locale/zh_CN";
 export default defineFakeRoute([
   // 用户管理
   {
-    url: "/user",
+    url: "/sys/user/page",
     method: "post",
     response: ({ body }) => {
       let list = [
@@ -1255,14 +1255,15 @@ export default defineFakeRoute([
   },
   // 部门管理
   {
-    url: "/dept",
+    url: "/sys/org/list",
     method: "post",
     response: () => {
       return {
+        code: 0,
         success: true,
         data: [
           {
-            name: "杭州总公司",
+            orgName: "杭州总公司",
             parentId: 0,
             id: 100,
             sort: 0,
@@ -1275,7 +1276,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "郑州分公司",
+            orgName: "郑州分公司",
             parentId: 100,
             id: 101,
             sort: 1,
@@ -1288,7 +1289,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "研发部门",
+            orgName: "研发部门",
             parentId: 101,
             id: 103,
             sort: 1,
@@ -1301,7 +1302,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "市场部门",
+            orgName: "市场部门",
             parentId: 102,
             id: 108,
             sort: 1,
@@ -1314,7 +1315,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "深圳分公司",
+            orgName: "深圳分公司",
             parentId: 100,
             id: 102,
             sort: 2,
@@ -1327,7 +1328,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "市场部门",
+            orgName: "市场部门",
             parentId: 101,
             id: 104,
             sort: 2,
@@ -1340,7 +1341,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "财务部门",
+            orgName: "财务部门",
             parentId: 102,
             id: 109,
             sort: 2,
@@ -1353,7 +1354,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "测试部门",
+            orgName: "测试部门",
             parentId: 101,
             id: 105,
             sort: 3,
@@ -1366,7 +1367,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "财务部门",
+            orgName: "财务部门",
             parentId: 101,
             id: 106,
             sort: 4,
@@ -1379,7 +1380,7 @@ export default defineFakeRoute([
             remark: "这里是备注信息这里是备注信息这里是备注信息这里是备注信息"
           },
           {
-            name: "运维部门",
+            orgName: "运维部门",
             parentId: 101,
             id: 107,
             sort: 5,

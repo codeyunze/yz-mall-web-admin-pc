@@ -10,18 +10,21 @@ type Result = {
 
 type ResultTable = {
   code: number;
+  msg: string;
   data?: {
     list: Array<any>;
     /** 列表数据 */
     items: Array<any>;
     /** 总条目数 */
-    total?: number;
+    total: number;
   };
 };
 
 /** 获取系统管理-用户管理列表 */
 export const getUserList = (data?: object) => {
-  return http.request<ResultTable>("post", "/user", { data });
+  return http.request<ResultTable>("post", baseUrlApi("/sys/user/page"), {
+    data
+  });
 };
 
 /** 系统管理-用户管理-获取所有角色列表 */
@@ -92,7 +95,22 @@ export const deleteMenuById = (data?: object) => {
 
 /** 获取系统管理-部门管理列表 */
 export const getDeptList = (data?: object) => {
-  return http.request<Result>("post", "/dept", { data });
+  return http.request<Result>("post", baseUrlApi("/sys/org/list"), { data });
+};
+
+/** 系统管理-组织部门-新增 */
+export const addDept = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/org/add"), { data });
+};
+
+/** 系统管理-组织部门-更新 */
+export const updateDept = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/org/update"), { data });
+};
+
+/** 系统管理-组织部门-更新 */
+export const deleteDept = (data?: object) => {
+  return http.request<Result>("delete", baseUrlApi(`/sys/org/delete/${data}`));
 };
 
 /** 获取系统监控-在线用户列表 */

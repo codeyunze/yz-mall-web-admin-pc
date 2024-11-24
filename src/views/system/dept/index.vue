@@ -43,7 +43,7 @@ function onFullscreen() {
     >
       <el-form-item label="部门名称：" prop="name">
         <el-input
-          v-model="form.name"
+          v-model="form.orgName"
           placeholder="请输入部门名称"
           clearable
           class="!w-[180px]"
@@ -133,7 +133,7 @@ function onFullscreen() {
               新增
             </el-button>
             <el-popconfirm
-              :title="`是否确认删除部门名称为${row.name}的这条数据`"
+              :title="`是否确认删除部门名称为 [${row.orgName}] 的这条数据`"
               @confirm="handleDelete(row)"
             >
               <template #reference>

@@ -8,9 +8,10 @@ import { usePublicHooks } from "../hooks";
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
     higherDeptOptions: [],
+    id: 0,
     parentId: 0,
-    name: "",
-    principal: "",
+    orgName: "",
+    userId: "",
     phone: "",
     email: "",
     sort: 0,
@@ -46,7 +47,7 @@ defineExpose({ getRef });
             :options="newFormInline.higherDeptOptions"
             :props="{
               value: 'id',
-              label: 'name',
+              label: 'orgName',
               emitPath: false,
               checkStrictly: true
             }"
@@ -55,7 +56,7 @@ defineExpose({ getRef });
             placeholder="请选择上级部门"
           >
             <template #default="{ node, data }">
-              <span>{{ data.name }}</span>
+              <span>{{ data.orgName }}</span>
               <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
             </template>
           </el-cascader>
@@ -63,9 +64,9 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="部门名称" prop="name">
+        <el-form-item label="部门名称" prop="orgName">
           <el-input
-            v-model="newFormInline.name"
+            v-model="newFormInline.orgName"
             clearable
             placeholder="请输入部门名称"
           />
@@ -74,7 +75,7 @@ defineExpose({ getRef });
       <re-col :value="12" :xs="24" :sm="24">
         <el-form-item label="部门负责人">
           <el-input
-            v-model="newFormInline.principal"
+            v-model="newFormInline.userId"
             clearable
             placeholder="请输入部门负责人"
           />

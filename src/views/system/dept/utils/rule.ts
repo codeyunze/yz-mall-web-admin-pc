@@ -4,7 +4,7 @@ import { isPhone, isEmail } from "@pureadmin/utils";
 
 /** 自定义表单规则校验 */
 export const formRules = reactive(<FormRules>{
-  name: [{ required: true, message: "部门名称为必填项", trigger: "blur" }],
+  orgName: [{ required: true, message: "部门名称为必填项", trigger: "blur" }],
   phone: [
     {
       validator: (rule, value, callback) => {

@@ -55,7 +55,7 @@ export function useRole(treeRef: Ref) {
     {
       label: "序号",
       type: "index",
-      width: 80
+      width: 90
     },
     {
       label: "角色名称",

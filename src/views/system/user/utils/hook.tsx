@@ -75,8 +75,8 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       reserveSelection: true // 数据刷新后保留选项
     },
     {
-      label: "用户编号",
-      prop: "id",
+      label: "序号",
+      type: "index",
       width: 90
     },
     {
@@ -98,11 +98,11 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       prop: "username",
       minWidth: 130
     },
-    {
-      label: "用户昵称",
-      prop: "nickname",
-      minWidth: 130
-    },
+    // {
+    //   label: "用户昵称",
+    //   prop: "nickname",
+    //   minWidth: 130
+    // },
     {
       label: "性别",
       prop: "sex",
@@ -116,11 +116,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
           {row.sex === 1 ? "女" : "男"}
         </el-tag>
       )
-    },
-    {
-      label: "部门",
-      prop: "dept.name",
-      minWidth: 90
     },
     {
       label: "手机号码",
@@ -237,7 +232,9 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function handleSizeChange(val: number) {
-    console.log(`${val} items per page`);
+    pagination.pageSize = val;
+    pagination.currentPage = 1;
+    onSearch();
   }
 
   function handleCurrentChange(val: number) {
@@ -270,11 +267,25 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     onSearch();
   }
 
-  async function onSearch() {
+  function onSearch() {
     loading.value = true;
-    const { data } = await getUserList(toRaw(form));
-    dataList.value = data.items;
-    pagination.total = data.total;
+    let param = {
+      filter: form,
+      size: pagination.pageSize,
+      current: pagination.currentPage
+    };
+
+    getUserList(toRaw(param)).then(data => {
+      if (data.code === 0) {
+        dataList.value = data.data.items;
+        pagination.total = Number(data.data.total);
+        loading.value = false;
+      } else {
+        message(data.msg, {
+          type: "success"
+        });
+      }
+    });
 
     setTimeout(() => {
       loading.value = false;
@@ -307,14 +318,14 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function openDialog(title = "新增", row?: FormItemProps) {
+    console.log(JSON.stringify(row));
     addDialog({
       title: `${title}用户`,
       props: {
         formInline: {
           title,
           higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
-          parentId: row?.dept.id ?? 0,
-          nickname: row?.nickname ?? "",
+          id: row?.dept.id ?? 0,
           username: row?.username ?? "",
           password: row?.password ?? "",
           phone: row?.phone ?? "",
@@ -495,8 +506,9 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     onSearch();
 
     // 归属部门
-    const { data } = await getDeptList();
+    const { data } = await getDeptList({});
     higherDeptOptions.value = handleTree(data);
+    console.log(data);
     treeData.value = handleTree(data);
     treeLoading.value = false;
 
