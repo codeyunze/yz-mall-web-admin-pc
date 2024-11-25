@@ -21,7 +21,10 @@ import {
   getRoleIds,
   getDeptList,
   getUserList,
-  getAllRoleList
+  getAllRoleList,
+  switchUserStatus,
+  addUser,
+  updateUserById
 } from "@/api/system";
 import {
   ElForm,
@@ -181,6 +184,13 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   const roleOptions = ref([]);
 
   function onChange({ row, index }) {
+    if (row.id == "1858113817985785856") {
+      message(`默认管理员角色不能停用`, {
+        type: "warning"
+      });
+      row.status === 0 ? (row.status = 1) : (row.status = 0);
+      return;
+    }
     ElMessageBox.confirm(
       `确认要<strong>${
         row.status === 0 ? "停用" : "启用"
@@ -204,18 +214,24 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
             loading: true
           }
         );
-        setTimeout(() => {
-          switchLoadMap.value[index] = Object.assign(
-            {},
-            switchLoadMap.value[index],
-            {
-              loading: false
-            }
-          );
-          message("已成功修改用户状态", {
-            type: "success"
-          });
-        }, 300);
+
+        switchUserStatus(row.id).then(res => {
+          if (res.code === 0) {
+            switchLoadMap.value[index] = Object.assign(
+              {},
+              switchLoadMap.value[index],
+              {
+                loading: false
+              }
+            );
+            message(`已${row.status === 0 ? "停用" : "启用"}${row.username}`, {
+              type: "success"
+            });
+          } else {
+            row.status === 0 ? (row.status = 1) : (row.status = 0);
+            message(res.msg, { type: "error" });
+          }
+        });
       })
       .catch(() => {
         row.status === 0 ? (row.status = 1) : (row.status = 0);
@@ -325,7 +341,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         formInline: {
           title,
           higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
-          id: row?.dept.id ?? 0,
+          id: row?.id ?? 0,
           username: row?.username ?? "",
           password: row?.password ?? "",
           phone: row?.phone ?? "",
@@ -357,10 +373,26 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
             // 表单规则校验通过
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
-              chores();
+              addUser(curData).then(res => {
+                if (res.code === 0) {
+                  chores();
+                } else {
+                  message(res.msg, {
+                    type: "warning"
+                  });
+                }
+              });
             } else {
               // 实际开发先调用修改接口，再进行下面操作
-              chores();
+              updateUserById(curData).then(res => {
+                if (res.code === 0) {
+                  chores();
+                } else {
+                  message(res.msg, {
+                    type: "warning"
+                  });
+                }
+              });
             }
           }
         });

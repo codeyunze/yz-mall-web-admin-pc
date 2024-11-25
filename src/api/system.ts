@@ -27,6 +27,21 @@ export const getUserList = (data?: object) => {
   });
 };
 
+/** 系统管理-用户管理-切换用户状态 */
+export const switchUserStatus = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi(`/sys/user/switch/${data}`));
+};
+
+/** 系统管理-用户管理-新增用户 */
+export const addUser = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/user/add"), { data });
+};
+
+/** 系统管理-用户管理-更新用户 */
+export const updateUserById = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/user/update"), { data });
+};
+
 /** 系统管理-用户管理-获取所有角色列表 */
 export const getAllRoleList = () => {
   return http.request<Result>("get", "/list-all-role");
