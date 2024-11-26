@@ -58,13 +58,12 @@ const {
   getDropdownItemStyle,
   getDropdownItemClass,
   icpRecord,
-  publicNetworkRecord,
-  defaultAccount
+  publicNetworkRecord
 } = useNav();
 const { locale, translationCh, translationEn } = useTranslationLang();
 
 const ruleForm = reactive({
-  username: defaultAccount,
+  username: "15316666668",
   password: "a1234567",
   verifyCode: ""
 });

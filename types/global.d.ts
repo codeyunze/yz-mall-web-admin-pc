@@ -86,7 +86,6 @@ declare global {
     Title?: string;
     ICPRecord?: string;
     PublicNetworkRecord?: string;
-    DefaultAccount?: string;
     FixedHeader?: boolean;
     HiddenSideBar?: boolean;
     MultiTagsCache?: boolean;
