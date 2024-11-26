@@ -6,9 +6,11 @@ import { message } from "@/utils/message";
 import { updateRules } from "../utils/rule";
 import type { FormInstance } from "element-plus";
 import { useVerifyCode } from "../utils/verifyCode";
+import Agreement from "./Agreement.vue";
 import { $t, transformI18n } from "@/plugins/i18n";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { addDialog } from "@/components/ReDialog";
 import Lock from "@iconify-icons/ri/lock-fill";
 import Iphone from "@iconify-icons/ep/iphone";
 import User from "@iconify-icons/ri/user-3-fill";
@@ -66,6 +68,14 @@ const onUpdate = async (formEl: FormInstance | undefined) => {
     }
   });
 };
+
+function onAgreement() {
+  addDialog({
+    title: "隐私政策及权限声明",
+    hideFooter: true,
+    contentRenderer: () => Agreement // jsx 语法 （注意在.vue文件启用jsx语法，需要在script开启lang="tsx"）
+  });
+}
 
 function onBack() {
   useVerifyCode().end();
@@ -164,7 +174,7 @@ function onBack() {
         <el-checkbox v-model="checked">
           {{ t("login.pureReadAccept") }}
         </el-checkbox>
-        <el-button link type="primary">
+        <el-button link type="primary" @click="onAgreement()">
           {{ t("login.purePrivacyPolicy") }}
         </el-button>
       </el-form-item>
