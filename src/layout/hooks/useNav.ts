@@ -97,6 +97,10 @@ export function useNav() {
     return $config.PublicNetworkRecord;
   });
 
+  const defaultAccount = computed(() => {
+    return $config.DefaultAccount;
+  });
+
   /** 动态title */
   function changeTitle(meta: routeMetaType) {
     const Title = getConfig().Title;
@@ -159,6 +163,7 @@ export function useNav() {
     title,
     icpRecord,
     publicNetworkRecord,
+    defaultAccount,
     device,
     layout,
     logout,

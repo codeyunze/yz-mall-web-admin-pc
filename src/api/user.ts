@@ -1,17 +1,14 @@
 import { http } from "@/utils/http";
-// import { baseUrlApi } from "./utils";
+import { baseUrlApi } from "@/api/utils";
 
 export type UserResult = {
   code: number;
-  success: boolean;
   msg: string;
   data: {
     /** 头像 */
     avatar: string;
     /** 用户名 */
     username: string;
-    /** 昵称 */
-    nickname: string;
     /** 当前登录用户的角色 */
     roles: Array<string>;
     /** 按钮级别权限 */
@@ -83,7 +80,12 @@ export type UserInfoResultTable = {
 
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/login", { data });
+  return http.request<UserResult>("post", baseUrlApi("/login"), { data });
+};
+
+/** 登出 */
+export const logout = () => {
+  return http.request("post", baseUrlApi("/logout"));
 };
 
 /** 刷新`token` */

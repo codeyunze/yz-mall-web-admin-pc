@@ -101,11 +101,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       prop: "username",
       minWidth: 130
     },
-    // {
-    //   label: "用户昵称",
-    //   prop: "nickname",
-    //   minWidth: 130
-    // },
     {
       label: "性别",
       prop: "sex",
@@ -513,7 +508,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       props: {
         formInline: {
           username: row?.username ?? "",
-          nickname: row?.nickname ?? "",
           roleOptions: roleOptions.value ?? [],
           ids
         }

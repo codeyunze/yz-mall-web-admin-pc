@@ -58,13 +58,14 @@ const {
   getDropdownItemStyle,
   getDropdownItemClass,
   icpRecord,
-  publicNetworkRecord
+  publicNetworkRecord,
+  defaultAccount
 } = useNav();
 const { locale, translationCh, translationEn } = useTranslationLang();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123",
+  username: defaultAccount,
+  password: "a1234567",
   verifyCode: ""
 });
 
@@ -79,19 +80,22 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           password: ruleForm.password
         })
         .then(res => {
-          if (res.success) {
+          console.log("222222222");
+          if (res.code === 0) {
             // 获取后端路由
             return initRouter().then(() => {
               disabled.value = true;
               router
                 .push(getTopMenu(true).path)
                 .then(() => {
-                  message(t("login.pureLoginSuccess"), { type: "success" });
+                  message("登录成功", { type: "success" });
                 })
                 .finally(() => (disabled.value = false));
             });
           } else {
-            message(t("login.pureLoginFail"), { type: "error" });
+            loading.value = false;
+            disabled.value = false;
+            message(res.msg, { type: "error" });
           }
         })
         .finally(() => (loading.value = false));

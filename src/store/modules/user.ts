@@ -11,7 +11,8 @@ import {
   type UserResult,
   type RefreshTokenResult,
   getLogin,
-  refreshTokenApi
+  refreshTokenApi,
+  logout
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
@@ -24,7 +25,7 @@ export const useUserStore = defineStore({
     // 用户名
     username: storageLocal().getItem<DataInfo<number>>(userKey)?.username ?? "",
     // 昵称
-    nickname: storageLocal().getItem<DataInfo<number>>(userKey)?.nickname ?? "",
+    nickname: storageLocal().getItem<DataInfo<number>>(userKey)?.username ?? "",
     // 页面级别权限
     roles: storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [],
     // 按钮级别权限
@@ -80,9 +81,12 @@ export const useUserStore = defineStore({
     async loginByUsername(data) {
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
-          .then(data => {
-            if (data?.success) setToken(data.data);
-            resolve(data);
+          .then(res => {
+            console.log("1233333333");
+            if (res?.code === 0) {
+              setToken(res.data);
+            }
+            resolve(res);
           })
           .catch(error => {
             reject(error);
@@ -94,10 +98,12 @@ export const useUserStore = defineStore({
       this.username = "";
       this.roles = [];
       this.permissions = [];
-      removeToken();
-      useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
-      resetRouter();
-      router.push("/login");
+      logout().finally(() => {
+        removeToken();
+        useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
+        resetRouter();
+        router.push("/login");
+      });
     },
     /** 刷新`token` */
     async handRefreshToken(data) {
