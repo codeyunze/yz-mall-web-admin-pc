@@ -5,6 +5,7 @@ export type UserResult = {
   code: number;
   msg: string;
   data: {
+    userId: string;
     /** 头像 */
     avatar: string;
     /** 用户名 */
@@ -27,6 +28,7 @@ export type RefreshTokenResult = {
   success: boolean;
   msg: string;
   data: {
+    userId: string;
     /** `token` */
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */
@@ -90,7 +92,9 @@ export const logout = () => {
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
-  return http.request<RefreshTokenResult>("post", "/refreshToken", { data });
+  return http.request<RefreshTokenResult>("post", baseUrlApi("/refreshToken"), {
+    data
+  });
 };
 
 /** 账户设置-个人信息 */

@@ -16,10 +16,13 @@ import {
 } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
+import { toRaw } from "vue";
 
 export const useUserStore = defineStore({
   id: "pure-user",
   state: (): userType => ({
+    // 用户Id
+    userId: storageLocal().getItem<DataInfo<number>>(userKey)?.userId ?? "",
     // 头像
     avatar: storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "",
     // 用户名
@@ -41,6 +44,10 @@ export const useUserStore = defineStore({
     loginDay: 7
   }),
   actions: {
+    /** 用户Id */
+    SET_USERID(userId: string) {
+      this.userId = userId;
+    },
     /** 存储头像 */
     SET_AVATAR(avatar: string) {
       this.avatar = avatar;
@@ -82,9 +89,9 @@ export const useUserStore = defineStore({
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(res => {
-            console.log("1233333333");
+            console.log("1233333333", res.data);
             if (res?.code === 0) {
-              setToken(res.data);
+              setToken(toRaw(res.data));
             }
             resolve(res);
           })
@@ -109,10 +116,10 @@ export const useUserStore = defineStore({
     async handRefreshToken(data) {
       return new Promise<RefreshTokenResult>((resolve, reject) => {
         refreshTokenApi(data)
-          .then(data => {
-            if (data.success) {
-              setToken(data.data);
-              resolve(data);
+          .then(res => {
+            if (res.code === 0) {
+              setToken(toRaw(res.data));
+              resolve(res);
             }
           })
           .catch(error => {

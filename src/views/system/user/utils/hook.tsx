@@ -47,7 +47,7 @@ import {
 export function useUser(tableRef: Ref, treeRef: Ref) {
   const form = reactive({
     // 左侧部门树的id
-    deptId: "",
+    orgId: "",
     username: "",
     phone: "",
     status: ""
@@ -306,13 +306,14 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   const resetForm = formEl => {
     if (!formEl) return;
     formEl.resetFields();
-    form.deptId = "";
+    form.orgId = "";
     treeRef.value.onTreeReset();
     onSearch();
   };
 
   function onTreeSelect({ id, selected }) {
-    form.deptId = selected ? id : "";
+    form.orgId = selected ? id : "";
+    console.log("选择部门：" + id);
     onSearch();
   }
 
@@ -539,7 +540,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     treeLoading.value = false;
 
     // 角色列表
-    roleOptions.value = (await getAllRoleList()).data;
+    roleOptions.value = (await getAllRoleList({})).data;
   });
 
   return {

@@ -63,14 +63,33 @@ export default defineFakeRoute([
   },
   // 用户管理-获取所有角色列表
   {
-    url: "/list-all-role",
+    url: "/sys/role/list",
     method: "get",
     response: () => {
       return {
         success: true,
         data: [
-          { id: 1, name: "超级管理员" },
-          { id: 2, name: "普通角色" }
+          {
+            id: 1,
+            name: "超级管理员",
+            roleName: "超级管理员",
+            roleCode: "admin",
+            orgId: -1
+          },
+          {
+            id: 2,
+            name: "普通角色",
+            roleName: "普通用户",
+            roleCode: "common",
+            orgId: -1
+          },
+          {
+            id: 3,
+            name: "游客",
+            roleName: "游客",
+            roleCode: "tourist",
+            orgId: -1
+          }
         ]
       };
     }

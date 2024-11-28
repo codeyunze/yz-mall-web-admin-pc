@@ -43,8 +43,8 @@ export const updateUserById = (data?: object) => {
 };
 
 /** 系统管理-用户管理-获取所有角色列表 */
-export const getAllRoleList = () => {
-  return http.request<Result>("get", "/list-all-role");
+export const getAllRoleList = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/role/list"), { data });
 };
 
 /** 系统管理-用户管理-根据userId，获取对应角色id列表（userId：用户id） */

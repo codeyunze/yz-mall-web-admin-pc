@@ -3,6 +3,8 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { storageLocal, isString, isIncludeAllChildren } from "@pureadmin/utils";
 
 export interface DataInfo<T> {
+  /** 用户Id */
+  userId: string;
   /** token */
   accessToken: string;
   /** `accessToken`的过期时间（时间戳） */
@@ -44,6 +46,7 @@ export function getToken(): DataInfo<number> {
  * 将`avatar`、`username`、`nickname`、`roles`、`permissions`、`refreshToken`、`expires`这七条信息放在key值为`user-info`的localStorage里（利用`multipleTabsKey`当浏览器完全关闭后自动销毁）
  */
 export function setToken(data: DataInfo<Date>) {
+  console.log("接收到userinfo", data);
   let expires = 0;
   const { accessToken, refreshToken } = data;
   const { isRemembered, loginDay } = useUserStoreHook();
@@ -66,13 +69,15 @@ export function setToken(data: DataInfo<Date>) {
       : {}
   );
 
-  function setUserKey({ avatar, username, roles, permissions }) {
+  function setUserKey({ userId, avatar, username, roles, permissions }) {
+    useUserStoreHook().SET_USERID(userId);
     useUserStoreHook().SET_AVATAR(avatar);
     useUserStoreHook().SET_USERNAME(username);
     useUserStoreHook().SET_NICKNAME(username);
     useUserStoreHook().SET_ROLES(roles);
     useUserStoreHook().SET_PERMS(permissions);
     storageLocal().setItem(userKey, {
+      userId,
       refreshToken,
       expires,
       avatar,
@@ -83,14 +88,17 @@ export function setToken(data: DataInfo<Date>) {
   }
 
   if (data.username && data.roles) {
-    const { username, roles } = data;
+    const { userId, username, roles } = data;
     setUserKey({
+      userId,
       avatar: data?.avatar ?? "",
       username,
       roles,
       permissions: data?.permissions ?? []
     });
   } else {
+    const userId =
+      storageLocal().getItem<DataInfo<number>>(userKey)?.userId ?? "";
     const avatar =
       storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "";
     const username =
@@ -102,6 +110,7 @@ export function setToken(data: DataInfo<Date>) {
     const permissions =
       storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [];
     setUserKey({
+      userId,
       avatar,
       username,
       roles,
