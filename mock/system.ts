@@ -96,23 +96,26 @@ export default defineFakeRoute([
   },
   // 用户管理-根据 userId 获取对应角色 id 列表（userId：用户id）
   {
-    url: "/list-role-ids",
+    url: "/sys/user/getUserRoles",
     method: "post",
     response: ({ body }) => {
       if (body.userId) {
-        if (body.userId == 1) {
+        if (body.userId == "1858113817985785856") {
           return {
+            code: 0,
             success: true,
-            data: [1]
+            data: ["1858098107289014272"]
           };
-        } else if (body.userId == 2) {
+        } else {
           return {
+            code: 0,
             success: true,
-            data: [2]
+            data: ["1860206762805207040"]
           };
         }
       } else {
         return {
+          code: 0,
           success: false,
           data: []
         };

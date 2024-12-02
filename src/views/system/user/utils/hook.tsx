@@ -24,7 +24,8 @@ import {
   getAllRoleList,
   switchUserStatus,
   addUser,
-  updateUserById
+  updateUserById,
+  bindRoleForUser
 } from "@/api/system";
 import {
   ElForm,
@@ -503,7 +504,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   /** 分配角色 */
   async function handleRole(row) {
     // 选中的角色列表
-    const ids = (await getRoleIds({ userId: row.id })).data ?? [];
+    const ids = (await getRoleIds(row.id)).data ?? [];
     addDialog({
       title: `分配 ${row.username} 用户的角色`,
       props: {
@@ -521,7 +522,25 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       contentRenderer: () => h(roleForm),
       beforeSure: (done, { options }) => {
         const curData = options.props.formInline as RoleFormItemProps;
-        console.log("curIds", curData.ids);
+
+        const bindRole = {
+          relationId: row.id,
+          type: 0,
+          roleIds: curData.ids
+        };
+
+        bindRoleForUser(bindRole).then(res => {
+          if (res.code === 0) {
+            message("角色分配成功", {
+              type: "success"
+            });
+            done(); // 关闭弹框
+          } else {
+            message(res.msg, {
+              type: "error"
+            });
+          }
+        });
         // 根据实际业务使用curData.ids和row里的某些字段去调用修改角色接口即可
         done(); // 关闭弹框
       }

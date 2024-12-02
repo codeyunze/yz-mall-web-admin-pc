@@ -49,7 +49,10 @@ export const getAllRoleList = (data?: object) => {
 
 /** 系统管理-用户管理-根据userId，获取对应角色id列表（userId：用户id） */
 export const getRoleIds = (data?: object) => {
-  return http.request<Result>("post", "/list-role-ids", { data });
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/user/getUserRoles/${data}`)
+  );
 };
 
 /** 获取系统管理-角色管理列表 */
@@ -81,6 +84,13 @@ export const switchRoleStatus = (data?: object) => {
 /** 系统管理-角色管理-删除角色 */
 export const deleteRoleById = (data?: object) => {
   return http.request<Result>("delete", baseUrlApi(`/sys/role/delete/${data}`));
+};
+
+/** 系统管理-用户&角色-绑定 */
+export const bindRoleForUser = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/user/role/bind"), {
+    data
+  });
 };
 
 /** 获取系统管理-菜单管理列表 */
