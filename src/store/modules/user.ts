@@ -120,6 +120,11 @@ export const useUserStore = defineStore({
             if (res.code === 0) {
               setToken(toRaw(res.data));
               resolve(res);
+            } else {
+              removeToken();
+              useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
+              resetRouter();
+              router.push("/login");
             }
           })
           .catch(error => {
