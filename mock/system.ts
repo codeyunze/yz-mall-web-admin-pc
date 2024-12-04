@@ -168,7 +168,7 @@ export default defineFakeRoute([
   },
   // 角色管理-权限-菜单权限
   {
-    url: "/role-menu",
+    url: "/sys/menu/listSlim",
     method: "post",
     response: () => {
       return {
@@ -371,10 +371,10 @@ export default defineFakeRoute([
   },
   // 角色管理-权限-菜单权限-根据角色 id 查对应菜单
   {
-    url: "/role-menu-ids",
-    method: "post",
+    url: "/sys/role/menu/getRoleMenus",
+    method: "get",
     response: ({ body }) => {
-      if (body.id == 1) {
+      if (body.id == "1858098107289014272") {
         return {
           success: true,
           data: [
@@ -383,7 +383,7 @@ export default defineFakeRoute([
             404, 500, 501, 502, 503
           ]
         };
-      } else if (body.id == 2) {
+      } else if (body.id == "1860206762805207040") {
         return {
           success: true,
           data: [

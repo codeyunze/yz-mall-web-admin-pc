@@ -11,6 +11,7 @@ import type { PaginationProps } from "@pureadmin/table";
 import { getKeyList, deviceDetection } from "@pureadmin/utils";
 import {
   addRole,
+  bindMenuForRole,
   deleteRoleById,
   getRoleList,
   getRoleMenu,
@@ -280,10 +281,11 @@ export function useRole(treeRef: Ref) {
     if (id) {
       curRow.value = row;
       isShow.value = true;
-      const { data } = await getRoleMenuIds({ id });
-      console.log("角色菜单", JSON.stringify(data));
+      // 查询选择角色所拥有的所有菜单
+      const { data } = await getRoleMenuIds(id);
+      // console.log("角色菜单", JSON.stringify(data));
       treeRef.value.setCheckedKeys(data);
-      console.log(JSON.stringify(treeRef.value));
+      // console.log(JSON.stringify(treeRef.value));
     } else {
       curRow.value = null;
       isShow.value = false;
@@ -300,11 +302,21 @@ export function useRole(treeRef: Ref) {
 
   /** 菜单权限-保存 */
   function handleSave() {
-    const { id, name } = curRow.value;
-    // 根据用户 id 调用实际项目中菜单权限修改接口
+    const { id, roleName } = curRow.value;
+    console.log("参数信息", JSON.stringify(curRow.value));
+    // 根据角色 id 调用实际项目中菜单权限修改接口
     console.log(id, treeRef.value.getCheckedKeys());
-    message(`角色名称为${name}的菜单权限修改成功`, {
-      type: "success"
+    bindMenuForRole({
+      roleId: id,
+      menuIds: treeRef.value.getCheckedKeys()
+    }).then(res => {
+      if (res.code === 0) {
+        message(`角色名称为 [${roleName}] 的菜单权限修改成功`, {
+          type: "success"
+        });
+      } else {
+        message(res.msg, { type: "error" });
+      }
     });
   }
 
