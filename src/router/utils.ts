@@ -154,6 +154,7 @@ function handleAsyncRoutes(routeList) {
   if (routeList.length === 0) {
     usePermissionStoreHook().handleWholeMenus(routeList);
   } else {
+    console.log("路由信息", routeList);
     formatFlatteningRoutes(addAsyncRoutes(routeList)).map(
       (v: RouteRecordRaw) => {
         // 防止重复添加路由
@@ -168,6 +169,9 @@ function handleAsyncRoutes(routeList) {
           router.options.routes[0].children.push(v);
           // 最终路由进行升序
           ascending(router.options.routes[0].children);
+          console.log("主要参数");
+          console.log("v", v);
+          console.log("v.name", v?.name);
           if (!router.hasRoute(v?.name)) router.addRoute(v);
           const flattenRouters: any = router
             .getRoutes()
@@ -203,6 +207,8 @@ function initRouter() {
     } else {
       return new Promise(resolve => {
         getAsyncRoutes().then(({ data }) => {
+          console.log("菜单信息");
+          console.log(data);
           handleAsyncRoutes(cloneDeep(data));
           storageLocal().setItem(key, data);
           resolve(router);
@@ -212,6 +218,8 @@ function initRouter() {
   } else {
     return new Promise(resolve => {
       getAsyncRoutes().then(({ data }) => {
+        console.log("菜单");
+        console.log(data);
         handleAsyncRoutes(cloneDeep(data));
         resolve(router);
       });

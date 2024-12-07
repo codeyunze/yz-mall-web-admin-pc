@@ -1,6 +1,7 @@
 // 模拟后端动态生成路由
 import { defineFakeRoute } from "vite-plugin-fake-server/client";
-import { system, monitor, permission, frame, tabs } from "@/router/enums";
+// import { system, monitor, permission, frame, tabs } from "@/router/enums";
+import { system, monitor } from "@/router/enums";
 
 /**
  * roles：页面级别权限，这里模拟二种 "admin"、"common"
@@ -16,15 +17,6 @@ const systemManagementRouter = {
     rank: system
   },
   children: [
-    {
-      path: "/system/user/info",
-      name: "SystemUserPage",
-      meta: {
-        icon: "ep:user-filled",
-        title: "menus.pureUser",
-        roles: ["1858098107289014272"]
-      }
-    },
     {
       path: "/system/user/index",
       name: "SystemUser",
@@ -115,7 +107,7 @@ const systemMonitorRouter = {
   ]
 };
 
-const permissionRouter = {
+/*const permissionRouter = {
   path: "/permission",
   meta: {
     title: "menus.purePermission",
@@ -162,9 +154,9 @@ const permissionRouter = {
       ]
     }
   ]
-};
+};*/
 
-const frameRouter = {
+/*const frameRouter = {
   path: "/iframe",
   meta: {
     icon: "ri:links-fill",
@@ -285,9 +277,9 @@ const frameRouter = {
       ]
     }
   ]
-};
+};*/
 
-const tabsRouter = {
+/*const tabsRouter = {
   path: "/tabs",
   meta: {
     icon: "ri:bookmark-2-line",
@@ -327,23 +319,23 @@ const tabsRouter = {
       }
     }
   ]
-};
+};*/
+
+// systemManagementRouter,
+//     systemMonitorRouter,
+//     permissionRouter,
+//     frameRouter,
+//     tabsRouter
 
 export default defineFakeRoute([
   {
-    url: "/get-async-routes",
+    url: "/sys/user/getUserMenus",
     method: "get",
     response: () => {
       return {
         code: 0,
         success: true,
-        data: [
-          systemManagementRouter,
-          systemMonitorRouter,
-          permissionRouter,
-          frameRouter,
-          tabsRouter
-        ]
+        data: [systemManagementRouter, systemMonitorRouter]
       };
     }
   }
