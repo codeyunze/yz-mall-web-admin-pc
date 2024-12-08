@@ -34,6 +34,8 @@ export function useMenu() {
         return text ? "外链" : "danger";
       case 3:
         return text ? "按钮" : "info";
+      case 4:
+        return text ? "接口" : "warning";
     }
   };
 

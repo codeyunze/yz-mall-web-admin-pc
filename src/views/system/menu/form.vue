@@ -105,7 +105,12 @@ defineExpose({ getRef });
           />
         </el-form-item>
       </re-col>
-      <re-col v-if="newFormInline.menuType !== 3" :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="路由名称" prop="name">
           <el-input
             v-model="newFormInline.name"
@@ -115,7 +120,11 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
 
-      <re-col v-if="newFormInline.menuType !== 3" :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
+        :xs="24"
+        :sm="24"
+      >
         <el-form-item label="路由路径" prop="path">
           <el-input
             v-model="newFormInline.path"
@@ -166,7 +175,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col
-        v-show="newFormInline.menuType !== 3"
+        v-show="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
         :value="12"
         :xs="24"
         :sm="24"
@@ -176,7 +185,7 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
       <re-col
-        v-show="newFormInline.menuType !== 3"
+        v-show="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
         :value="12"
         :xs="24"
         :sm="24"
@@ -221,7 +230,12 @@ defineExpose({ getRef });
           />
         </el-form-item>
       </re-col>
-      <re-col v-if="newFormInline.menuType === 3" :value="12" :xs="24" :sm="24">
+      <re-col
+        v-if="newFormInline.menuType === 3 || newFormInline.menuType === 4"
+        :value="12"
+        :xs="24"
+        :sm="24"
+      >
         <!-- 按钮级别权限设置 -->
         <el-form-item label="权限标识" prop="auths">
           <el-input
@@ -262,7 +276,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col
-        v-show="newFormInline.menuType !== 3"
+        v-show="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
         :value="12"
         :xs="24"
         :sm="24"
@@ -280,7 +294,7 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
       <re-col
-        v-show="newFormInline.menuType !== 3"
+        v-show="newFormInline.menuType !== 3 && newFormInline.menuType !== 4"
         :value="12"
         :xs="24"
         :sm="24"
