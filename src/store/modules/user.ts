@@ -89,7 +89,6 @@ export const useUserStore = defineStore({
       return new Promise<UserResult>((resolve, reject) => {
         getLogin(data)
           .then(res => {
-            console.log("1233333333", res.data);
             if (res?.code === 0) {
               setToken(toRaw(res.data));
             }
