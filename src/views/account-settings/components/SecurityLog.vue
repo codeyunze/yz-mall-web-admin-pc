@@ -57,7 +57,7 @@ async function onSearch() {
   loading.value = true;
   const { data } = await getMineLogs();
   dataList.value = data.items;
-  pagination.total = data.total;
+  pagination.total = Number(data.total);
 
   setTimeout(() => {
     loading.value = false;

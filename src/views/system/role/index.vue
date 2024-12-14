@@ -16,9 +16,11 @@ import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";
 import Menu from "@iconify-icons/ep/menu";
+import User from "@iconify-icons/ep/user";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 import Close from "@iconify-icons/ep/close";
 import Check from "@iconify-icons/ep/check";
+import More from "@iconify-icons/ep/more-filled";
 
 defineOptions({
   name: "SystemRole"
@@ -50,9 +52,11 @@ const treeHeight = ref();
 const {
   form,
   isShow,
+  isShowUser,
   curRow,
   loading,
   columns,
+  userColumns,
   rowStyle,
   dataList,
   treeData,
@@ -62,21 +66,27 @@ const {
   isExpandAll,
   isSelectAll,
   treeSearchValue,
-  // buttonClass,
+  userSearchValue,
+  userLoading,
+  buttonClass,
+  tableData,
   onSearch,
   resetForm,
   openDialog,
   handleMenu,
+  handleUser,
   handleSave,
   handleDelete,
   filterMethod,
   transformI18n,
   onQueryChanged,
+  onQueryUserChanged,
   // handleDatabase,
   handleSizeChange,
   handleCurrentChange,
   handleSelectionChange,
-  displayOperationButton
+  displayOperationButton,
+  onLoadMoreUser
 } = useRole(treeRef);
 
 onMounted(() => {
@@ -185,6 +195,28 @@ onMounted(() => {
           >
             <template #operation="{ row }">
               <el-button
+                v-if="!displayOperationButton(row)"
+                class="reset-margin"
+                link
+                type="primary"
+                :size="size"
+                :icon="useRenderIcon(Menu)"
+                @click="handleMenu(row)"
+              >
+                菜单权限
+              </el-button>
+              <el-button
+                v-if="!displayOperationButton(row)"
+                class="reset-margin"
+                link
+                type="primary"
+                :size="size"
+                :icon="useRenderIcon(User)"
+                @click="handleUser(row)"
+              >
+                成员信息
+              </el-button>
+              <el-button
                 v-if="displayOperationButton(row)"
                 class="reset-margin"
                 link
@@ -212,16 +244,44 @@ onMounted(() => {
                   </el-button>
                 </template>
               </el-popconfirm>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(Menu)"
-                @click="handleMenu(row)"
-              >
-                权限
-              </el-button>
+              <el-dropdown v-if="displayOperationButton(row)">
+                <el-button
+                  class="ml-3 mt-[2px]"
+                  link
+                  type="primary"
+                  :size="size"
+                  :icon="useRenderIcon(More)"
+                />
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item>
+                      <el-button
+                        :class="buttonClass"
+                        link
+                        type="primary"
+                        :size="size"
+                        :icon="useRenderIcon(Menu)"
+                        @click="handleMenu(row)"
+                      >
+                        菜单权限
+                      </el-button>
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <el-button
+                        :class="buttonClass"
+                        link
+                        type="primary"
+                        :size="size"
+                        :icon="useRenderIcon(User)"
+                        @click="handleUser(row)"
+                      >
+                        成员信息
+                      </el-button>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+
               <!-- <el-dropdown>
               <el-button
                 class="ml-3 mt-[2px]"
@@ -266,6 +326,7 @@ onMounted(() => {
 
       <div
         v-if="isShow"
+        v-loading="userLoading"
         class="!min-w-[calc(100vw-60vw-268px)] w-full mt-2 px-2 pb-2 bg-bg_color ml-2 overflow-auto"
       >
         <div class="flex justify-between w-full px-3 pt-5 pb-4">
@@ -295,24 +356,38 @@ onMounted(() => {
               />
             </span>
           </div>
-          <p class="font-bold truncate">
+          <p v-if="!isShowUser" class="font-bold truncate">
             菜单权限
-            {{ `${curRow?.name ? `（${curRow.name}）` : ""}` }}
+            {{ `${curRow?.roleName ? `（${curRow.roleName}）` : ""}` }}
+          </p>
+          <p v-if="isShowUser" class="font-bold truncate">
+            成员信息
+            {{ `${curRow?.roleName ? `（${curRow.roleName}）` : ""}` }}
           </p>
         </div>
         <el-input
+          v-if="!isShowUser"
           v-model="treeSearchValue"
           placeholder="请输入菜单进行搜索"
           class="mb-1"
           clearable
           @input="onQueryChanged"
         />
-        <div class="flex flex-wrap">
+        <el-input
+          v-else
+          v-model="userSearchValue"
+          placeholder="请输入用户名称或手机号进行搜索"
+          class="mb-1"
+          clearable
+          @input="onQueryUserChanged"
+        />
+        <div v-if="!isShowUser" class="flex flex-wrap">
           <el-checkbox v-model="isExpandAll" label="展开/折叠" />
           <el-checkbox v-model="isSelectAll" label="全选/全不选" />
           <el-checkbox v-model="isLinkage" label="父子联动" />
         </div>
         <el-tree-v2
+          v-if="!isShowUser"
           ref="treeRef"
           show-checkbox
           :data="treeData"
@@ -325,6 +400,21 @@ onMounted(() => {
             <span>{{ transformI18n(node.label) }}</span>
           </template>
         </el-tree-v2>
+
+        <pure-table
+          v-if="isShowUser"
+          :data="tableData"
+          :columns="userColumns"
+          maxHeight="500"
+        />
+        <el-button
+          v-if="isShowUser"
+          class="mt-4"
+          style="width: 100%"
+          @click="onLoadMoreUser"
+        >
+          加载更多
+        </el-button>
       </div>
     </div>
   </div>

@@ -294,7 +294,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         loading.value = false;
       } else {
         message(data.msg, {
-          type: "success"
+          type: "error"
         });
       }
     });
@@ -554,7 +554,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     // 归属部门
     const { data } = await getDeptList({});
     higherDeptOptions.value = handleTree(data);
-    console.log(data);
     treeData.value = handleTree(data);
     treeLoading.value = false;
 

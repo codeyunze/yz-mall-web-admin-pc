@@ -43,6 +43,36 @@ const tableData = [
     date,
     name: "Mike",
     address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Dick",
+    address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Harry",
+    address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Sam",
+    address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Lucy",
+    address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Mary",
+    address: "No. 189, Grove St, Los Angeles"
+  },
+  {
+    date,
+    name: "Mike",
+    address: "No. 189, Grove St, Los Angeles"
   }
 ];
 

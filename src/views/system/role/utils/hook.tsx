@@ -8,7 +8,8 @@ import { transformI18n } from "@/plugins/i18n";
 import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
 import type { PaginationProps } from "@pureadmin/table";
-import { getKeyList, deviceDetection } from "@pureadmin/utils";
+import { getKeyList, deviceDetection, hideTextAtIndex } from "@pureadmin/utils";
+// import { tableDataMore } from "../../../table/base/data";
 import {
   addRole,
   bindMenuForRole,
@@ -16,10 +17,20 @@ import {
   getRoleList,
   getRoleMenu,
   getRoleMenuIds,
+  getUserList,
   switchRoleStatus,
   updateRoleById
 } from "@/api/system";
-import { type Ref, reactive, ref, onMounted, h, toRaw, watch } from "vue";
+import {
+  type Ref,
+  reactive,
+  ref,
+  onMounted,
+  h,
+  toRaw,
+  watch,
+  computed
+} from "vue";
 
 export function useRole(treeRef: Ref) {
   const form = reactive({
@@ -28,19 +39,24 @@ export function useRole(treeRef: Ref) {
     roleCode: "",
     status: ""
   });
+  const currentPage = ref(1);
   const curRow = ref();
   const formRef = ref();
   const dataList = ref([]);
   const treeIds = ref([]);
   const treeData = ref([]);
   const isShow = ref(false);
+  const isShowUser = ref(false);
   const loading = ref(true);
   const isLinkage = ref(false);
   const treeSearchValue = ref();
+  const userSearchValue = ref();
+  const userLoading = ref(false);
   const switchLoadMap = ref({});
   const isExpandAll = ref(false);
   const isSelectAll = ref(false);
   const { switchStyle } = usePublicHooks();
+  const tableData = ref();
   const treeProps = {
     value: "id",
     label: "title",
@@ -99,10 +115,67 @@ export function useRole(treeRef: Ref) {
     {
       label: "操作",
       fixed: "right",
-      width: 210,
+      width: 250,
       slot: "operation"
     }
   ];
+  const buttonClass = computed(() => {
+    return [
+      "!h-[20px]",
+      "reset-margin",
+      "!text-gray-500",
+      "dark:!text-white",
+      "dark:hover:!text-primary"
+    ];
+  });
+
+  const userColumns: TableColumnList = [
+    {
+      label: "序号",
+      type: "index",
+      width: 90
+    },
+    {
+      label: "用户名称",
+      prop: "username",
+      width: 120
+    },
+    {
+      label: "手机号",
+      prop: "phone",
+      formatter: ({ phone }) => hideTextAtIndex(phone, { start: 3, end: 6 })
+    }
+  ];
+
+  // 当前操作角色Id
+  const currentRoleId = ref(null);
+  // 用户信息过滤
+  const userFilter = ref("");
+  const onLoadMoreUser = () => {
+    if (!currentRoleId.value) {
+      return;
+    }
+    currentPage.value++;
+    const param = {
+      filter: {
+        roleId: currentRoleId.value,
+        comprehensive: userFilter.value
+      },
+      current: currentPage.value
+    };
+    getUserList(toRaw(param)).then(data => {
+      if (data.code !== 0 || data.data.items.length === 0) {
+        userLoading.value = false;
+      }
+
+      for (let i = data.data.items.length - 1; i >= 0; i--) {
+        tableData.value.push(data.data.items[i]);
+      }
+      setTimeout(() => {
+        userLoading.value = false;
+      }, 300);
+    });
+  };
 
   function onChange({ row, index }) {
     if (row.roleCode === "admin") {
@@ -201,7 +274,7 @@ export function useRole(treeRef: Ref) {
     };
     const { data } = await getRoleList(toRaw(queryFilter));
     dataList.value = data.items;
-    pagination.total = data.total;
+    pagination.total = Number(data.total);
 
     setTimeout(() => {
       loading.value = false;
@@ -277,6 +350,7 @@ export function useRole(treeRef: Ref) {
 
   /** 菜单权限 */
   async function handleMenu(row?: any) {
+    isShowUser.value = false;
     const { id } = row;
     if (id) {
       curRow.value = row;
@@ -290,6 +364,34 @@ export function useRole(treeRef: Ref) {
       curRow.value = null;
       isShow.value = false;
     }
+  }
+
+  /** 成员信息 */
+  async function handleUser(row?: any) {
+    userLoading.value = true;
+    curRow.value = null;
+    isShow.value = true;
+    tableData.value = null;
+    isShowUser.value = true;
+    currentPage.value = 1;
+    currentRoleId.value = row.id;
+    userFilter.value = "";
+
+    const param = {
+      filter: {
+        roleId: currentRoleId.value,
+        comprehensive: userFilter.value
+      },
+      current: currentPage.value
+    };
+    getUserList(toRaw(param)).then(data => {
+      if (data.code === 0) {
+        tableData.value = data.data.items;
+        setTimeout(() => {
+          userLoading.value = false;
+        }, 300);
+      }
+    });
   }
 
   /** 高亮当前权限选中行 */
@@ -327,6 +429,29 @@ export function useRole(treeRef: Ref) {
     treeRef.value!.filter(query);
   };
 
+  const onQueryUserChanged = (query: string) => {
+    // treeRef.value!.filter(query);
+    userLoading.value = true;
+    tableData.value = null;
+    currentPage.value = 1;
+    userFilter.value = query;
+    const param = {
+      filter: {
+        roleId: currentRoleId.value,
+        comprehensive: userFilter.value
+      },
+      current: currentPage.value
+    };
+    getUserList(toRaw(param)).then(data => {
+      if (data.code === 0) {
+        tableData.value = data.data.items;
+        setTimeout(() => {
+          userLoading.value = false;
+        }, 300);
+      }
+    });
+  };
+
   const filterMethod = (query: string, node) => {
     return transformI18n(node.title)!.includes(query);
   };
@@ -350,12 +475,22 @@ export function useRole(treeRef: Ref) {
       : treeRef.value.setCheckedKeys([]);
   });
 
+  watch(userLoading, newValue => {
+    if (newValue === true) {
+      setTimeout(() => {
+        userLoading.value = false;
+      }, 3000);
+    }
+  });
+
   return {
     form,
     isShow,
+    isShowUser,
     curRow,
     loading,
     columns,
+    userColumns,
     rowStyle,
     dataList,
     treeData,
@@ -365,20 +500,27 @@ export function useRole(treeRef: Ref) {
     isExpandAll,
     isSelectAll,
     treeSearchValue,
-    // buttonClass,
+    userSearchValue,
+    userLoading,
+    buttonClass,
+    tableData,
+    userFilter,
     onSearch,
     resetForm,
     openDialog,
     handleMenu,
+    handleUser,
     handleSave,
     handleDelete,
     filterMethod,
     transformI18n,
     onQueryChanged,
+    onQueryUserChanged,
     // handleDatabase,
     handleSizeChange,
     handleCurrentChange,
     handleSelectionChange,
-    displayOperationButton
+    displayOperationButton,
+    onLoadMoreUser
   };
 }

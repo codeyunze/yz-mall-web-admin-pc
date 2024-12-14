@@ -82,7 +82,7 @@ export function useRole() {
     loading.value = true;
     const { data } = await getOnlineLogsList(toRaw(form));
     dataList.value = data.list;
-    pagination.total = data.total;
+    pagination.total = Number(data.total);
     setTimeout(() => {
       loading.value = false;
     }, 500);

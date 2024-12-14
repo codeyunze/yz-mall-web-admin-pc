@@ -131,7 +131,7 @@ export function useRole(tableRef: Ref) {
     loading.value = true;
     const { data } = await getLoginLogsList(toRaw(form));
     dataList.value = data.list;
-    pagination.total = data.total;
+    pagination.total = Number(data.total);
 
     setTimeout(() => {
       loading.value = false;
