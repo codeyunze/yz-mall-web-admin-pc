@@ -7,7 +7,7 @@ import { usePublicHooks } from "../../hooks";
 import { transformI18n } from "@/plugins/i18n";
 import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
-import type { PaginationProps } from "@pureadmin/table";
+import type { AdaptiveConfig, PaginationProps } from "@pureadmin/table";
 import { getKeyList, deviceDetection, hideTextAtIndex } from "@pureadmin/utils";
 // import { tableDataMore } from "../../../table/base/data";
 import {
@@ -137,8 +137,7 @@ export function useRole(treeRef: Ref) {
     },
     {
       label: "用户名称",
-      prop: "username",
-      width: 120
+      prop: "username"
     },
     {
       label: "手机号",
@@ -146,6 +145,17 @@ export function useRole(treeRef: Ref) {
       formatter: ({ phone }) => hideTextAtIndex(phone, { start: 3, end: 6 })
     }
   ];
+
+  const adaptiveConfig: AdaptiveConfig = {
+    /** 表格距离页面底部的偏移量，默认值为 `96` */
+    offsetBottom: 110
+    /** 是否固定表头，默认值为 `true`（如果不想固定表头，fixHeader设置为false并且表格要设置table-layout="auto"） */
+    // fixHeader: true
+    /** 页面 `resize` 时的防抖时间，默认值为 `60` ms */
+    // timeout: 60
+    /** 表头的 `z-index`，默认值为 `100` */
+    // zIndex: 100
+  };
 
   // 当前操作角色Id
   const currentRoleId = ref(null);
@@ -161,6 +171,7 @@ export function useRole(treeRef: Ref) {
         roleId: currentRoleId.value,
         comprehensive: userFilter.value
       },
+      size: 15,
       current: currentPage.value
     };
     getUserList(toRaw(param)).then(data => {
@@ -382,6 +393,7 @@ export function useRole(treeRef: Ref) {
         roleId: currentRoleId.value,
         comprehensive: userFilter.value
       },
+      size: 15,
       current: currentPage.value
     };
     getUserList(toRaw(param)).then(data => {
@@ -440,6 +452,7 @@ export function useRole(treeRef: Ref) {
         roleId: currentRoleId.value,
         comprehensive: userFilter.value
       },
+      size: 15,
       current: currentPage.value
     };
     getUserList(toRaw(param)).then(data => {
@@ -521,6 +534,7 @@ export function useRole(treeRef: Ref) {
     handleCurrentChange,
     handleSelectionChange,
     displayOperationButton,
-    onLoadMoreUser
+    onLoadMoreUser,
+    adaptiveConfig
   };
 }

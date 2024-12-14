@@ -86,7 +86,8 @@ const {
   handleCurrentChange,
   handleSelectionChange,
   displayOperationButton,
-  onLoadMoreUser
+  onLoadMoreUser,
+  adaptiveConfig
 } = useRole(treeRef);
 
 onMounted(() => {
@@ -403,9 +404,15 @@ onMounted(() => {
 
         <pure-table
           v-if="isShowUser"
+          ref="tableRef"
+          border
+          adaptive
+          :adaptiveConfig="adaptiveConfig"
+          row-key="id"
+          alignWhole="center"
+          showOverflowTooltip
           :data="tableData"
           :columns="userColumns"
-          maxHeight="500"
         />
         <el-button
           v-if="isShowUser"
