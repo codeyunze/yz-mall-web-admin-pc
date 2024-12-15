@@ -169,7 +169,7 @@ class PureHttp {
         .then((response: undefined) => {
           resolve(response);
           const result = JSON.parse(JSON.stringify(response));
-          if (result.code === 50008) {
+          if (result.code !== 0) {
             message(result.msg, {
               type: "error"
             });

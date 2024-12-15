@@ -13,7 +13,12 @@ import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "../utils/types";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import { cloneDeep, isAllEmpty, deviceDetection } from "@pureadmin/utils";
+import {
+  cloneDeep,
+  isAllEmpty,
+  deviceDetection,
+  debounce
+} from "@pureadmin/utils";
 
 export function useMenu() {
   const form = reactive({
@@ -140,6 +145,55 @@ export function useMenu() {
     return newTreeList;
   }
 
+  const menuParam = ref({});
+
+  /**
+   * 处理新增菜单操作
+   */
+  const debounceHandleAddMenu: any = debounce(
+    (operation, title, done) => {
+      addMenu(menuParam.value).then(res => {
+        if (res.code === 0) {
+          message(`您${operation}了菜单名称为${title}的这条数据`, {
+            type: "success"
+          });
+          done(); // 关闭弹框
+          onSearch(); // 刷新表格数据
+        } else {
+          message(res.msg, {
+            type: "error"
+          });
+        }
+      });
+    },
+    3000,
+    true
+  );
+
+  /**
+   * 处理修改菜单操作
+   * @param operation 操作类型
+   * @param title 菜单名称
+   * @param done 关闭弹窗
+   */
+  const debounceHandleUpdateMenu: any = debounce(
+    (operation, title, done) => {
+      updateMenuById(menuParam.value).then(res => {
+        if (res.code === 0) {
+          message(`您${operation}了菜单名称为${title}的这条数据`, {
+            type: "success"
+          });
+          done(); // 关闭弹框
+          onSearch(); // 刷新表格数据
+        } else {
+          message(res.msg, { type: "error" });
+        }
+      });
+    },
+    3000,
+    true
+  );
+
   function openDialog(title = "新增", row?: FormItemProps) {
     console.log(JSON.stringify(row));
     addDialog({
@@ -180,41 +234,18 @@ export function useMenu() {
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
-        function chores() {
-          message(
-            `您${title}了菜单名称为${transformI18n(curData.title)}的这条数据`,
-            {
-              type: "success"
-            }
-          );
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        }
         FormRef.validate(valid => {
           if (valid) {
             // 表单规则校验通过
+            menuParam.value = curData;
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
-              addMenu(curData).then(res => {
-                if (res.code === 0) {
-                  chores();
-                } else {
-                  message(res.msg, {
-                    type: "error"
-                  });
-                }
-              });
+              // 防抖(3秒内连续点击只会执行第一次点击事件)
+              debounceHandleAddMenu(title, curData.title, done);
             } else {
               // 实际开发先调用修改接口，再进行下面操作
-              updateMenuById(curData).then(res => {
-                if (res.code === 0) {
-                  chores();
-                } else {
-                  message(res.msg, {
-                    type: "error"
-                  });
-                }
-              });
+              // 防抖(3秒内连续点击只会执行第一次点击事件)
+              debounceHandleUpdateMenu(title, curData.title, done);
             }
           }
         });
