@@ -35,7 +35,7 @@ const {
   deviceDetection,
   onSearch,
   resetForm,
-  onbatchDel,
+  onBatchDel,
   openDialog,
   onTreeSelect,
   handleUpdate,
@@ -137,7 +137,7 @@ const {
                 取消选择
               </el-button>
             </div>
-            <el-popconfirm title="是否确认删除?" @confirm="onbatchDel">
+            <el-popconfirm title="是否确认删除?" @confirm="onBatchDel">
               <template #reference>
                 <el-button type="danger" text class="mr-1">
                   批量删除

@@ -268,7 +268,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   /** 批量删除 */
-  function onbatchDel() {
+  function onBatchDel() {
     // 返回当前选中的行
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
@@ -331,7 +331,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function openDialog(title = "新增", row?: FormItemProps) {
-    console.log(JSON.stringify(row));
     addDialog({
       title: `${title}用户`,
       props: {
@@ -366,17 +365,12 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         }
         FormRef.validate(valid => {
           if (valid) {
-            console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
               addUser(curData).then(res => {
                 if (res.code === 0) {
                   chores();
-                } else {
-                  message(res.msg, {
-                    type: "warning"
-                  });
                 }
               });
             } else {
@@ -384,10 +378,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
               updateUserById(curData).then(res => {
                 if (res.code === 0) {
                   chores();
-                } else {
-                  message(res.msg, {
-                    type: "warning"
-                  });
                 }
               });
             }
@@ -574,7 +564,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     deviceDetection,
     onSearch,
     resetForm,
-    onbatchDel,
+    onBatchDel,
     openDialog,
     onTreeSelect,
     handleUpdate,
