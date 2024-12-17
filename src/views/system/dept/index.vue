@@ -40,6 +40,7 @@ function onFullscreen() {
       :inline="true"
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
+      style="border-radius: 10px"
     >
       <el-form-item label="部门名称：" prop="name">
         <el-input
@@ -77,6 +78,7 @@ function onFullscreen() {
 
     <PureTableBar
       title="部门管理"
+      style="border-radius: 10px"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
       @refresh="onSearch"

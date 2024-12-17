@@ -54,6 +54,7 @@ const {
   <div :class="['flex', 'justify-between', deviceDetection() && 'flex-wrap']">
     <tree
       ref="treeRef"
+      style="border-radius: 10px"
       :class="['mr-2', deviceDetection() ? 'w-full' : 'min-w-[300px]']"
       :treeData="treeData"
       :treeLoading="treeLoading"
@@ -67,6 +68,7 @@ const {
         :inline="true"
         :model="form"
         class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
+        style="border-radius: 10px"
       >
         <el-form-item label="用户名称：" prop="username">
           <el-input
@@ -110,7 +112,12 @@ const {
         </el-form-item>
       </el-form>
 
-      <PureTableBar title="用户管理" :columns="columns" @refresh="onSearch">
+      <PureTableBar
+        title="用户管理"
+        :columns="columns"
+        style="border-radius: 10px"
+        @refresh="onSearch"
+      >
         <template #buttons>
           <el-button
             type="primary"

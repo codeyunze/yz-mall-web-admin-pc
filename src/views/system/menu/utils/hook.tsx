@@ -49,6 +49,7 @@ export function useMenu() {
       label: "菜单名称",
       prop: "title",
       align: "left",
+      minWidth: 120,
       cellRenderer: ({ row }) => (
         <>
           <span class="inline-block mr-1">
@@ -76,29 +77,33 @@ export function useMenu() {
     },
     {
       label: "路由路径",
-      prop: "path"
+      prop: "path",
+      align: "left"
     },
     {
       label: "组件路径",
       prop: "component",
+      align: "left",
       formatter: ({ path, component }) =>
         isAllEmpty(component) ? path : component
     },
     {
       label: "权限标识",
-      prop: "auths"
+      prop: "auths",
+      align: "left",
+      minWidth: 120
     },
     {
       label: "排序",
       prop: "sort",
       width: 100
     },
-    {
-      label: "隐藏",
-      prop: "showLink",
-      formatter: ({ showLink }) => (showLink ? "否" : "是"),
-      width: 100
-    },
+    // {
+    //   label: "隐藏",
+    //   prop: "showLink",
+    //   formatter: ({ showLink }) => (showLink ? "否" : "是"),
+    //   width: 100
+    // },
     {
       label: "操作",
       fixed: "right",
@@ -154,7 +159,7 @@ export function useMenu() {
     (operation, title, done) => {
       addMenu(menuParam.value).then(res => {
         if (res.code === 0) {
-          message(`您${operation}了菜单名称为${title}的这条数据`, {
+          message(`您${operation}了菜单名称为 [${title}] 的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -180,7 +185,7 @@ export function useMenu() {
     (operation, title, done) => {
       updateMenuById(menuParam.value).then(res => {
         if (res.code === 0) {
-          message(`您${operation}了菜单名称为${title}的这条数据`, {
+          message(`您${operation}了菜单名称为 [${title}] 的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框

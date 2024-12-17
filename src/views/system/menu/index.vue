@@ -40,6 +40,7 @@ function onFullscreen() {
       :inline="true"
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
+      style="border-radius: 10px"
     >
       <el-form-item label="菜单名称：" prop="title">
         <el-input
@@ -66,6 +67,7 @@ function onFullscreen() {
 
     <PureTableBar
       title="菜单管理"
+      style="border-radius: 10px"
       :columns="columns"
       :isExpandAll="false"
       :tableRef="tableRef?.getTableRef()"

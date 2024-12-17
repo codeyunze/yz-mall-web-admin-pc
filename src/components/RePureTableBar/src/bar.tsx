@@ -264,7 +264,7 @@ export default defineComponent({
               : "mt-2"
           ]}
         >
-          <div class="flex justify-between w-full h-[60px] p-4">
+          <div class="flex justify-between w-full h-[60px] p-4 xxxxxx">
             {slots?.title ? (
               slots.title()
             ) : (

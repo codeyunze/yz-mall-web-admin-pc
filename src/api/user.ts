@@ -87,7 +87,7 @@ export const getLogin = (data?: object) => {
 
 /** 登出 */
 export const logout = () => {
-  return http.request("post", baseUrlApi("/logout"));
+  return http.request("get", baseUrlApi("/logout"));
 };
 
 /** 刷新`token` */

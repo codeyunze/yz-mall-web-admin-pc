@@ -120,6 +120,9 @@ export function useDept() {
         }
       },
       width: "40%",
+      style: {
+        "border-radius": "12px"
+      },
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,

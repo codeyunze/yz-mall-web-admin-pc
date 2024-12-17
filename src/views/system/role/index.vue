@@ -109,6 +109,7 @@ onMounted(() => {
       :inline="true"
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
+      style="border-radius: 10px"
     >
       <el-form-item label="角色名称：" prop="roleName">
         <el-input
@@ -158,7 +159,10 @@ onMounted(() => {
     >
       <PureTableBar
         :class="[isShow && !deviceDetection() ? '!w-[60vw]' : 'w-full']"
-        style="transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1)"
+        style="
+          border-radius: 10px;
+          transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+        "
         title="角色管理"
         :columns="columns"
         @refresh="onSearch"
@@ -329,6 +333,7 @@ onMounted(() => {
         v-if="isShow"
         v-loading="userLoading"
         class="!min-w-[calc(100vw-60vw-268px)] w-full mt-2 px-2 pb-2 bg-bg_color ml-2 overflow-auto"
+        style="border-radius: 10px"
       >
         <div class="flex justify-between w-full px-3 pt-5 pb-4">
           <div class="flex">
