@@ -70,16 +70,6 @@ type ResultTable = {
   };
 };
 
-export type UserInfoResultTable = {
-  code: number;
-  success: boolean;
-  msg: string;
-  data: {
-    items: Array<any>;
-    total: number;
-  };
-};
-
 /** 登录 */
 export const getLogin = (data?: object) => {
   return http.request<UserResult>("post", baseUrlApi("/login"), { data });
@@ -109,7 +99,18 @@ export const getMineLogs = (data?: object) => {
 
 /** 分页查询用户信息 */
 export const pageUserInfo = (data?: object) => {
-  return http.request<UserInfoResultTable>("post", "/sys/user/page", {
+  return http.request<ResultTable>("post", "/sys/user/page", {
     data
   });
+};
+
+/** 用户密码重置 */
+export const resetPassword = (data?: object) => {
+  return http.request<UserInfoResult>(
+    "post",
+    baseUrlApi("/sys/user/resetPassword"),
+    {
+      data
+    }
+  );
 };
