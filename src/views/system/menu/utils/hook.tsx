@@ -231,6 +231,9 @@ export function useMenu() {
         }
       },
       width: "45%",
+      style: {
+        "border-radius": "12px"
+      },
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,

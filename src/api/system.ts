@@ -184,3 +184,8 @@ export const bindMenuForRole = (data?: object) => {
     data
   });
 };
+
+/** 获取用户管理-根据用户Id删除用户信息 */
+export const deleteByUserId = (data?: object) => {
+  return http.request<Result>("delete", baseUrlApi(`/sys/user/delete/${data}`));
+};

@@ -23,6 +23,14 @@ const menuTypeOptions: Array<OptionsType> = [
   }
 ];
 
+const menuTypeEnum = {
+  0: "菜单",
+  1: "iframe",
+  2: "外链",
+  3: "按钮",
+  4: "接口"
+};
+
 const showLinkOptions: Array<OptionsType> = [
   {
     label: "显示",
@@ -102,6 +110,7 @@ const frameLoadingOptions: Array<OptionsType> = [
 ];
 
 export {
+  menuTypeEnum,
   menuTypeOptions,
   showLinkOptions,
   fixedTagOptions,

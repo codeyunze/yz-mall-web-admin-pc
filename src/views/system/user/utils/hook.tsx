@@ -25,7 +25,8 @@ import {
   switchUserStatus,
   addUser,
   updateUserById,
-  bindRoleForUser
+  bindRoleForUser,
+  deleteByUserId
 } from "@/api/system";
 import {
   ElForm,
@@ -226,7 +227,13 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
             });
           } else {
             row.status === 0 ? (row.status = 1) : (row.status = 0);
-            message(res.msg, { type: "error" });
+            switchLoadMap.value[index] = Object.assign(
+              {},
+              switchLoadMap.value[index],
+              {
+                loading: false
+              }
+            );
           }
         });
       })
@@ -239,9 +246,19 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     console.log(row);
   }
 
+  /**
+   * 删除用户信息
+   * @param row 用户信息
+   */
   function handleDelete(row) {
-    message(`您删除了用户编号为${row.id}的这条数据`, { type: "success" });
-    onSearch();
+    deleteByUserId(row.id).then(res => {
+      if (res.code === 0) {
+        onSearch();
+        message(`您删除了用户名称为 [${row.username}] 的这条数据`, {
+          type: "success"
+        });
+      }
+    });
   }
 
   function handleSizeChange(val: number) {
@@ -349,6 +366,9 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         }
       },
       width: "46%",
+      style: {
+        "border-radius": "12px"
+      },
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
@@ -394,6 +414,9 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     addDialog({
       title: "裁剪、上传头像",
       width: "40%",
+      style: {
+        "border-radius": "12px"
+      },
       closeOnClickModal: false,
       fullscreen: deviceDetection(),
       contentRenderer: () =>

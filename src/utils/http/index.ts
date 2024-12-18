@@ -79,7 +79,6 @@ class PureHttp {
           ? config
           : new Promise(resolve => {
               const data = getToken();
-              console.log(config.url.split("/"));
               if (data) {
                 const now = new Date().getTime();
                 const expired = parseInt(data.expires) - now <= 0;

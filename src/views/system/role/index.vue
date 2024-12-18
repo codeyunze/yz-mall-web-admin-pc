@@ -410,7 +410,6 @@ onMounted(() => {
         <pure-table
           v-if="isShowUser"
           ref="tableRef"
-          border
           adaptive
           :adaptiveConfig="adaptiveConfig"
           row-key="id"

@@ -94,7 +94,7 @@ const {
             class="!w-[180px]"
           >
             <el-option label="已开启" value="1" />
-            <el-option label="已关闭" value="0" />
+            <el-option label="已停用" value="0" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -184,7 +184,7 @@ const {
                 修改
               </el-button>
               <el-popconfirm
-                :title="`是否确认删除用户编号为${row.id}的这条数据`"
+                :title="`是否确认删除用户名称为 [${row.username}] ，手机号为 [${row.phone}] 的这条数据`"
                 @confirm="handleDelete(row)"
               >
                 <template #reference>

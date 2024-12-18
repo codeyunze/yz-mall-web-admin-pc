@@ -4,6 +4,7 @@ import { handleTree } from "@/utils/tree";
 import { message } from "@/utils/message";
 import { ElMessageBox } from "element-plus";
 import { usePublicHooks } from "../../hooks";
+import { menuTypeEnum } from "../../menu/utils/enums";
 import { transformI18n } from "@/plugins/i18n";
 import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
@@ -311,6 +312,9 @@ export function useRole(treeRef: Ref) {
         }
       },
       width: "40%",
+      style: {
+        "border-radius": "12px"
+      },
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
@@ -328,7 +332,6 @@ export function useRole(treeRef: Ref) {
         }
         FormRef.validate(valid => {
           if (valid) {
-            console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
@@ -368,9 +371,7 @@ export function useRole(treeRef: Ref) {
       isShow.value = true;
       // 查询选择角色所拥有的所有菜单
       const { data } = await getRoleMenuIds(id);
-      // console.log("角色菜单", JSON.stringify(data));
       treeRef.value.setCheckedKeys(data);
-      // console.log(JSON.stringify(treeRef.value));
     } else {
       curRow.value = null;
       isShow.value = false;
@@ -417,9 +418,7 @@ export function useRole(treeRef: Ref) {
   /** 菜单权限-保存 */
   function handleSave() {
     const { id, roleName } = curRow.value;
-    console.log("参数信息", JSON.stringify(curRow.value));
     // 根据角色 id 调用实际项目中菜单权限修改接口
-    console.log(id, treeRef.value.getCheckedKeys());
     bindMenuForRole({
       roleId: id,
       menuIds: treeRef.value.getCheckedKeys()
@@ -472,6 +471,10 @@ export function useRole(treeRef: Ref) {
   onMounted(async () => {
     onSearch();
     const { data } = await getRoleMenu();
+    data.forEach(item => {
+      console.log(item);
+      item.title = item.title + " ----- [" + menuTypeEnum[item.menuType] + "]";
+    });
     treeIds.value = getKeyList(data, "id");
     treeData.value = handleTree(data);
   });
