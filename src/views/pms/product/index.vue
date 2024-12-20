@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // import { list } from "./list";
-import Adaptive from "./adaptive/index.vue";
+import Adaptive from "@/views/pms/product/adaptive/index.vue";
 
 defineOptions({
-  name: "SystemUserPage"
+  name: "PmsProductManage"
 });
 </script>
 

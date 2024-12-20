@@ -1,4 +1,4 @@
-import Adaptive from "./adaptive/index.vue";
+import Adaptive from "@/views/pms/product/adaptive/index.vue";
 
 const rendContent = (val: string) =>
   `代码位置：src/views/table/high/${val}/index.vue`;
