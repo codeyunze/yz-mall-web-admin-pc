@@ -5,6 +5,7 @@ import { FormProps } from "./utils/types";
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
+    higherDeptOptions: [],
     id: "",
     roleName: "",
     roleCode: "",
@@ -30,6 +31,27 @@ defineExpose({ getRef });
     :rules="formRules"
     label-width="82px"
   >
+    <el-form-item label="所属部门">
+      <el-cascader
+        v-model="newFormInline.orgId"
+        class="w-full"
+        :options="newFormInline.higherDeptOptions"
+        :props="{
+          value: 'id',
+          label: 'orgName',
+          emitPath: false,
+          checkStrictly: true
+        }"
+        clearable
+        filterable
+        placeholder="请选择角色所属部门"
+      >
+        <template #default="{ node, data }">
+          <span>{{ data.orgName }}</span>
+          <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+        </template>
+      </el-cascader>
+    </el-form-item>
     <el-form-item label="角色名称" prop="roleName">
       <el-input
         v-model="newFormInline.roleName"

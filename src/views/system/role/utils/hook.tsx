@@ -9,12 +9,18 @@ import { transformI18n } from "@/plugins/i18n";
 import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
 import type { AdaptiveConfig, PaginationProps } from "@pureadmin/table";
-import { getKeyList, deviceDetection, hideTextAtIndex } from "@pureadmin/utils";
+import {
+  getKeyList,
+  deviceDetection,
+  hideTextAtIndex,
+  cloneDeep
+} from "@pureadmin/utils";
 // import { tableDataMore } from "../../../table/base/data";
 import {
   addRole,
   bindMenuForRole,
   deleteRoleById,
+  getDeptList,
   getRoleList,
   getRoleMenu,
   getRoleMenuIds,
@@ -44,6 +50,7 @@ export function useRole(treeRef: Ref) {
   const curRow = ref();
   const formRef = ref();
   const dataList = ref([]);
+  const deptDataList = ref([]);
   const treeIds = ref([]);
   const treeData = ref([]);
   const isShow = ref(false);
@@ -299,11 +306,17 @@ export function useRole(treeRef: Ref) {
     onSearch();
   };
 
-  function openDialog(title = "新增", row?: FormItemProps) {
+  async function openDialog(title = "新增", row?: FormItemProps) {
+    const { data } = await getDeptList({});
+    deptDataList.value = handleTree(data);
+
     addDialog({
       title: `${title}角色`,
       props: {
         formInline: {
+          higherDeptOptions: formatHigherDeptOptions(
+            cloneDeep(deptDataList.value)
+          ),
           id: row?.id ?? "",
           roleName: row?.roleName ?? "",
           roleCode: row?.roleCode ?? "",
@@ -338,10 +351,6 @@ export function useRole(treeRef: Ref) {
               addRole(curData).then(res => {
                 if (res.code === 0) {
                   chores();
-                } else {
-                  message(res.msg, {
-                    type: "warning"
-                  });
                 }
               });
             } else {
@@ -349,10 +358,6 @@ export function useRole(treeRef: Ref) {
               updateRoleById(curData).then(res => {
                 if (res.code === 0) {
                   chores();
-                } else {
-                  message(res.msg, {
-                    type: "warning"
-                  });
                 }
               });
             }
@@ -360,6 +365,18 @@ export function useRole(treeRef: Ref) {
         });
       }
     });
+  }
+
+  function formatHigherDeptOptions(treeList) {
+    // 根据返回数据的status字段值判断追加是否禁用disabled字段，返回处理后的树结构，用于上级部门级联选择器的展示（实际开发中也是如此，不可能前端需要的每个字段后端都会返回，这时需要前端自行根据后端返回的某些字段做逻辑处理）
+    if (!treeList || !treeList.length) return;
+    const newTreeList = [];
+    for (let i = 0; i < treeList.length; i++) {
+      treeList[i].disabled = treeList[i].status === 0 ? true : false;
+      formatHigherDeptOptions(treeList[i].children);
+      newTreeList.push(treeList[i]);
+    }
+    return newTreeList;
   }
 
   /** 菜单权限 */
