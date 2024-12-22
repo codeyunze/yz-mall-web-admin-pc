@@ -122,7 +122,7 @@ const handleRest = () => {
     <PlusSearch
       v-model="state"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
-      style=" margin-bottom: 20px;border-radius: 10px"
+      style="margin-bottom: 20px; border-radius: 10px"
       :columns="filterColumns"
       :show-number="2"
       label-width="80"
