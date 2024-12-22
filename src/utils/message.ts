@@ -30,7 +30,7 @@ interface MessageParams {
   onClose?: Function | null;
 }
 
-/** 用法非常简单，参考 src/views/components/message/index.vue 文件 */
+/** 用法非常简单，参考 src/views/components/message/one.vue 文件 */
 
 /**
  * `Message` 消息提示函数
