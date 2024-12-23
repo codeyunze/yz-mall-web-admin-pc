@@ -12,6 +12,8 @@ import Delete from "@iconify-icons/ep/delete";
 import More from "@iconify-icons/ep/more-filled";
 import Role from "@iconify-icons/ri/admin-line";
 import { PureTableBar } from "@/components/RePureTableBar";
+import Eye from "@iconify-icons/ri/eye-line";
+import View from "@iconify-icons/ep/view";
 
 defineOptions({
   name: "PmsProductManage"
@@ -50,31 +52,12 @@ const state = ref({
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "手机号",
-    prop: "phone"
+    label: "商品名称",
+    prop: "name"
   },
   {
-    label: "邮件",
-    prop: "email"
-  },
-  {
-    label: "名称",
-    prop: "username"
-  },
-  {
-    label: "性别",
-    prop: "sex",
-    valueType: "select",
-    options: [
-      {
-        label: "男",
-        value: "0"
-      },
-      {
-        label: "女",
-        value: "1"
-      }
-    ]
+    label: "商品标签",
+    prop: "titles"
   },
   {
     label: "创建时间",
@@ -92,11 +75,8 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  console.log("search");
-  console.log(JSON.stringify(JSON.stringify(values)));
-  form.phone = values.phone;
-  form.email = values.email;
-  console.log(values.createTime);
+  form.name = values.name;
+  form.titles = values.titles;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -109,8 +89,8 @@ const handleSearch = (values: any) => {
 };
 const handleRest = () => {
   console.log("handleRest");
-  form.phone = null;
-  form.email = null;
+  form.name = null;
+  form.titles = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();
@@ -133,7 +113,7 @@ const handleRest = () => {
     />
 
     <PureTableBar
-      title="用户管理"
+      title="商品管理"
       :columns="columns"
       style="border-radius: 10px"
       @refresh="onSearch"
@@ -144,7 +124,7 @@ const handleRest = () => {
           :icon="useRenderIcon(AddFill)"
           @click="openDialog()"
         >
-          新增用户
+          新增商品
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
@@ -196,10 +176,10 @@ const handleRest = () => {
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(EditPen)"
-              @click="openDialog('修改', row)"
+              :icon="useRenderIcon(View)"
+              @click="openDialog('详情', row)"
             >
-              修改
+              详情
             </el-button>
             <el-popconfirm
               :title="`是否确认删除用户名称为 [${row.username}] ，手机号为 [${row.phone}] 的这条数据`"
@@ -228,6 +208,18 @@ const handleRest = () => {
               />
               <template #dropdown>
                 <el-dropdown-menu>
+                  <el-dropdown-item>
+                    <el-button
+                      :class="buttonClass"
+                      link
+                      type="primary"
+                      :size="size"
+                      :icon="useRenderIcon(EditPen)"
+                      @click="openDialog('修改', row)"
+                    >
+                      修改
+                    </el-button>
+                  </el-dropdown-item>
                   <el-dropdown-item>
                     <el-button
                       :class="buttonClass"

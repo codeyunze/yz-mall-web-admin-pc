@@ -4,31 +4,23 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { pageUserInfo } from "@/api/user";
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
 import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/system/user/form/index.vue";
-import type {
-  FormItemProps,
-  RoleFormItemProps
-} from "@/views/system/user/utils/types";
 import { message } from "@/utils/message";
 import {
-  addUser,
-  bindRoleForUser,
-  deleteByUserId,
-  getRoleIds,
-  updateUserById
-} from "@/api/system";
-import roleForm from "@/views/system/user/form/role.vue";
+  addProduct,
+  deleteProduct,
+  getProductPage,
+  updateProductById
+} from "@/api/pms";
+import type { FormItemProps } from "@/views/pms/product/utils/types";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
   const selectedNum = ref(0);
-  const higherDeptOptions = ref();
-  const roleOptions = ref([]);
   const columns: TableColumnList = [
     {
       label: "勾选列", // 如果需要表格多选，此处label必须设置
@@ -42,17 +34,21 @@ export function useColumns(tableRef: Ref) {
       width: 90
     },
     {
-      label: "用户名称",
-      prop: "username",
+      label: "商品",
+      prop: "name",
       minWidth: 130
     },
     {
-      label: "手机号",
-      prop: "phone"
+      label: "标签",
+      prop: "titles"
     },
     {
-      label: "邮件",
-      prop: "email"
+      label: "售价",
+      prop: "price"
+    },
+    {
+      label: "说明",
+      prop: "remark"
     },
     {
       label: "创建日期",
@@ -66,13 +62,13 @@ export function useColumns(tableRef: Ref) {
     }
   ];
 
+  const formRef = ref();
   const form = reactive({
-    phone: null,
-    email: null,
+    name: null,
+    titles: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
-  const formRef = ref();
   const buttonClass = computed(() => {
     return [
       "!h-[20px]",
@@ -114,18 +110,14 @@ export function useColumns(tableRef: Ref) {
   /** 撑满内容区自适应高度相关配置 */
   const adaptiveConfig: AdaptiveConfig = {
     /** 表格距离页面底部的偏移量，默认值为 `96` */
-    offsetBottom: 110
+    offsetBottom: 110,
     /** 是否固定表头，默认值为 `true`（如果不想固定表头，fixHeader设置为false并且表格要设置table-layout="auto"） */
     // fixHeader: true
     /** 页面 `resize` 时的防抖时间，默认值为 `60` ms */
-    // timeout: 60
+    timeout: 200
     /** 表头的 `z-index`，默认值为 `100` */
     // zIndex: 100
   };
-
-  function onSizeChange(val) {
-    console.log("onSizeChange", val);
-  }
 
   function onCurrentChange(val) {
     loadingConfig.text = `正在加载第${val}页...`;
@@ -142,12 +134,10 @@ export function useColumns(tableRef: Ref) {
       current: pagination.currentPage,
       filter: form
     };
-    console.log("请求过滤" + JSON.stringify(queryFilter));
 
-    pageUserInfo(queryFilter).then(data => {
-      console.log("接口数据" + JSON.stringify(data));
+    getProductPage(queryFilter).then(data => {
       dataList.value = data.data.items;
-      pagination.total = data.data.total;
+      pagination.total = Number(data.data.total);
     });
     setTimeout(() => {
       loading.value = false;
@@ -162,19 +152,17 @@ export function useColumns(tableRef: Ref) {
 
   function openDialog(title = "新增", row?: FormItemProps) {
     addDialog({
-      title: `${title}用户信息`,
+      title: `${title}商品信息`,
       props: {
         formInline: {
           title,
-          higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
           id: row?.id ?? 0,
-          username: row?.username ?? "",
-          password: row?.password ?? "",
-          phone: row?.phone ?? "",
-          email: row?.email ?? "",
-          sex: row?.sex ?? "",
-          status: row?.status ?? 1,
-          remark: row?.remark ?? ""
+          name: row?.name ?? "",
+          remark: row?.remark ?? "",
+          titles: row?.titles ?? "",
+          price: row?.price ?? "",
+          publish_status: row?.publish_status ?? 1,
+          verify_status: row?.verify_status ?? 1
         }
       },
       width: "46%",
@@ -190,7 +178,7 @@ export function useColumns(tableRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了用户名称为${curData.username}的这条数据`, {
+          message(`您${title}了用户名称为${curData.name}的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -203,14 +191,14 @@ export function useColumns(tableRef: Ref) {
           // 表单规则校验通过
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
-            addUser(curData).then(res => {
+            addProduct(curData).then(res => {
               if (res.code === 0) {
                 chores();
               }
             });
           } else {
             // 实际开发先调用修改接口，再进行下面操作
-            updateUserById(curData).then(res => {
+            updateProductById(curData).then(res => {
               if (res.code === 0) {
                 chores();
               }
@@ -219,18 +207,6 @@ export function useColumns(tableRef: Ref) {
         });
       }
     });
-  }
-
-  function formatHigherDeptOptions(treeList) {
-    // 根据返回数据的status字段值判断追加是否禁用disabled字段，返回处理后的树结构，用于上级部门级联选择器的展示（实际开发中也是如此，不可能前端需要的每个字段后端都会返回，这时需要前端自行根据后端返回的某些字段做逻辑处理）
-    if (!treeList || !treeList.length) return;
-    const newTreeList = [];
-    for (let i = 0; i < treeList.length; i++) {
-      treeList[i].disabled = treeList[i].status === 0;
-      formatHigherDeptOptions(treeList[i].children);
-      newTreeList.push(treeList[i]);
-    }
-    return newTreeList;
   }
 
   /** 取消选择 */
@@ -247,14 +223,23 @@ export function useColumns(tableRef: Ref) {
     tableRef.value.setAdaptive();
   }
 
+  /**
+   * 设置一页数据量
+   * @param val 一页展示的数据量
+   */
   function handleSizeChange(val: number) {
     pagination.pageSize = val;
     pagination.currentPage = 1;
     onSearch();
   }
 
+  /**
+   * 翻页
+   * @param val 页码
+   */
   function handleCurrentChange(val: number) {
-    console.log(`current page: ${val}`);
+    pagination.currentPage = val;
+    onSearch();
   }
 
   /** 批量删除 */
@@ -270,14 +255,14 @@ export function useColumns(tableRef: Ref) {
   }
 
   /**
-   * 删除用户信息
-   * @param row 用户信息
+   * 删除商品信息
+   * @param row 商品信息
    */
   function handleDelete(row) {
-    deleteByUserId(row.id).then(res => {
+    deleteProduct(row.id).then(res => {
       if (res.code === 0) {
         onSearch();
-        message(`您删除了用户名称为 [${row.username}] 的这条数据`, {
+        message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
           type: "success"
         });
       }
@@ -288,46 +273,8 @@ export function useColumns(tableRef: Ref) {
     console.log(row);
   }
 
-  /** 分配角色 */
-  async function handleRole(row) {
-    // 选中的角色列表
-    const ids = (await getRoleIds(row.id)).data ?? [];
-    addDialog({
-      title: `分配 [${row.username}] 用户的角色`,
-      props: {
-        formInline: {
-          username: row?.username ?? "",
-          roleOptions: roleOptions.value ?? [],
-          ids
-        }
-      },
-      width: "400px",
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () => h(roleForm),
-      beforeSure: (done, { options }) => {
-        const curData = options.props.formInline as RoleFormItemProps;
-
-        const bindRole = {
-          relationId: row.id,
-          type: 0,
-          roleIds: curData.ids
-        };
-
-        bindRoleForUser(bindRole).then(res => {
-          if (res.code === 0) {
-            message("角色分配成功", {
-              type: "success"
-            });
-            done(); // 关闭弹框
-          }
-        });
-        // 根据实际业务使用curData.ids和row里的某些字段去调用修改角色接口即可
-        done(); // 关闭弹框
-      }
-    });
+  function handleRole(row) {
+    console.log(row);
   }
 
   onMounted(() => {
@@ -346,7 +293,6 @@ export function useColumns(tableRef: Ref) {
     buttonClass,
     onSearch,
     resetForm,
-    onSizeChange,
     onCurrentChange,
     openDialog,
     handleSelectionChange,

@@ -1,0 +1,50 @@
+import { http } from "@/utils/http";
+import { baseUrlApi } from "./utils";
+
+type ResultTable = {
+  code: number;
+  msg: string;
+  data?: {
+    list: Array<any>;
+    /** 列表数据 */
+    items: Array<any>;
+    /** 总条目数 */
+    total: number;
+  };
+};
+
+type Result = {
+  code: number;
+  success: boolean;
+  data?: Array<any>;
+  msg: string;
+};
+
+/** 获取产品管理-商品信息 */
+export const getProductPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/product/page"), {
+    data
+  });
+};
+
+/** 产品管理-删除商品信息 */
+export const deleteProduct = (data?: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/pms/product/delete/${data}`)
+  );
+};
+
+/** 产品管理-新增商品信息 */
+export const addProduct = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/product/add"), {
+    data
+  });
+};
+
+/** 产品管理-新增商品信息 */
+export const updateProductById = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/product/update"), {
+    data
+  });
+};
