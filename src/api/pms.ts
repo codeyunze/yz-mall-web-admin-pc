@@ -48,3 +48,19 @@ export const updateProductById = (data?: object) => {
     data
   });
 };
+
+/** 产品管理-商品上架 */
+export const publishProductById = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/pms/product/publish/${data}`)
+  );
+};
+
+/** 产品管理-商品下架 */
+export const delistingProductById = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/pms/product/delisting/${data}`)
+  );
+};

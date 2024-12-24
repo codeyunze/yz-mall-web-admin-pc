@@ -7,12 +7,14 @@ import type {
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
 import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/system/user/form/index.vue";
+import editForm from "@/views/pms/product/form/index.vue";
 import { message } from "@/utils/message";
 import {
   addProduct,
   deleteProduct,
+  delistingProductById,
   getProductPage,
+  publishProductById,
   updateProductById
 } from "@/api/pms";
 import type { FormItemProps } from "@/views/pms/product/utils/types";
@@ -47,8 +49,31 @@ export function useColumns(tableRef: Ref) {
       prop: "price"
     },
     {
-      label: "说明",
-      prop: "remark"
+      label: "上架状态",
+      prop: "publishStatus",
+      minWidth: 90,
+      cellRenderer: ({ row, props }) => (
+        <el-tag
+          size={props.size}
+          type={row.publishStatus === 0 ? "danger" : null}
+          effect="plain"
+        >
+          {row.publishStatus === 1 ? "上架" : "下架"}
+        </el-tag>
+      )
+    },
+    {
+      label: "审核状态",
+      prop: "verifyStatus",
+      cellRenderer: ({ row, props }) => (
+        <el-tag
+          size={props.size}
+          type={row.verifyStatus === 0 ? "danger" : null}
+          effect="plain"
+        >
+          {row.verifyStatus === 1 ? "审核通过" : "未审核"}
+        </el-tag>
+      )
     },
     {
       label: "创建日期",
@@ -173,21 +198,23 @@ export function useColumns(tableRef: Ref) {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
+      hideFooter: title !== "编辑" && title !== "新增",
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了用户名称为${curData.name}的这条数据`, {
+          message(`您${title}了商品名称为${curData.name}的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
         FormRef.validate(valid => {
-          if (valid) {
+          if (!valid) {
             return;
           }
+
           // 表单规则校验通过
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
@@ -205,6 +232,36 @@ export function useColumns(tableRef: Ref) {
             });
           }
         });
+      }
+    });
+  }
+
+  /**
+   * 商品上架
+   * @param row 商品信息
+   */
+  function handlePublish(row) {
+    publishProductById(row.id).then(res => {
+      if (res.code === 0) {
+        message(`商品 [${row.name}] 上架成功`, {
+          type: "success"
+        });
+        onSearch();
+      }
+    });
+  }
+
+  /**
+   * 商品下架
+   * @param row 商品信息
+   */
+  function handleDelisting(row) {
+    delistingProductById(row.id).then(res => {
+      if (res.code === 0) {
+        message(`商品 [${row.name}] 下架成功`, {
+          type: "success"
+        });
+        onSearch();
       }
     });
   }
@@ -295,6 +352,8 @@ export function useColumns(tableRef: Ref) {
     resetForm,
     onCurrentChange,
     openDialog,
+    handlePublish,
+    handleDelisting,
     handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,

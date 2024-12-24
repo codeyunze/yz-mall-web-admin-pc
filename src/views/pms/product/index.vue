@@ -12,8 +12,10 @@ import Delete from "@iconify-icons/ep/delete";
 import More from "@iconify-icons/ep/more-filled";
 import Role from "@iconify-icons/ri/admin-line";
 import { PureTableBar } from "@/components/RePureTableBar";
-import Eye from "@iconify-icons/ri/eye-line";
 import View from "@iconify-icons/ep/view";
+import UploadIcon from "@iconify-icons/ri/upload-2-line";
+import DownloadIcon from "@iconify-icons/ri/download-2-line";
+// import { DownloadIcon } from "@/components/ReCropper/src/svg";
 
 defineOptions({
   name: "PmsProductManage"
@@ -35,6 +37,8 @@ const {
   resetForm,
   onCurrentChange,
   openDialog,
+  handlePublish,
+  handleDelisting,
   handleSelectionChange,
   handleSizeChange,
   handleCurrentChange,
@@ -177,7 +181,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View)"
-              @click="openDialog('详情', row)"
+              @click="openDialog('查看', row)"
             >
               详情
             </el-button>
@@ -215,9 +219,33 @@ const handleRest = () => {
                       type="primary"
                       :size="size"
                       :icon="useRenderIcon(EditPen)"
-                      @click="openDialog('修改', row)"
+                      @click="openDialog('编辑', row)"
                     >
-                      修改
+                      编辑
+                    </el-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.publishStatus === 0">
+                    <el-button
+                      :class="buttonClass"
+                      link
+                      type="primary"
+                      :size="size"
+                      :icon="useRenderIcon(UploadIcon)"
+                      @click="handlePublish(row)"
+                    >
+                      上架
+                    </el-button>
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="row.publishStatus === 1">
+                    <el-button
+                      :class="buttonClass"
+                      link
+                      type="primary"
+                      :size="size"
+                      :icon="useRenderIcon(DownloadIcon)"
+                      @click="handleDelisting(row)"
+                    >
+                      下架
                     </el-button>
                   </el-dropdown-item>
                   <el-dropdown-item>
