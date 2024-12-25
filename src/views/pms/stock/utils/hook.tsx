@@ -5,31 +5,18 @@ import type {
 } from "@pureadmin/table";
 
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
+import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/pms/product/form/index.vue";
+import editForm from "@/views/pms/stock/form/index.vue";
 import { message } from "@/utils/message";
-import {
-  addProduct,
-  deleteProduct,
-  delistingProductById,
-  getProductPage,
-  publishProductById,
-  updateProductById
-} from "@/api/pms";
-import type { FormItemProps } from "@/views/pms/product/utils/types";
+import { deleteProduct, getStockPage, pmsProductStockIn } from "@/api/pms";
+import type { FormItemProps } from "@/views/pms/stock/utils/types";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
-    {
-      label: "勾选列", // 如果需要表格多选，此处label必须设置
-      type: "selection",
-      fixed: "left",
-      reserveSelection: true // 数据刷新后保留选项
-    },
     {
       label: "序号",
       type: "index",
@@ -48,39 +35,11 @@ export function useColumns(tableRef: Ref) {
     {
       label: "售价（元）",
       prop: "price",
-      width: 100
+      width: 200
     },
     {
-      label: "上架状态",
-      prop: "publishStatus",
-      width: 100,
-      cellRenderer: ({ row, props }) => (
-        <el-tag
-          size={props.size}
-          type={row.publishStatus === 0 ? "danger" : null}
-          effect="plain"
-        >
-          {row.publishStatus === 1 ? "上架" : "下架"}
-        </el-tag>
-      )
-    },
-    {
-      label: "审核状态",
-      prop: "verifyStatus",
-      width: 100,
-      cellRenderer: ({ row, props }) => (
-        <el-tag
-          size={props.size}
-          type={row.verifyStatus === 0 ? "danger" : null}
-          effect="plain"
-        >
-          {row.verifyStatus === 1 ? "审核通过" : "未审核"}
-        </el-tag>
-      )
-    },
-    {
-      label: "创建日期",
-      prop: "createTime",
+      label: "库存数量",
+      prop: "quantity",
       width: 200
     },
     {
@@ -93,10 +52,9 @@ export function useColumns(tableRef: Ref) {
 
   const formRef = ref();
   const form = reactive({
-    name: null,
-    titles: null,
-    publishStatus: null,
-    verifyStatus: null,
+    name: "",
+    productId: 0,
+    quantity: 0,
     startTimeFilter: null,
     endTimeFilter: null
   });
@@ -166,7 +124,7 @@ export function useColumns(tableRef: Ref) {
       filter: form
     };
 
-    getProductPage(queryFilter).then(data => {
+    getStockPage(queryFilter).then(data => {
       dataList.value = data.data.items;
       pagination.total = Number(data.data.total);
     });
@@ -181,19 +139,14 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(title = "新增", row?: FormItemProps) {
+  function openDialog(row?: FormItemProps) {
     addDialog({
-      title: `${title}商品信息`,
+      title: `${row.name} 商品入库`,
       props: {
         formInline: {
-          title,
-          id: row?.id ?? 0,
-          name: row?.name ?? "",
-          remark: row?.remark ?? "",
-          titles: row?.titles ?? "",
-          price: row?.price ?? "",
-          publish_status: row?.publish_status ?? 1,
-          verify_status: row?.verify_status ?? 1
+          name: row.name,
+          productId: row.productId,
+          quantity: 0
         }
       },
       width: "46%",
@@ -204,13 +157,12 @@ export function useColumns(tableRef: Ref) {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
-      hideFooter: title !== "编辑" && title !== "新增",
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了商品名称为${curData.name}的这条数据`, {
+          message(`商品 [${row.name}] 成功入库数量 ${curData.quantity}`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -220,54 +172,12 @@ export function useColumns(tableRef: Ref) {
           if (!valid) {
             return;
           }
-
-          // 表单规则校验通过
-          if (title === "新增") {
-            // 实际开发先调用新增接口，再进行下面操作
-            addProduct(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          } else {
-            // 实际开发先调用修改接口，再进行下面操作
-            updateProductById(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          }
+          pmsProductStockIn(curData).then(res => {
+            if (res.code === 0) {
+              chores();
+            }
+          });
         });
-      }
-    });
-  }
-
-  /**
-   * 商品上架
-   * @param row 商品信息
-   */
-  function handlePublish(row) {
-    publishProductById(row.id).then(res => {
-      if (res.code === 0) {
-        message(`商品 [${row.name}] 上架成功`, {
-          type: "success"
-        });
-        onSearch();
-      }
-    });
-  }
-
-  /**
-   * 商品下架
-   * @param row 商品信息
-   */
-  function handleDelisting(row) {
-    delistingProductById(row.id).then(res => {
-      if (res.code === 0) {
-        message(`商品 [${row.name}] 下架成功`, {
-          type: "success"
-        });
-        onSearch();
       }
     });
   }
@@ -302,18 +212,6 @@ export function useColumns(tableRef: Ref) {
    */
   function handleCurrentChange(val: number) {
     pagination.currentPage = val;
-    onSearch();
-  }
-
-  /** 批量删除 */
-  function onBatchDel() {
-    // 返回当前选中的行
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
-    message(`已删除用户编号为 ${getKeyList(curSelected, "id")} 的数据`, {
-      type: "success"
-    });
-    tableRef.value.getTableRef().clearSelection();
     onSearch();
   }
 
@@ -354,13 +252,10 @@ export function useColumns(tableRef: Ref) {
     resetForm,
     onCurrentChange,
     openDialog,
-    handlePublish,
-    handleDelisting,
     handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
     onSelectionCancel,
-    onBatchDel,
     handleDelete,
     handleUpdate
   };

@@ -49,7 +49,7 @@ export function useMenu() {
       label: "菜单名称",
       prop: "title",
       align: "left",
-      minWidth: 120,
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <>
           <span class="inline-block mr-1">
@@ -91,12 +91,12 @@ export function useMenu() {
       label: "权限标识",
       prop: "auths",
       align: "left",
-      minWidth: 120
+      minWidth: 100
     },
     {
       label: "排序",
       prop: "sort",
-      width: 100
+      width: 90
     },
     // {
     //   label: "隐藏",

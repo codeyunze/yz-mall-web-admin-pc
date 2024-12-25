@@ -64,3 +64,17 @@ export const delistingProductById = (data?: object) => {
     baseUrlApi(`/pms/product/delisting/${data}`)
   );
 };
+
+/** 产品管理-库存-分页查询 */
+export const getStockPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/stock/page"), {
+    data
+  });
+};
+
+/** 产品管理-库存管理-入库明显-入库 */
+export const pmsProductStockIn = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("pms/stock/detail/add"), {
+    data
+  });
+};
