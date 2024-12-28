@@ -11,6 +11,7 @@ import More from "@iconify-icons/ep/more-filled";
 import { PureTableBar } from "@/components/RePureTableBar";
 import View from "@iconify-icons/ep/view";
 import DownloadIcon from "@iconify-icons/ri/download-2-line";
+import Upload from "@iconify-icons/ri/upload-line";
 
 defineOptions({
   name: "PmsStockManage"
@@ -140,9 +141,19 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(DownloadIcon)"
-              @click="openDialog(row)"
+              @click="openDialog('入库', row)"
             >
               入库
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              :icon="useRenderIcon(Upload)"
+              @click="openDialog('出库', row)"
+            >
+              出库
             </el-button>
             <el-dropdown>
               <el-button

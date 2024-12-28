@@ -42,7 +42,7 @@ defineExpose({ getRef });
       </re-col>
 
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="入库数量" prop="quantity">
+        <el-form-item label="数量" prop="quantity">
           <el-input-number v-model="newFormInline.quantity" :min="1" />
         </el-form-item>
       </re-col>
@@ -51,7 +51,7 @@ defineExpose({ getRef });
         <el-form-item label="商品备注">
           <el-input
             v-model="newFormInline.remark"
-            placeholder="请输入商品说明信息"
+            placeholder="请输入说明信息"
             type="textarea"
           />
         </el-form-item>

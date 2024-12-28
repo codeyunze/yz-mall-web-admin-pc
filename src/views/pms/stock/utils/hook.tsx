@@ -9,7 +9,12 @@ import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/stock/form/index.vue";
 import { message } from "@/utils/message";
-import { deleteProduct, getStockPage, pmsProductStockIn } from "@/api/pms";
+import {
+  deleteProduct,
+  getStockPage,
+  pmsProductStockIn,
+  pmsProductStockOut
+} from "@/api/pms";
 import type { FormItemProps } from "@/views/pms/stock/utils/types";
 export { default as dayjs } from "dayjs";
 
@@ -139,9 +144,9 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(row?: FormItemProps) {
+  function openDialog(title = "入库", row?: FormItemProps) {
     addDialog({
-      title: `${row.name} 商品入库`,
+      title: `${row.name} 商品${title}`,
       props: {
         formInline: {
           name: row.name,
@@ -162,7 +167,7 @@ export function useColumns(tableRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`商品 [${row.name}] 成功入库数量 ${curData.quantity}`, {
+          message(`商品 [${row.name}] 成功${title}数量 ${curData.quantity}`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -172,11 +177,19 @@ export function useColumns(tableRef: Ref) {
           if (!valid) {
             return;
           }
-          pmsProductStockIn(curData).then(res => {
-            if (res.code === 0) {
-              chores();
-            }
-          });
+          if (title === "入库") {
+            pmsProductStockIn(curData).then(res => {
+              if (res.code === 0) {
+                chores();
+              }
+            });
+          } else {
+            pmsProductStockOut(curData).then(res => {
+              if (res.code === 0) {
+                chores();
+              }
+            });
+          }
         });
       }
     });

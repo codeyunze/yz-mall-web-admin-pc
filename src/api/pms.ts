@@ -72,9 +72,16 @@ export const getStockPage = (data?: object) => {
   });
 };
 
-/** 产品管理-库存管理-入库明显-入库 */
+/** 产品管理-库存管理-入库明细-入库 */
 export const pmsProductStockIn = (data?: object) => {
-  return http.request<Result>("post", baseUrlApi("pms/stock/detail/add"), {
+  return http.request<Result>("post", baseUrlApi("pms/stock/add"), {
+    data
+  });
+};
+
+/** 产品管理-库存管理-出库明细-出库 */
+export const pmsProductStockOut = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("pms/stock/deduct"), {
     data
   });
 };
