@@ -200,7 +200,6 @@ export function useMenu() {
   );
 
   function openDialog(title = "新增", row?: FormItemProps) {
-    console.log(JSON.stringify(row));
     addDialog({
       title: `${title}菜单`,
       props: {
