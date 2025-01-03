@@ -7,7 +7,7 @@ import type {
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
 import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/pms/product/form/index.vue";
+import editForm from "@/views/pms/product/info/form/index.vue";
 import { message } from "@/utils/message";
 import {
   addProduct,
@@ -17,7 +17,7 @@ import {
   publishProductById,
   updateProductById
 } from "@/api/pms";
-import type { FormItemProps } from "@/views/pms/product/utils/types";
+import type { FormItemProps } from "@/views/pms/product/info/utils/types";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {

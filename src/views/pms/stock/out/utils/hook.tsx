@@ -7,15 +7,14 @@ import type {
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
 import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/pms/stock/form/index.vue";
+import editForm from "@/views/pms/stock/info/form/index.vue";
 import { message } from "@/utils/message";
 import {
-  deleteProduct,
-  getStockPage,
+  pmsStockOutPage,
   pmsProductStockIn,
   pmsProductStockOut
 } from "@/api/pms";
-import type { FormItemProps } from "@/views/pms/stock/utils/types";
+import type { FormItemProps } from "@/views/pms/stock/info/utils/types";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
@@ -28,8 +27,12 @@ export function useColumns(tableRef: Ref) {
       width: 90
     },
     {
+      label: "出库编号",
+      prop: "stockOutCode"
+    },
+    {
       label: "商品",
-      prop: "name",
+      prop: "productName",
       align: "left"
     },
     {
@@ -38,14 +41,16 @@ export function useColumns(tableRef: Ref) {
       minWidth: 200
     },
     {
-      label: "售价（元）",
-      prop: "price",
-      width: 200
+      label: "出库数量",
+      prop: "quantity"
     },
     {
-      label: "库存数量",
-      prop: "quantity",
-      width: 200
+      label: "出库时间",
+      prop: "createTime"
+    },
+    {
+      label: "关联订单",
+      prop: "orderId"
     },
     {
       label: "操作",
@@ -129,7 +134,7 @@ export function useColumns(tableRef: Ref) {
       filter: form
     };
 
-    getStockPage(queryFilter).then(data => {
+    pmsStockOutPage(queryFilter).then(data => {
       dataList.value = data.data.items;
       pagination.total = Number(data.data.total);
     });
@@ -195,13 +200,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  /** 取消选择 */
-  function onSelectionCancel() {
-    selectedNum.value = 0;
-    // 用于多选表格，清空用户的选择
-    tableRef.value.getTableRef().clearSelection();
-  }
-
   /** 当CheckBox选择项发生变化时会触发该事件 */
   function handleSelectionChange(val) {
     selectedNum.value = val.length;
@@ -228,25 +226,6 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   }
 
-  /**
-   * 删除商品信息
-   * @param row 商品信息
-   */
-  function handleDelete(row) {
-    deleteProduct(row.id).then(res => {
-      if (res.code === 0) {
-        onSearch();
-        message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
-          type: "success"
-        });
-      }
-    });
-  }
-
-  function handleUpdate(row) {
-    console.log(row);
-  }
-
   onMounted(() => {
     onSearch();
   });
@@ -267,9 +246,6 @@ export function useColumns(tableRef: Ref) {
     openDialog,
     handleSelectionChange,
     handleSizeChange,
-    handleCurrentChange,
-    onSelectionCancel,
-    handleDelete,
-    handleUpdate
+    handleCurrentChange
   };
 }

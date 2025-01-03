@@ -85,3 +85,17 @@ export const pmsProductStockOut = (data?: object) => {
     data
   });
 };
+
+/** 产品管理-库存管理-入库明细-分页查询 */
+export const pmsStockInPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/stock/in/page"), {
+    data
+  });
+};
+
+/** 产品管理-库存管理-出库明细-分页查询 */
+export const pmsStockOutPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/stock/out/page"), {
+    data
+  });
+};
