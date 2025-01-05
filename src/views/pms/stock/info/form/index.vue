@@ -43,7 +43,12 @@ defineExpose({ getRef });
 
       <re-col :value="12" :xs="24" :sm="24">
         <el-form-item label="数量" prop="quantity">
-          <el-input-number v-model="newFormInline.quantity" :min="1" />
+          <el-input-number
+            v-model="newFormInline.quantity"
+            class="!w-full"
+            :min="1"
+            controls-position="right"
+          />
         </el-form-item>
       </re-col>
 

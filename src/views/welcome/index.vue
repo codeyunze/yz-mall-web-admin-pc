@@ -184,7 +184,7 @@ const optionsBasis: Array<OptionsType> = [
           }
         }"
       >
-        <el-card shadow="never" class="h-[580px]">
+        <el-card shadow="never" class="h-[550px]">
           <div class="flex justify-between">
             <span class="text-md font-medium">数据统计</span>
           </div>
@@ -213,7 +213,7 @@ const optionsBasis: Array<OptionsType> = [
           <div class="flex justify-between">
             <span class="text-md font-medium">最新动态</span>
           </div>
-          <el-scrollbar max-height="504" class="mt-3">
+          <el-scrollbar max-height="474" class="mt-3">
             <el-timeline>
               <el-timeline-item
                 v-for="(item, index) in latestNewsData"
@@ -249,6 +249,8 @@ const optionsBasis: Array<OptionsType> = [
 :deep(.el-card) {
   --el-card-border-color: none;
 
+  border-radius: 12px;
+
   /* 解决概率进度条宽度 */
   .el-progress--line {
     width: 85%;
@@ -271,6 +273,6 @@ const optionsBasis: Array<OptionsType> = [
 }
 
 .main-content {
-  margin: 20px 20px 0 !important;
+  margin: 10px 20px 0 !important;
 }
 </style>
