@@ -1,4 +1,4 @@
-import { message } from "@/utils/message";
+// import { message } from "@/utils/message";
 import { ref, reactive, type Ref, onMounted } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
 import { getAuPage } from "@/api/au";
@@ -7,16 +7,24 @@ export function useColumns(selectRef: Ref) {
   const selectValue = ref("");
   const columns: TableColumnList = [
     {
+      label: "ID",
+      prop: "id",
+      minWidth: 180
+    },
+    {
       label: "剩余数量（克）",
-      prop: "quantity"
+      prop: "quantity",
+      minWidth: 150
     },
     {
       label: "交易价格（元/克）",
-      prop: "price"
+      prop: "price",
+      minWidth: 150
     },
     {
-      label: "盈利金额（元）",
-      prop: "profitAmount"
+      label: "可盈利金额（元）",
+      prop: "profitAmount",
+      minWidth: 150
     }
   ];
 
@@ -44,8 +52,7 @@ export function useColumns(selectRef: Ref) {
   function onRowClick(row) {
     selectValue.value = row.id;
     selectRef.value.blur();
-    this.$emit("set-relation-id");
-    message(`当前选中行的数据为：${JSON.stringify(row)}`, { type: "success" });
+    // message(`当前选中行的数据为：${JSON.stringify(row)}`, { type: "success" });
   }
 
   /** 买入信息记录查询 */

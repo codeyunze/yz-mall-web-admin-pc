@@ -5,9 +5,11 @@ interface FormItemProps {
   transactionType: number;
   price: number;
   quantity: number;
-  relationId: string;
+  relationId: any;
   transactionTime: string;
+  profitAmount: number;
 }
+
 interface FormProps {
   formInline: FormItemProps;
 }

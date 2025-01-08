@@ -5,17 +5,17 @@ import type {
 } from "@pureadmin/table";
 
 import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
+import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/system/au/form/index.vue";
 import { message } from "@/utils/message";
-import {
-  deleteProduct,
-  delistingProductById,
-  publishProductById
-} from "@/api/pms";
 import type { FormItemProps } from "@/views/system/au/utils/types";
-import { addAuRecord, getAuPage, updateAuRecordById } from "@/api/au";
+import {
+  addAuRecord,
+  deleteAuRecordById,
+  getAuPage,
+  updateAuRecordById
+} from "@/api/au";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
@@ -26,6 +26,10 @@ export function useColumns(tableRef: Ref) {
       label: "序号",
       type: "index",
       width: 90
+    },
+    {
+      label: "ID",
+      prop: "id"
     },
     {
       label: "交易类型",
@@ -49,6 +53,10 @@ export function useColumns(tableRef: Ref) {
       prop: "price"
     },
     {
+      label: "交易总价（元）",
+      prop: "priceTotal"
+    },
+    {
       label: "盈利金额（元）",
       prop: "profitAmount"
     },
@@ -67,10 +75,11 @@ export function useColumns(tableRef: Ref) {
 
   const formRef = ref();
   const form = reactive({
+    id: null,
     transactionType: null,
     price: 0,
     quantity: 0,
-    relationId: null,
+    relationId: "",
     startTimeFilter: null,
     endTimeFilter: null
   });
@@ -142,6 +151,12 @@ export function useColumns(tableRef: Ref) {
 
     getAuPage(queryFilter).then(data => {
       dataList.value = data.data.items;
+      dataList.value.forEach(item => {
+        item.priceTotal = item.price * item.quantity;
+        if (item.relationId == -1) {
+          item.relationId = "";
+        }
+      });
       pagination.total = Number(data.data.total);
     });
     setTimeout(() => {
@@ -160,12 +175,14 @@ export function useColumns(tableRef: Ref) {
       title: `${title}交易记录`,
       props: {
         formInline: {
-          title,
+          title: title === "查看" ? "详情" : title,
           id: row?.id ?? 0,
-          transactionType: row?.transactionType ?? "0",
+          transactionType: row?.transactionType ?? 0,
           price: row?.price ?? 0,
           quantity: row?.quantity ?? 0,
-          relationId: row?.relationId ?? 0
+          relationId: row?.relationId ?? "",
+          transactionTime: row?.transactionTime ?? null,
+          profitAmount: row?.profitAmount ?? 0
         }
       },
       width: "46%",
@@ -177,10 +194,16 @@ export function useColumns(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       hideFooter: title !== "编辑" && title !== "新增",
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+      contentRenderer: () =>
+        h(editForm, {
+          ref: formRef,
+          formInline: null
+        }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
+        if (1 === curData.transactionType) {
+        }
         function chores() {
           message("操作成功", {
             type: "success"
@@ -214,43 +237,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  /**
-   * 商品上架
-   * @param row 商品信息
-   */
-  function handlePublish(row) {
-    publishProductById(row.id).then(res => {
-      if (res.code === 0) {
-        message(`商品 [${row.name}] 上架成功`, {
-          type: "success"
-        });
-        onSearch();
-      }
-    });
-  }
-
-  /**
-   * 商品下架
-   * @param row 商品信息
-   */
-  function handleDelisting(row) {
-    delistingProductById(row.id).then(res => {
-      if (res.code === 0) {
-        message(`商品 [${row.name}] 下架成功`, {
-          type: "success"
-        });
-        onSearch();
-      }
-    });
-  }
-
-  /** 取消选择 */
-  function onSelectionCancel() {
-    selectedNum.value = 0;
-    // 用于多选表格，清空用户的选择
-    tableRef.value.getTableRef().clearSelection();
-  }
-
   /** 当CheckBox选择项发生变化时会触发该事件 */
   function handleSelectionChange(val) {
     selectedNum.value = val.length;
@@ -277,27 +263,15 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   }
 
-  /** 批量删除 */
-  function onBatchDel() {
-    // 返回当前选中的行
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
-    message(`已删除用户编号为 ${getKeyList(curSelected, "id")} 的数据`, {
-      type: "success"
-    });
-    tableRef.value.getTableRef().clearSelection();
-    onSearch();
-  }
-
   /**
-   * 删除商品信息
-   * @param row 商品信息
+   * 删除交易记录信息
+   * @param row 交易信息
    */
   function handleDelete(row) {
-    deleteProduct(row.id).then(res => {
+    deleteAuRecordById(row.id).then(res => {
       if (res.code === 0) {
         onSearch();
-        message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
+        message(`您删除了交易记录 [${row.id}] 的这条数据`, {
           type: "success"
         });
       }
@@ -326,13 +300,9 @@ export function useColumns(tableRef: Ref) {
     resetForm,
     onCurrentChange,
     openDialog,
-    handlePublish,
-    handleDelisting,
     handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
-    onSelectionCancel,
-    onBatchDel,
     handleDelete,
     handleUpdate
   };

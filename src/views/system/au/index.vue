@@ -10,7 +10,7 @@ import AddFill from "@iconify-icons/ri/add-circle-line";
 import Delete from "@iconify-icons/ep/delete";
 import { PureTableBar } from "@/components/RePureTableBar";
 import View from "@iconify-icons/ep/view";
-import DownloadIcon from "@iconify-icons/ri/download-2-line";
+import Edit from "@iconify-icons/ep/edit";
 
 defineOptions({
   name: "SystemGold"
@@ -32,11 +32,9 @@ const {
   resetForm,
   onCurrentChange,
   openDialog,
-  handleDelisting,
   handleSelectionChange,
   handleSizeChange,
   handleCurrentChange,
-  onSelectionCancel,
   handleDelete,
   handleUpdate
 } = useColumns(tableRef);
@@ -73,7 +71,27 @@ const filterColumns: PlusColumn[] = [
       startPlaceholder: "请选择",
       endPlaceholder: "请选择"
     }
+  },
+  {
+    label: "ID",
+    prop: "id"
   }
+  /*,
+  {
+    label: "盈利",
+    prop: "profit",
+    valueType: "plus-radio",
+    options: [
+      {
+        label: "盈利",
+        value: "0"
+      },
+      {
+        label: "亏损",
+        value: "1"
+      }
+    ]
+  }*/
 ];
 
 const handleChange = (values: any) => {
@@ -81,6 +99,7 @@ const handleChange = (values: any) => {
 };
 const handleSearch = (values: any) => {
   form.transactionType = values.transactionType;
+  form.id = values.id;
   if (values.transactionTime) {
     form.startTimeFilter = dayjs(values.transactionTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -93,8 +112,10 @@ const handleSearch = (values: any) => {
 };
 const handleRest = () => {
   form.transactionType = null;
+  form.relationId = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
+  form.id = null;
   onSearch();
 };
 </script>
@@ -162,19 +183,17 @@ const handleRest = () => {
               详情
             </el-button>
             <el-button
-              v-if="row.publishStatus === 1 && row.verifyStatus === 0"
               class="reset-margin"
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(DownloadIcon)"
-              @click="handleDelisting(row)"
+              :icon="useRenderIcon(Edit)"
+              @click="openDialog('编辑', row)"
             >
-              下架
+              编辑
             </el-button>
             <el-popconfirm
-              v-else
-              :title="`是否确认删除用户名称为 [${row.username}] ，手机号为 [${row.phone}] 的这条数据`"
+              :title="`是否确认删除交易数量 [${row.quantity}] 克，价格为 [${row.price}] 的这条交易数据`"
               @confirm="handleDelete(row)"
             >
               <template #reference>
