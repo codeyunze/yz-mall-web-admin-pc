@@ -48,3 +48,14 @@ export const deleteAuRecordById = (data?: object) => {
     baseUrlApi(`/sys/account/au/delete/${data}`)
   );
 };
+
+/** 黄金-汇总信息分页查询 */
+export const getAuSummaryPage = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/sys/account/au/pageSummary"),
+    {
+      data
+    }
+  );
+};
