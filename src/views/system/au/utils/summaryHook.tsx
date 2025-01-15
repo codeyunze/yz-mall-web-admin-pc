@@ -4,7 +4,7 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
+import { ref, onMounted, reactive, h, computed } from "vue";
 import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/system/au/form/index.vue";
@@ -18,10 +18,14 @@ import {
 } from "@/api/au";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
+    {
+      type: "expand",
+      slot: "expand"
+    },
     {
       label: "序号",
       type: "index",
@@ -29,19 +33,24 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "ID",
-      prop: "id"
+      prop: "id",
+      width: 100
     },
     {
-      label: "交易价格（元/克）",
+      label: "买入价格（元/克）",
       prop: "price"
     },
     {
-      label: "交易数量（克）",
+      label: "建议卖出价格（元/克）",
+      prop: "proposalPrice"
+    },
+    {
+      label: "买入数量（克）",
       prop: "quantity"
     },
     {
-      label: "交易总价（元）",
-      prop: "priceTotal"
+      label: "剩余数量(克)",
+      prop: "surplusQuantity"
     },
     {
       label: "盈利金额（元）",
@@ -51,12 +60,29 @@ export function useColumns(tableRef: Ref) {
       label: "交易时间",
       prop: "transactionTime",
       width: 200
+    }
+  ];
+
+  const childColumns: TableColumnList = [
+    {
+      label: "ID",
+      prop: "id"
     },
     {
-      label: "操作",
-      fixed: "right",
-      width: 200,
-      slot: "operation"
+      label: "卖出价格（元/克）",
+      prop: "price"
+    },
+    {
+      label: "卖出数量（克）",
+      prop: "quantity"
+    },
+    {
+      label: "盈利金额（元）",
+      prop: "profitAmount"
+    },
+    {
+      label: "交易时间",
+      prop: "transactionTime"
     }
   ];
 
@@ -66,7 +92,7 @@ export function useColumns(tableRef: Ref) {
     transactionType: null,
     price: 0,
     quantity: 0,
-    relationId: "",
+    stockStatus: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
@@ -224,13 +250,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
-  }
-
   /**
    * 设置一页数据量
    * @param val 一页展示的数据量
@@ -276,6 +295,7 @@ export function useColumns(tableRef: Ref) {
   return {
     loading,
     columns,
+    childColumns,
     form,
     dataList,
     pagination,
@@ -287,7 +307,6 @@ export function useColumns(tableRef: Ref) {
     resetForm,
     onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
     handleDelete,

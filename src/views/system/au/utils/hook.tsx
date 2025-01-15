@@ -152,7 +152,7 @@ export function useColumns(tableRef: Ref) {
     getAuPage(queryFilter).then(data => {
       dataList.value = data.data.items;
       dataList.value.forEach(item => {
-        item.priceTotal = item.price * item.quantity;
+        item.priceTotal = (item.price * item.quantity).toFixed(2);
         if (item.relationId == -1) {
           item.relationId = "";
         }

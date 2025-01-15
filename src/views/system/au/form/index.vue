@@ -7,8 +7,6 @@ import { useColumns } from "@/views/system/au/buy-record/columns";
 import Segmented, { type OptionsType } from "@/components/ReSegmented";
 
 const selectRef = ref();
-const { columns, pagination, selectValue, dataList, rowStyle, onRowClick } =
-  useColumns(selectRef);
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
@@ -22,6 +20,18 @@ const props = withDefaults(defineProps<FormProps>(), {
   })
 });
 
+const {
+  columns,
+  pagination,
+  selectValue,
+  dataList,
+  rowStyle,
+  onRowClick,
+  onSearch,
+  handleSizeChange,
+  handleCurrentChange
+} = useColumns(selectRef, props.formInline.price);
+
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 
@@ -34,6 +44,25 @@ defineExpose({ getRef });
 watch(selectValue, newVal => {
   newFormInline.value.relationId = newVal;
 });
+
+watch(
+  () => props.formInline.price,
+  newVal => {
+    console.log("交易价格变动", newVal);
+    if (newFormInline.value.transactionType === 1) {
+      onSearch(newVal);
+    }
+  }
+);
+
+watch(
+  () => props.formInline.transactionType,
+  newVal => {
+    if (newFormInline.value.transactionType === 1) {
+      onSearch(newFormInline.value.price);
+    }
+  }
+);
 
 const transactionTypeOptions: Array<OptionsType> = [
   {
@@ -95,15 +124,12 @@ const transactionTypeOptions: Array<OptionsType> = [
                     color: 'var(--el-text-color-primary)'
                   }"
                   :row-style="rowStyle"
-                  :data="
-                    dataList.slice(
-                      (pagination.currentPage - 1) * pagination.pageSize,
-                      pagination.currentPage * pagination.pageSize
-                    )
-                  "
+                  :data="dataList"
                   :columns="columns"
                   :pagination="pagination"
                   @row-click="onRowClick"
+                  @page-size-change="handleSizeChange"
+                  @page-current-change="handleCurrentChange"
                 />
               </div>
             </template>

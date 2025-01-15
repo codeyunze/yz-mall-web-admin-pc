@@ -1,9 +1,8 @@
-// import { message } from "@/utils/message";
-import { ref, reactive, type Ref, onMounted } from "vue";
+import { reactive, ref, type Ref, onMounted } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
-import { getAuPage } from "@/api/au";
+import { getAuChoosePage } from "@/api/au";
 
-export function useColumns(selectRef: Ref) {
+export function useColumns(selectRef: Ref, price: number) {
   const selectValue = ref("");
   const columns: TableColumnList = [
     {
@@ -17,16 +16,18 @@ export function useColumns(selectRef: Ref) {
       minWidth: 150
     },
     {
-      label: "交易价格（元/克）",
-      prop: "price",
+      label: "建议卖出价格(元/克)",
+      prop: "proposalPrice",
       minWidth: 150
     },
     {
-      label: "可盈利金额（元）",
-      prop: "profitAmount",
-      minWidth: 150
+      label: "交易时间",
+      prop: "transactionTime",
+      minWidth: 180
     }
   ];
+
+  const queryPrice = ref(0);
 
   const dataList = ref([]);
 
@@ -39,6 +40,25 @@ export function useColumns(selectRef: Ref) {
     background: true,
     size: "small"
   });
+
+  /**
+   * 设置一页数据量
+   * @param val 一页展示的数据量
+   */
+  function handleSizeChange(val: number) {
+    pagination.pageSize = val;
+    pagination.currentPage = 1;
+    onSearch(queryPrice.value);
+  }
+
+  /**
+   * 翻页
+   * @param val 页码
+   */
+  function handleCurrentChange(val: number) {
+    pagination.currentPage = val;
+    onSearch(queryPrice.value);
+  }
 
   /** 高亮当前选中行 */
   function rowStyle({ row: { id } }) {
@@ -56,22 +76,23 @@ export function useColumns(selectRef: Ref) {
   }
 
   /** 买入信息记录查询 */
-  function onSearch() {
+  function onSearch(paramPrice: number) {
+    queryPrice.value = paramPrice;
     const queryFilter = {
       size: pagination.pageSize,
       current: pagination.currentPage,
       filter: {
-        transactionType: 0
+        price: queryPrice.value
       }
     };
-    getAuPage(queryFilter).then(data => {
+    getAuChoosePage(queryFilter).then(data => {
       dataList.value = data.data.items;
       pagination.total = Number(data.data.total);
     });
   }
 
   onMounted(() => {
-    onSearch();
+    queryPrice.value = price;
   });
 
   return {
@@ -80,6 +101,9 @@ export function useColumns(selectRef: Ref) {
     selectValue,
     dataList,
     rowStyle,
-    onRowClick
+    onRowClick,
+    onSearch,
+    handleSizeChange,
+    handleCurrentChange
   };
 }

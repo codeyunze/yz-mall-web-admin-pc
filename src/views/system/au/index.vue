@@ -76,22 +76,6 @@ const filterColumns: PlusColumn[] = [
     label: "ID",
     prop: "id"
   }
-  /*,
-  {
-    label: "盈利",
-    prop: "profit",
-    valueType: "plus-radio",
-    options: [
-      {
-        label: "盈利",
-        value: "0"
-      },
-      {
-        label: "亏损",
-        value: "1"
-      }
-    ]
-  }*/
 ];
 
 const handleChange = (values: any) => {

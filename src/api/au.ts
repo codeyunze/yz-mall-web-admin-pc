@@ -59,3 +59,14 @@ export const getAuSummaryPage = (data?: object) => {
     }
   );
 };
+
+/** 黄金-查询买入记录查询 */
+export const getAuChoosePage = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/sys/account/au/choose"),
+    {
+      data
+    }
+  );
+};
