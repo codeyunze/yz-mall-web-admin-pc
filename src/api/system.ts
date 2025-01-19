@@ -189,3 +189,10 @@ export const bindMenuForRole = (data?: object) => {
 export const deleteByUserId = (data?: object) => {
   return http.request<Result>("delete", baseUrlApi(`/sys/user/delete/${data}`));
 };
+
+/** 分页查询用户待办信息 */
+export const getUserTaskList = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/tasks/page"), {
+    data
+  });
+};

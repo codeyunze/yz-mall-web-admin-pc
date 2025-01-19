@@ -169,7 +169,9 @@ class PureHttp {
         .then((response: undefined) => {
           resolve(response);
           const result = JSON.parse(JSON.stringify(response));
-          if (result.code !== 0) {
+          if (result.code === 50001) {
+            useUserStoreHook().logOut();
+          } else if (result.code !== 0) {
             message(result.msg, {
               type: "error"
             });

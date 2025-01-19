@@ -11,8 +11,10 @@ import { subBefore, getQueryMap } from "@pureadmin/utils";
  * 4.使用 window.location.replace 跳转正确页面
  */
 (function () {
+  console.log("单点原始参数", location.href);
   // 获取 url 中的参数
   const params = getQueryMap(location.href) as DataInfo<Date>;
+  console.log("单点参数", JSON.stringify(params));
   const must = ["username", "roles", "accessToken"];
   const mustLength = must.length;
   if (Object.keys(params).length !== mustLength) return;
@@ -37,6 +39,7 @@ import { subBefore, getQueryMap } from "@pureadmin/utils";
     removeToken();
 
     // 保存新信息到本地
+    console.log("信息", JSON.stringify(params));
     setToken(params);
 
     // 删除不需要显示在 url 的参数
