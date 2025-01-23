@@ -196,3 +196,17 @@ export const getUserTaskList = (data?: object) => {
     data
   });
 };
+
+/** 待办开始 */
+export const addTask = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/tasks/add"), {
+    data
+  });
+};
+
+/** 待办结束 */
+export const endTask = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/tasks/end"), {
+    data
+  });
+};

@@ -71,10 +71,20 @@ export function useColumns(tableRef: Ref) {
       cellRenderer: ({ row, props }) => (
         <el-tag
           size={props.size}
-          type={row.verifyStatus === 0 ? "danger" : null}
+          type={
+            row.verifyStatus === 0
+              ? "danger"
+              : row.verifyStatus === 1
+                ? "success"
+                : "info"
+          }
           effect="plain"
         >
-          {row.verifyStatus === 1 ? "审核通过" : "未审核"}
+          {row.verifyStatus === 0
+            ? "未审核"
+            : row.verifyStatus === 1
+              ? "审核通过"
+              : "待审核"}
         </el-tag>
       )
     },

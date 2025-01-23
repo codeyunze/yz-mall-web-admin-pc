@@ -27,47 +27,41 @@ const {
   resetForm,
   onCurrentChange,
   openDialog,
-  handleSelectionChange,
   handleSizeChange,
-  handleCurrentChange,
-  onSelectionCancel
+  handleCurrentChange
 } = useColumns(tableRef);
 
 const state = ref({
-  status: "0",
+  taskStatus: "0",
   time: new Date().toString()
 });
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "手机号",
-    prop: "phone"
+    label: "任务标题",
+    prop: "taskTitle"
   },
   {
-    label: "邮件",
-    prop: "email"
-  },
-  {
-    label: "名称",
-    prop: "username"
-  },
-  {
-    label: "性别",
-    prop: "sex",
+    label: "任务状态",
+    prop: "taskStatus",
     valueType: "select",
     options: [
       {
-        label: "男",
+        label: "进行中",
         value: "0"
       },
       {
-        label: "女",
+        label: "已结束",
         value: "1"
       }
     ]
   },
   {
-    label: "创建时间",
+    label: "任务标识",
+    prop: "taskCode"
+  },
+  {
+    label: "开始时间",
     prop: "createTime",
     valueType: "date-picker",
     fieldProps: {
@@ -82,11 +76,9 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  console.log("search");
-  console.log(JSON.stringify(JSON.stringify(values)));
-  form.phone = values.phone;
-  form.email = values.email;
-  console.log(values.createTime);
+  form.taskTitle = values.taskTitle;
+  form.taskCode = values.taskCode;
+  form.taskStatus = values.taskStatus;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -98,9 +90,10 @@ const handleSearch = (values: any) => {
   onSearch();
 };
 const handleRest = () => {
-  console.log("handleRest");
-  form.phone = null;
-  form.email = null;
+  form.taskTitle = null;
+  form.taskCode = null;
+  form.taskStatus = "0";
+  state.value.taskStatus = "0";
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();
@@ -145,7 +138,6 @@ const handleRest = () => {
             background: 'var(--el-fill-color-light)',
             color: 'var(--el-text-color-primary)'
           }"
-          @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
         >
@@ -155,7 +147,7 @@ const handleRest = () => {
               link
               type="primary"
               :size="size"
-              @click="openDialog('处理', row)"
+              @click="openDialog(row)"
             >
               处理
             </el-button>

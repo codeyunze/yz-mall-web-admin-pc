@@ -4,20 +4,17 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection } from "@pureadmin/utils";
-import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/system/user/form/index.vue";
-import type { FormItemProps } from "@/views/system/user/utils/types";
-import { message } from "@/utils/message";
-import { addUser, getUserTaskList, updateUserById } from "@/api/system";
+import { ref, onMounted, reactive, computed, type Ref } from "vue";
+import { delay } from "@pureadmin/utils";
+import { endTask, getUserTaskList } from "@/api/system";
 import { usePublicHooks } from "@/views/system/hooks";
+import type { FormItemProps } from "./types";
+import { message } from "@/utils/message";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
   const selectedNum = ref(0);
-  const higherDeptOptions = ref();
   const { tagStyle } = usePublicHooks();
   const columns: TableColumnList = [
     {
@@ -64,12 +61,13 @@ export function useColumns(tableRef: Ref) {
   ];
 
   const form = reactive({
-    phone: null,
-    email: null,
+    taskTitle: null,
+    taskCode: null,
+    taskStatus: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
-  const formRef = ref();
+
   const buttonClass = computed(() => {
     return [
       "!h-[20px]",
@@ -139,12 +137,10 @@ export function useColumns(tableRef: Ref) {
       current: pagination.currentPage,
       filter: form
     };
-    console.log("请求过滤" + JSON.stringify(queryFilter));
 
     getUserTaskList(queryFilter).then(data => {
-      console.log("接口数据" + JSON.stringify(data));
       dataList.value = data.data.items;
-      pagination.total = data.data.total;
+      pagination.total = Number(data.data.total);
     });
     setTimeout(() => {
       loading.value = false;
@@ -157,91 +153,17 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(title = "新增", row?: FormItemProps) {
-    addDialog({
-      title: `${title}用户信息`,
-      props: {
-        formInline: {
-          title,
-          higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
-          id: row?.id ?? 0,
-          username: row?.username ?? "",
-          password: row?.password ?? "",
-          phone: row?.phone ?? "",
-          email: row?.email ?? "",
-          sex: row?.sex ?? "",
-          status: row?.status ?? 1,
-          remark: row?.remark ?? ""
+  function openDialog(row?: FormItemProps) {
+    console.log(row);
+    console.log(tableRef);
+    if ("PMS:PRODUCT:PUBLISH" === row.taskCode) {
+      endTask({ id: row.id }).then(data => {
+        if (data.data) {
+          message("操作成功", { type: "success" });
+          onSearch();
         }
-      },
-      width: "46%",
-      style: {
-        "border-radius": "12px"
-      },
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
-        const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
-        function chores() {
-          message(`您${title}了用户名称为${curData.username}的这条数据`, {
-            type: "success"
-          });
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        }
-        FormRef.validate(valid => {
-          if (valid) {
-            return;
-          }
-          // 表单规则校验通过
-          if (title === "新增") {
-            // 实际开发先调用新增接口，再进行下面操作
-            addUser(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          } else {
-            // 实际开发先调用修改接口，再进行下面操作
-            updateUserById(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          }
-        });
-      }
-    });
-  }
-
-  function formatHigherDeptOptions(treeList) {
-    // 根据返回数据的status字段值判断追加是否禁用disabled字段，返回处理后的树结构，用于上级部门级联选择器的展示（实际开发中也是如此，不可能前端需要的每个字段后端都会返回，这时需要前端自行根据后端返回的某些字段做逻辑处理）
-    if (!treeList || !treeList.length) return;
-    const newTreeList = [];
-    for (let i = 0; i < treeList.length; i++) {
-      treeList[i].disabled = treeList[i].status === 0;
-      formatHigherDeptOptions(treeList[i].children);
-      newTreeList.push(treeList[i]);
+      });
     }
-    return newTreeList;
-  }
-
-  /** 取消选择 */
-  function onSelectionCancel() {
-    selectedNum.value = 0;
-    // 用于多选表格，清空用户的选择
-    tableRef.value.getTableRef().clearSelection();
-  }
-
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
   }
 
   function handleSizeChange(val: number) {
@@ -255,6 +177,7 @@ export function useColumns(tableRef: Ref) {
   }
 
   onMounted(() => {
+    form.taskStatus = 0;
     onSearch();
   });
 
@@ -273,9 +196,7 @@ export function useColumns(tableRef: Ref) {
     onSizeChange,
     onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
-    handleCurrentChange,
-    onSelectionCancel
+    handleCurrentChange
   };
 }

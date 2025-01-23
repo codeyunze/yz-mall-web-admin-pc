@@ -114,3 +114,8 @@ export const resetPassword = (data?: object) => {
     }
   );
 };
+
+/** 查询登录用户的信息 */
+export const getUserInfo = () => {
+  return http.request<UserResult>("get", baseUrlApi("/getUserInfo"));
+};

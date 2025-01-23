@@ -1,5 +1,6 @@
 import { removeToken, setToken, type DataInfo } from "./auth";
 import { subBefore, getQueryMap } from "@pureadmin/utils";
+import { getUserInfo } from "@/api/user";
 
 /**
  * 简版前端单点登录，根据实际业务自行编写，平台启动后本地可以跳后面这个链接进行测试 http://localhost:8848/#/permission/page/index?username=sso&roles=admin&accessToken=eyJhbGciOiJIUzUxMiJ9.admin
@@ -11,10 +12,8 @@ import { subBefore, getQueryMap } from "@pureadmin/utils";
  * 4.使用 window.location.replace 跳转正确页面
  */
 (function () {
-  console.log("单点原始参数", location.href);
   // 获取 url 中的参数
   const params = getQueryMap(location.href) as DataInfo<Date>;
-  console.log("单点参数", JSON.stringify(params));
   const must = ["username", "roles", "accessToken"];
   const mustLength = must.length;
   if (Object.keys(params).length !== mustLength) return;
@@ -39,8 +38,13 @@ import { subBefore, getQueryMap } from "@pureadmin/utils";
     removeToken();
 
     // 保存新信息到本地
-    console.log("信息", JSON.stringify(params));
     setToken(params);
+    getUserInfo().then(res => {
+      if (res.code === 0) {
+        removeToken();
+        setToken(res.data);
+      }
+    });
 
     // 删除不需要显示在 url 的参数
     delete params.roles;
