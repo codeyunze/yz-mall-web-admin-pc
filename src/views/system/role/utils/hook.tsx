@@ -444,8 +444,6 @@ export function useRole(treeRef: Ref) {
         message(`角色名称为 [${roleName}] 的菜单权限修改成功`, {
           type: "success"
         });
-      } else {
-        message(res.msg, { type: "error" });
       }
     });
   }

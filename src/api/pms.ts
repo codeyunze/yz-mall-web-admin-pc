@@ -99,3 +99,31 @@ export const pmsStockOutPage = (data?: object) => {
     data
   });
 };
+
+/** 产品管理-商品信息查询 */
+export const pmsProductInfo = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/product/info"), {
+    data
+  });
+};
+
+/** 商品添加购物车 */
+export const addCart = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/cart/add"), {
+    data
+  });
+};
+
+/** 购物车商品查询 */
+export const getCartPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/cart/page"), {
+    data
+  });
+};
+
+/** 购物车商品删除 */
+export const deleteCart = (data?: object) => {
+  return http.request<Result>("delete", baseUrlApi("/pms/cart/delete"), {
+    data
+  });
+};

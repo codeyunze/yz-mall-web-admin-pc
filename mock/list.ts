@@ -6,6 +6,7 @@ export default defineFakeRoute([
     method: "post",
     response: () => {
       return {
+        code: 0,
         success: true,
         data: {
           list: [
