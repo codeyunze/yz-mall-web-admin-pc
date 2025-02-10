@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, PropType, reactive } from "vue";
-import { Star, Share } from "@element-plus/icons-vue";
+import { Star, Share, ShoppingCart } from "@element-plus/icons-vue";
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
 
@@ -52,6 +52,10 @@ function addToCart(productId) {
     }
   });
 }
+
+function addOrder(product?: CardProductType) {
+  console.log("立即购买: {}", product);
+}
 </script>
 
 <template>
@@ -98,11 +102,24 @@ function addToCart(productId) {
       <p class="list-card-item_detail--desc text-text_color_regular">
         {{ product.remark }}
       </p>
-      <el-button type="primary" @click="addToCart(product.id)"
-        >加入购物车</el-button
-      >
-      <el-button type="primary" :icon="Star" plain circle />
-      <el-button type="primary" :icon="Share" plain circle />
+      <div>
+        <el-button-group class="ml-4">
+          <el-button :icon="Star" plain />
+          <el-button :icon="Share" plain />
+          <el-button
+            :icon="ShoppingCart"
+            plain
+            @click="addToCart(product.id)"
+          />
+        </el-button-group>
+        <el-button
+          type="primary"
+          plain
+          style="float: right"
+          @click="addOrder(product)"
+          >立即购买</el-button
+        >
+      </div>
     </div>
   </div>
 </template>

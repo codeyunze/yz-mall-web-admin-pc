@@ -1,24 +1,6 @@
 import { http } from "@/utils/http";
 import { baseUrlApi } from "./utils";
-
-type ResultTable = {
-  code: number;
-  msg: string;
-  data?: {
-    list: Array<any>;
-    /** 列表数据 */
-    items: Array<any>;
-    /** 总条目数 */
-    total: number;
-  };
-};
-
-type Result = {
-  code: number;
-  success: boolean;
-  data?: Array<any>;
-  msg: string;
-};
+import type { ResultTable, Result } from "./type";
 
 /** 获取产品管理-商品信息 */
 export const getProductPage = (data?: object) => {

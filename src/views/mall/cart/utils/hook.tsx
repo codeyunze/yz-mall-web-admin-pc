@@ -45,7 +45,6 @@ export function useColumns(tableRef: Ref) {
               class="!w-full"
               min="1"
               max="999"
-              controls-position="right"
             />
           }
         </>

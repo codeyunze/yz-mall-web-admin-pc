@@ -4,21 +4,18 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection } from "@pureadmin/utils";
-import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/pms/stock/info/form/index.vue";
-import { message } from "@/utils/message";
-import {
-  pmsStockInPage,
-  pmsProductStockIn,
-  pmsProductStockOut
-} from "@/api/pms";
-import type { FormItemProps } from "@/views/pms/stock/info/utils/viewTypes";
+import { ref, onMounted, reactive, computed, type Ref } from "vue";
+import { delay } from "@pureadmin/utils";
+import type { Order } from "./types";
+import { omsOrderPage } from "@/api/oms";
+import { usePublicHooks } from "@/views/system/hooks";
+import { addDrawer } from "@/components/ReDrawer/index";
+import forms from "../form.vue";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
+  const { tagStyle } = usePublicHooks();
   const selectedNum = ref(0);
   const columns: TableColumnList = [
     {
@@ -27,31 +24,57 @@ export function useColumns(tableRef: Ref) {
       width: 90
     },
     {
-      label: "入库编号",
-      prop: "stockInCode"
+      label: "订单编号",
+      prop: "orderCode"
     },
     {
-      label: "商品",
-      prop: "productName",
-      align: "left"
+      label: "订单类型",
+      prop: "orderType",
+      cellRenderer: ({ row }) =>
+        // 0正常订单；1秒杀订单
+        row.orderType === 1 ? "秒杀订单" : "正常订单"
     },
     {
-      label: "标签",
-      prop: "titles",
-      minWidth: 200
+      label: "订单状态",
+      prop: "orderStatus",
+      cellRenderer: ({ row }) => {
+        // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭；6无效订单
+        if (row.orderStatus === 0) {
+          return "待付款";
+        } else if (row.orderStatus === 1) {
+          return "待发货";
+        } else if (row.orderStatus === 2) {
+          return "已发货";
+        } else if (row.orderStatus === 3) {
+          return "待收货";
+        } else if (row.orderStatus === 4) {
+          return "已完成";
+        } else if (row.orderStatus === 5) {
+          return "已关闭";
+        } else if (row.orderStatus === 6) {
+          return "无效订单";
+        }
+      }
     },
     {
-      label: "供应商名称",
-      prop: "supplierName",
-      align: "left"
+      label: "收货状态",
+      prop: "confirmStatus",
+      cellRenderer: ({ row, props }) => (
+        <el-tag
+          size={props.size}
+          style={tagStyle.value(row.confirmStatus === 1 ? 1 : 2)}
+        >
+          {row.confirmStatus === 1 ? "已收货" : "未收货"}
+        </el-tag>
+      )
     },
     {
-      label: "入库数量",
-      prop: "quantity"
+      label: "收货人姓名",
+      prop: "receiverName"
     },
     {
-      label: "入库时间",
-      prop: "createTime"
+      label: "收货人手机号",
+      prop: "receiverPhone"
     },
     {
       label: "操作",
@@ -61,11 +84,13 @@ export function useColumns(tableRef: Ref) {
     }
   ];
 
-  const formRef = ref();
   const form = reactive({
-    name: "",
-    productId: 0,
-    quantity: 0,
+    orderCode: "",
+    orderStatus: null,
+    orderType: null,
+    confirmStatus: null,
+    payType: null,
+    receiverPhone: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
@@ -135,7 +160,7 @@ export function useColumns(tableRef: Ref) {
       filter: form
     };
 
-    pmsStockInPage(queryFilter).then(data => {
+    omsOrderPage(queryFilter).then(data => {
       dataList.value = data.data.items;
       pagination.total = Number(data.data.total);
     });
@@ -150,56 +175,18 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(title = "入库", row?: FormItemProps) {
-    addDialog({
-      title: `${row.productName} 商品${title}`,
+  function openDialog(title = "订单详情", row?: Order) {
+    console.log(title, row);
+    addDrawer({
+      size: "50%",
+      title: title,
+      contentRenderer: () => forms,
       props: {
-        formInline: {
-          name: row.productName,
-          productId: row.productId,
-          quantity: 0
-        }
+        // 赋默认值
+        formInline: row
       },
-      width: "46%",
-      style: {
-        "border-radius": "12px"
-      },
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
-        const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
-        function chores() {
-          message(
-            `商品 [${row.productName}] 成功${title}数量 ${curData.quantity}`,
-            {
-              type: "success"
-            }
-          );
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        }
-        FormRef.validate(valid => {
-          if (!valid) {
-            return;
-          }
-          if (title === "入库") {
-            pmsProductStockIn(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          } else {
-            pmsProductStockOut(curData).then(res => {
-              if (res.code === 0) {
-                chores();
-              }
-            });
-          }
-        });
+      closeCallBack: ({ options, args }) => {
+        console.log(options, args);
       }
     });
   }
