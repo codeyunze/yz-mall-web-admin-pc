@@ -126,7 +126,7 @@ const newFormInline = ref(props.formInline);
       style="width: 100%"
       shadow="hover"
     >
-      <div style=" float: left;width: 120px; height: 120px">
+      <div style="float: left; width: 120px; height: 120px">
         <el-image
           style="width: 100px; height: 100px"
           src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
