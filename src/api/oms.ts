@@ -8,3 +8,11 @@ export const omsOrderPage = (data?: object) => {
     data
   });
 };
+
+/** 订单信息-分页查询 */
+export const omsOrderCancel = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi(`/oms/order/cancel/${data}`)
+  );
+};

@@ -45,7 +45,7 @@ const filterColumns: PlusColumn[] = [
     prop: "orderCode"
   },
   {
-    // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭；6无效订单
+    // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单
     label: "订单状态",
     prop: "orderStatus",
     valueType: "select",
@@ -71,7 +71,7 @@ const filterColumns: PlusColumn[] = [
         value: "4"
       },
       {
-        label: "已关闭",
+        label: "已取消",
         value: "5"
       },
       {

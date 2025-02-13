@@ -7,10 +7,11 @@ import type {
 import { ref, onMounted, reactive, computed, type Ref } from "vue";
 import { delay } from "@pureadmin/utils";
 import type { Order } from "./types";
-import { omsOrderPage } from "@/api/oms";
+import { omsOrderCancel, omsOrderPage } from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
-import { addDrawer } from "@/components/ReDrawer/index";
+import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
 import forms from "../form.vue";
+import { message } from "@/utils/message";
 export { default as dayjs } from "dayjs";
 
 export function useColumns(tableRef: Ref) {
@@ -38,7 +39,7 @@ export function useColumns(tableRef: Ref) {
       label: "订单状态",
       prop: "orderStatus",
       cellRenderer: ({ row }) => {
-        // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭；6无效订单
+        // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单
         if (row.orderStatus === 0) {
           return "待付款";
         } else if (row.orderStatus === 1) {
@@ -50,7 +51,7 @@ export function useColumns(tableRef: Ref) {
         } else if (row.orderStatus === 4) {
           return "已完成";
         } else if (row.orderStatus === 5) {
-          return "已关闭";
+          return "已取消";
         } else if (row.orderStatus === 6) {
           return "无效订单";
         }
@@ -181,6 +182,36 @@ export function useColumns(tableRef: Ref) {
       size: "50%",
       title: title,
       contentRenderer: () => forms,
+      footerRenderer: ({ options, index }) => {
+        const orderStatus = options.props.formInline.orderStatus;
+        return (
+          <div>
+            {orderStatus === 0 && (
+              <div>
+                <el-button onClick={() => orderCancelHandle(options, index)}>
+                  取消订单
+                </el-button>
+                <el-button onClick={() => orderCancelHandle(options, index)}>
+                  修改订单
+                </el-button>
+                <el-button
+                  type="success"
+                  onClick={() => orderPayHandle(options, index)}
+                >
+                  去支付
+                </el-button>
+              </div>
+            )}
+            {(orderStatus === 1 || orderStatus === 2 || orderStatus === 3) && (
+              <el-button>申请退款</el-button>
+            )}
+            {orderStatus === 4 && <el-button>退款/售后</el-button>}
+            {(orderStatus === 4 || orderStatus === 5) && (
+              <el-button type="warning">再次购买</el-button>
+            )}
+          </div>
+        );
+      },
       props: {
         // 赋默认值
         formInline: row
@@ -189,6 +220,24 @@ export function useColumns(tableRef: Ref) {
         console.log(options, args);
       }
     });
+  }
+
+  /**
+   * 取消订单
+   */
+  function orderCancelHandle(options, index) {
+    omsOrderCancel(options.props.formInline.id).then(result => {
+      message(result.msg, { type: "success" });
+      onSearch();
+      closeDrawer(options, index);
+    });
+  }
+
+  /**
+   * 订单支付
+   */
+  function orderPayHandle(options, index) {
+    console.log(options, index);
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */

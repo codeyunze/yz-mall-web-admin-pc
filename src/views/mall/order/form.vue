@@ -63,7 +63,7 @@ const newFormInline = ref(props.formInline);
         >已完成
       </el-tag>
       <el-tag v-if="newFormInline.orderStatus === 5" size="small" type="success"
-        >已关闭
+        >已取消
       </el-tag>
       <el-tag v-if="newFormInline.orderStatus === 6" size="small" type="info"
         >无效订单
@@ -126,18 +126,42 @@ const newFormInline = ref(props.formInline);
       style="width: 100%"
       shadow="hover"
     >
-      <div style="float: left; width: 120px; height: 120px">
-        <el-image
-          style="width: 100px; height: 100px"
-          src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-        />
-      </div>
-      <div>
-        商品: {{ product.productId }} 数量: {{ product.productQuantity }} SKU:
-        XXX 原价: ￥{{ product.price }} 到手价: ￥{{ product.realAmount }} 共减:
-        ￥
-        {{ product.discountAmount }}
-      </div>
+      <el-row>
+        <el-col :span="4">
+          <el-image
+            style="width: 100px; height: 100px"
+            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          />
+        </el-col>
+        <el-col :span="20">
+          <el-descriptions>
+            <el-descriptions-item :span="2" label="商品: ">{{
+              product.productId
+            }}</el-descriptions-item>
+            <el-descriptions-item label="原价: "
+              >￥ {{ product.price }}</el-descriptions-item
+            >
+            <el-descriptions-item :span="2" label="SKU: "
+              >XXX</el-descriptions-item
+            >
+            <el-descriptions-item label="到手价: "
+              >￥ {{ product.realAmount }}</el-descriptions-item
+            >
+            <el-descriptions-item label="数量: ">{{
+              product.productQuantity
+            }}</el-descriptions-item>
+            <el-descriptions-item label="共减: "
+              >￥ {{ product.discountAmount }}</el-descriptions-item
+            >
+            <el-descriptions-item label="合计: "
+              >￥
+              {{
+                product.realAmount * product.productQuantity
+              }}</el-descriptions-item
+            >
+          </el-descriptions>
+        </el-col>
+      </el-row>
     </el-card>
   </div>
 </template>
