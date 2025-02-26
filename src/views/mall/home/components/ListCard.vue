@@ -3,6 +3,8 @@ import { computed, PropType, reactive } from "vue";
 import { Star, Share, ShoppingCart } from "@element-plus/icons-vue";
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
+import { useNav } from "@/layout/hooks/useNav";
+const { objectStorageAddress } = useNav();
 
 defineOptions({
   name: "MallProductCard"
@@ -62,11 +64,17 @@ function addOrder(product?: CardProductType) {
   <div :class="cardClass">
     <div class="list-card-item_detail bg-bg_color">
       <el-row justify="space-between">
-        <div :class="cardLogoClass">
+        <div
+          :class="cardLogoClass"
+          style=" width: 278px;height: 278px; border: 1px solid #fff"
+        >
           <img
-            src="../img/iPhone16Pro.png"
-            height="846"
-            width="898"
+            :src="
+              objectStorageAddress +
+              (product.name === '磁吸充电宝'
+                ? '/home/100000001.png'
+                : '/home/iPhone16Pro.png')
+            "
             alt="商品图片"
           />
         </div>

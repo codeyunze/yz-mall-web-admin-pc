@@ -97,6 +97,10 @@ export function useNav() {
     return $config.PublicNetworkRecord;
   });
 
+  const objectStorageAddress = computed(() => {
+    return $config.ObjectStorageAddress;
+  });
+
   /** 动态title */
   function changeTitle(meta: routeMetaType) {
     const Title = getConfig().Title;
@@ -159,6 +163,7 @@ export function useNav() {
     title,
     icpRecord,
     publicNetworkRecord,
+    objectStorageAddress,
     device,
     layout,
     logout,
