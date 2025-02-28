@@ -6,9 +6,9 @@ interface FormItemProps {
   titles: string;
   remark: string;
   price: number;
-  publish_status: number;
-  verify_status: number;
-  album_pics: string;
+  publishStatus: number;
+  verifyStatus: number;
+  albumPics: string;
 }
 interface FormProps {
   formInline: FormItemProps;

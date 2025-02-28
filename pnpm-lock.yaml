@@ -25,10 +25,10 @@ importers:
         version: 1.2.28(canvas@2.11.2)
       '@pureadmin/descriptions':
         specifier: ^1.2.1
-        version: 1.2.1(echarts@5.5.1)(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)
+        version: 1.2.1(echarts@5.5.1)(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)
       '@pureadmin/table':
         specifier: ^3.2.1
-        version: 3.2.1(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)
+        version: 3.2.1(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)
       '@pureadmin/utils':
         specifier: ^2.4.8
         version: 2.4.8(echarts@5.5.1)(vue@3.5.12(typescript@5.6.3))
@@ -75,8 +75,8 @@ importers:
         specifier: ^3.0.6
         version: 3.0.6(typescript@5.6.3)
       element-plus:
-        specifier: ^2.8.5
-        version: 2.8.5(vue@3.5.12(typescript@5.6.3))
+        specifier: ^2.9.4
+        version: 2.9.5(vue@3.5.12(typescript@5.6.3))
       intro.js:
         specifier: ^7.2.0
         version: 7.2.0
@@ -112,7 +112,7 @@ importers:
         version: 3.25.0
       plus-pro-components:
         specifier: ^0.1.17
-        version: 0.1.17(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
+        version: 0.1.17(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -1081,20 +1081,20 @@ packages:
     resolution: {integrity: sha512-GG428DkrrWCMhxRMRQZjuS7zmSUzarYcaHJqG9VB8dXAxw4iQDoKVQ7ChJRB6ZtsCsX3Jse1PEUlHrJiyQrOTg==}
     engines: {node: '>= 16'}
 
-  '@intlify/message-compiler@10.0.0':
-    resolution: {integrity: sha512-OcaWc63NC/9p1cMdgoNKBj4d61BH8sUW1Hfs6YijTd9656ZR4rNqXAlRnBrfS5ABq0vjQjpa8VnyvH9hK49yBw==}
-    engines: {node: '>= 16'}
-
   '@intlify/message-compiler@10.0.4':
     resolution: {integrity: sha512-AFbhEo10DP095/45EauinQJ5hJ3rJUmuuqltGguvc3WsvezZN+g8qNHLGWKu60FHQVizMrQY7VJ+zVlBXlQQkQ==}
     engines: {node: '>= 16'}
 
-  '@intlify/shared@10.0.0':
-    resolution: {integrity: sha512-6ngLfI7DOTew2dcF9WMJx+NnMWghMBhIiHbGg+wRvngpzD5KZJZiJVuzMsUQE1a5YebEmtpTEfUrDp/NqVGdiw==}
+  '@intlify/message-compiler@11.0.0-rc.1':
+    resolution: {integrity: sha512-TGw2uBfuTFTegZf/BHtUQBEKxl7Q/dVGLoqRIdw8lFsp9g/53sYn5iD+0HxIzdYjbWL6BTJMXCPUHp9PxDTRPw==}
     engines: {node: '>= 16'}
 
   '@intlify/shared@10.0.4':
     resolution: {integrity: sha512-ukFn0I01HsSgr3VYhYcvkTCLS7rGa0gw4A4AMpcy/A9xx/zRJy7PS2BElMXLwUazVFMAr5zuiTk3MQeoeGXaJg==}
+    engines: {node: '>= 16'}
+
+  '@intlify/shared@11.0.0-rc.1':
+    resolution: {integrity: sha512-8tR1xe7ZEbkabTuE/tNhzpolygUn9OaYp9yuYAF4MgDNZg06C3Qny80bes2/e9/Wm3aVkPUlCw6WgU7mQd0yEg==}
     engines: {node: '>= 16'}
 
   '@intlify/unplugin-vue-i18n@5.2.0':
@@ -2676,8 +2676,8 @@ packages:
   electron-to-chromium@1.5.36:
     resolution: {integrity: sha512-HYTX8tKge/VNp6FGO+f/uVDmUkq+cEfcxYhKf15Akc4M5yxt5YmorwlAitKWjWhWQnKcDRBAQKXkhqqXMqcrjw==}
 
-  element-plus@2.8.5:
-    resolution: {integrity: sha512-Px+kPbRTVvn5oa5+9saa7QEOnUweKXm0JVI7yJHzKF/doQGixwcFMsQEF2+3Fy62EA/7dRRKVuhsNGGZYNk3cw==}
+  element-plus@2.9.5:
+    resolution: {integrity: sha512-r+X79oogLbYq8p9L5f9fHSHhUFNM0AL72aikqiZVxSc2/08mK6m/PotiB9e/D90QmWTIHIaFnFmW65AcXmneig==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -6435,8 +6435,8 @@ snapshots:
 
   '@intlify/bundle-utils@9.0.0-beta.0(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))':
     dependencies:
-      '@intlify/message-compiler': 10.0.0
-      '@intlify/shared': 10.0.0
+      '@intlify/message-compiler': 11.0.0-rc.1
+      '@intlify/shared': 11.0.0-rc.1
       acorn: 8.12.1
       escodegen: 2.1.0
       estree-walker: 2.0.2
@@ -6452,26 +6452,26 @@ snapshots:
       '@intlify/message-compiler': 10.0.4
       '@intlify/shared': 10.0.4
 
-  '@intlify/message-compiler@10.0.0':
-    dependencies:
-      '@intlify/shared': 10.0.0
-      source-map-js: 1.2.1
-
   '@intlify/message-compiler@10.0.4':
     dependencies:
       '@intlify/shared': 10.0.4
       source-map-js: 1.2.1
 
-  '@intlify/shared@10.0.0': {}
+  '@intlify/message-compiler@11.0.0-rc.1':
+    dependencies:
+      '@intlify/shared': 11.0.0-rc.1
+      source-map-js: 1.2.1
 
   '@intlify/shared@10.0.4': {}
+
+  '@intlify/shared@11.0.0-rc.1': {}
 
   '@intlify/unplugin-vue-i18n@5.2.0(@vue/compiler-dom@3.5.12)(eslint@9.12.0(jiti@2.3.3))(rollup@4.24.0)(typescript@5.6.3)(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.12.0(jiti@2.3.3))
       '@intlify/bundle-utils': 9.0.0-beta.0(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))
-      '@intlify/shared': 10.0.0
-      '@intlify/vue-i18n-extensions': 7.0.0(@intlify/shared@10.0.0)(@vue/compiler-dom@3.5.12)(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
+      '@intlify/shared': 11.0.0-rc.1
+      '@intlify/vue-i18n-extensions': 7.0.0(@intlify/shared@11.0.0-rc.1)(@vue/compiler-dom@3.5.12)(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))
       '@rollup/pluginutils': 5.1.2(rollup@4.24.0)
       '@typescript-eslint/scope-manager': 7.18.0
       '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.6.3)
@@ -6494,11 +6494,11 @@ snapshots:
       - typescript
       - webpack-sources
 
-  '@intlify/vue-i18n-extensions@7.0.0(@intlify/shared@10.0.0)(@vue/compiler-dom@3.5.12)(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))':
+  '@intlify/vue-i18n-extensions@7.0.0(@intlify/shared@11.0.0-rc.1)(@vue/compiler-dom@3.5.12)(vue-i18n@10.0.4(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
       '@babel/parser': 7.25.8
     optionalDependencies:
-      '@intlify/shared': 10.0.0
+      '@intlify/shared': 11.0.0-rc.1
       '@vue/compiler-dom': 3.5.12
       vue: 3.5.12(typescript@5.6.3)
       vue-i18n: 10.0.4(vue@3.5.12(typescript@5.6.3))
@@ -6847,19 +6847,19 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
-  '@pureadmin/descriptions@1.2.1(echarts@5.5.1)(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)':
+  '@pureadmin/descriptions@1.2.1(echarts@5.5.1)(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)':
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.5.12(typescript@5.6.3))
       '@pureadmin/utils': 2.4.8(echarts@5.5.1)(vue@3.5.12(typescript@5.6.3))
-      element-plus: 2.8.5(vue@3.5.12(typescript@5.6.3))
+      element-plus: 2.9.5(vue@3.5.12(typescript@5.6.3))
       vue: 3.5.12(typescript@5.6.3)
     transitivePeerDependencies:
       - echarts
       - typescript
 
-  '@pureadmin/table@3.2.1(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)':
+  '@pureadmin/table@3.2.1(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(typescript@5.6.3)':
     dependencies:
-      element-plus: 2.8.5(vue@3.5.12(typescript@5.6.3))
+      element-plus: 2.9.5(vue@3.5.12(typescript@5.6.3))
       vue: 3.5.12(typescript@5.6.3)
     transitivePeerDependencies:
       - typescript
@@ -8393,7 +8393,7 @@ snapshots:
   el-table-infinite-scroll@3.0.6(typescript@5.6.3):
     dependencies:
       core-js: 3.38.1
-      element-plus: 2.8.5(vue@3.5.12(typescript@5.6.3))
+      element-plus: 2.9.5(vue@3.5.12(typescript@5.6.3))
       vue: 3.5.12(typescript@5.6.3)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -8401,7 +8401,7 @@ snapshots:
 
   electron-to-chromium@1.5.36: {}
 
-  element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)):
+  element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)):
     dependencies:
       '@ctrl/tinycolor': 3.6.1
       '@element-plus/icons-vue': 2.3.1(vue@3.5.12(typescript@5.6.3))
@@ -10216,10 +10216,10 @@ snapshots:
       mlly: 1.7.2
       pathe: 1.1.2
 
-  plus-pro-components@0.1.17(element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3)):
+  plus-pro-components@0.1.17(element-plus@2.9.5(vue@3.5.12(typescript@5.6.3)))(vue@3.5.12(typescript@5.6.3)):
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.5.12(typescript@5.6.3))
-      element-plus: 2.8.5(vue@3.5.12(typescript@5.6.3))
+      element-plus: 2.9.5(vue@3.5.12(typescript@5.6.3))
       lodash-es: 4.17.21
       sortablejs: 1.15.3
       vue: 3.5.12(typescript@5.6.3)

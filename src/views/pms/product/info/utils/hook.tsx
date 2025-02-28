@@ -202,8 +202,9 @@ export function useColumns(tableRef: Ref) {
           remark: row?.remark ?? "",
           titles: row?.titles ?? "",
           price: row?.price ?? "",
-          publish_status: row?.publish_status ?? 1,
-          verify_status: row?.verify_status ?? 1
+          publishStatus: row?.publishStatus ?? 1,
+          verifyStatus: row?.verifyStatus ?? 1,
+          albumPics: row?.albumPics ?? ""
         }
       },
       width: "46%",
@@ -240,6 +241,7 @@ export function useColumns(tableRef: Ref) {
               }
             });
           } else {
+            console.log(curData);
             // 实际开发先调用修改接口，再进行下面操作
             updateProductById(curData).then(res => {
               if (res.code === 0) {

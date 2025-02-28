@@ -1,24 +1,6 @@
 import { http } from "@/utils/http";
 import { baseUrlApi } from "./utils";
-
-type Result = {
-  code: number;
-  success: boolean;
-  data?: Array<any>;
-  msg: string;
-};
-
-type ResultTable = {
-  code: number;
-  msg: string;
-  data?: {
-    list: Array<any>;
-    /** 列表数据 */
-    items: Array<any>;
-    /** 总条目数 */
-    total: number;
-  };
-};
+import type { Result, ResultTable } from "./type";
 
 /** 获取系统管理-用户管理列表 */
 export const getUserList = (data?: object) => {
@@ -210,3 +192,30 @@ export const endTask = (data?: object) => {
     data
   });
 };
+
+export type FileInfo = {
+  // 0: 公开；1: 不公开；
+  publicAccess: number;
+  // 存储模式: local、cos、oss
+  fileStorageMode: string;
+  // 存储站
+  fileStorageStation: string;
+  // 文件Id
+  fileId: string;
+};
+
+/** 文件上传 */
+export const fileUpload = (data?: FileInfo) => {
+  return baseUrlApi(
+    `/file/upload?fileStorageMode=${data.fileStorageMode}&publicAccess=${data.publicAccess}&fileStorageStation=${data.fileStorageStation}&fileId=${data.fileId}`
+  ).toString();
+};
+
+/** 文件上传 */
+export const filePreview = (data?: FileInfo) => {
+  return baseUrlApi(
+    `/file/preview?fileStorageMode=${data.fileStorageMode}&publicAccess=${data.publicAccess}&fileStorageStation=${data.fileStorageStation}&fileId=${data.fileId}`
+  ).toString();
+};
+
+export const filePreviewUrl = baseUrlApi("/file/preview");

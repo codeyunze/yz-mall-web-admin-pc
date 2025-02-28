@@ -66,7 +66,7 @@ function addOrder(product?: CardProductType) {
       <el-row justify="space-between">
         <div
           :class="cardLogoClass"
-          style=" width: 278px;height: 278px; border: 1px solid #fff"
+          style="width: 278px; height: 278px; border: 1px solid #fff"
         >
           <img
             :src="
