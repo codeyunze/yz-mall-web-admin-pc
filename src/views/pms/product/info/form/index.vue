@@ -6,7 +6,7 @@ import { FormProps } from "@/views/pms/product/info/utils/types";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps, UploadUserFile } from "element-plus";
 import { formatToken, getToken } from "@/utils/auth";
-import { filePreviewUrl, fileUpload } from "@/api/system";
+import { filePublicPreviewUrl, fileUploadUrl } from "@/api/system";
 import type { ImageInstance } from "element-plus";
 import { message } from "@/utils/message";
 
@@ -26,6 +26,12 @@ const props = withDefaults(defineProps<FormProps>(), {
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 const imageRef = ref<ImageInstance>();
+// 预览图片列表
+const filesUrl = ref([]);
+// 选中预览图片地址
+const previewFileUrl = ref("");
+// 选中预览图片在图片列表里的索引下标
+const previewFileIndex = ref(0);
 
 function getRef() {
   return ruleFormRef.value;
@@ -35,39 +41,68 @@ defineExpose({ getRef });
 
 const fileList = ref<UploadUserFile[]>([]);
 
+function getRequestAddress() {
+  return window.location.href.substring(0, window.location.href.indexOf("/#"));
+}
+
 const getFileList = () => {
-  console.log("获取图片信息前执行代码");
-  var fileUrl = filePreviewUrl;
-  console.log(fileUrl);
-  return [
-    {
-      name: "food.jpeg",
-      url: "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100"
-    },
-    {
-      name: "food.jpeg",
-      url: "http://localhost:8899/api/file/public/preview?fileStorageMode=cos&fileId=1895001369306943488&fileStorageStation=home"
-    }
-  ];
+  if (!newFormInline.value.albumPics) {
+    return [];
+  }
+
+  if (newFormInline.value.albumPics.indexOf(",") === -1) {
+    previewFileUrl.value = assembleFileUrl(newFormInline.value.albumPics);
+    filesUrl.value.push(newFormInline.value.albumPics);
+    return [
+      {
+        url: assembleFileUrl(newFormInline.value.albumPics)
+      }
+    ];
+  }
+
+  const split = newFormInline.value.albumPics.split(",");
+  const files = [];
+  split.forEach(item => {
+    const file = {
+      url: assembleFileUrl(item)
+    };
+    filesUrl.value.push(file.url);
+    files.push(file);
+  });
+  previewFileUrl.value = files.length > 0 ? files[0].url : "";
+  return files;
 };
 
-const url =
-  "http://localhost:8899/api/file/public/preview?fileStorageMode=cos&fileId=1895001369306943488&fileStorageStation=home";
-
-const fileUrl = [
-  "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-  "http://localhost:8899/api/file/public/preview?fileStorageMode=cos&fileId=1895001369306943488&fileStorageStation=home"
-];
+/**
+ * 组装文件预览地址
+ * @param fileId 文件唯一Id
+ */
+function assembleFileUrl(fileId) {
+  return (
+    getRequestAddress() +
+    filePublicPreviewUrl +
+    "?fileId=" +
+    fileId +
+    "&fileStorageMode=cos&fileStorageStation=3xj"
+  );
+}
 
 const dialogVisible = ref(false);
 
 const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
-  console.log(fileUpload);
 };
 
 const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
+  console.log(uploadFile);
   dialogVisible.value = true;
+  if (uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    previewFileUrl.value = assembleFileUrl(file.data);
+  } else {
+    previewFileUrl.value = uploadFile.url;
+  }
+  previewFileIndex.value = filesUrl.value.indexOf(previewFileUrl.value);
   imageRef.value!.showPreview();
 };
 
@@ -80,12 +115,22 @@ const handleUploadSuccess: UploadProps["onSuccess"] = uploadFile => {
   } else {
     newFormInline.value.albumPics += "," + uploadFile.data;
   }
+  console.log(assembleFileUrl(uploadFile.data));
+  filesUrl.value.push(assembleFileUrl(uploadFile.data));
+  filesUrl.value.forEach(item => {
+    console.log(item);
+  });
 };
 
 const handleUploadExceed: UploadProps["onExceed"] = uploadFile => {
   message("图片数量超过限制", {
     type: "warning"
   });
+};
+
+const handleUploadProgress: UploadProps["onProgress"] = uploadFile => {
+  console.log(uploadFile);
+  uploadFile.percent = uploadFile.percent / 2;
 };
 
 onMounted(() => {
@@ -143,17 +188,21 @@ onMounted(() => {
           </el-form-item>
         </re-col>
 
-        <re-col :value="24" :xs="24" :sm="24">
-          <el-form-item label="图片" prop="titles">
+        <!-- <re-col :value="24" :xs="24" :sm="24">
+          <el-form-item label="图片" prop="albumPics">
             <el-input v-model="newFormInline.albumPics" />
           </el-form-item>
-        </re-col>
+        </re-col>-->
 
         <re-col :value="24" :xs="24" :sm="24">
-          <el-form-item label="商品图片">
+          <el-form-item label="商品图片" prop="albumPics">
             <el-upload
               v-model:file-list="fileList"
-              action="http://localhost:8899/api/file/upload?fileStorageMode=cos&publicAccess=1"
+              :action="
+                getRequestAddress() +
+                fileUploadUrl +
+                '?fileStorageMode=cos&publicAccess=1&fileStorageStation=3xj'
+              "
               list-type="picture-card"
               accept="image/jpeg,image/png,image/jpg"
               method="PUT"
@@ -167,8 +216,11 @@ onMounted(() => {
               :on-remove="handleRemove"
               :on-success="handleUploadSuccess"
               :on-exceed="handleUploadExceed"
+              :on-progress="handleUploadProgress"
             >
-              <el-icon><Plus /></el-icon>
+              <el-icon>
+                <Plus />
+              </el-icon>
             </el-upload>
           </el-form-item>
         </re-col>
@@ -179,13 +231,14 @@ onMounted(() => {
       v-show="dialogVisible"
       ref="imageRef"
       style="width: 0; height: 0"
-      :src="url"
+      :src="previewFileUrl"
       :zoom-rate="1.2"
       :max-scale="7"
       :min-scale="0.2"
-      :preview-src-list="fileUrl"
+      :preview-src-list="filesUrl"
       show-progress
-      :initial-index="4"
+      :initial-index="previewFileIndex"
+      :infinite="false"
       fit="cover"
     />
   </div>

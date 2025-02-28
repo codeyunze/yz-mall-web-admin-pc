@@ -204,18 +204,9 @@ export type FileInfo = {
   fileId: string;
 };
 
-/** 文件上传 */
-export const fileUpload = (data?: FileInfo) => {
-  return baseUrlApi(
-    `/file/upload?fileStorageMode=${data.fileStorageMode}&publicAccess=${data.publicAccess}&fileStorageStation=${data.fileStorageStation}&fileId=${data.fileId}`
-  ).toString();
-};
-
-/** 文件上传 */
-export const filePreview = (data?: FileInfo) => {
-  return baseUrlApi(
-    `/file/preview?fileStorageMode=${data.fileStorageMode}&publicAccess=${data.publicAccess}&fileStorageStation=${data.fileStorageStation}&fileId=${data.fileId}`
-  ).toString();
-};
-
+/** 文件上传地址 */
+export const fileUploadUrl = baseUrlApi("/file/upload");
+/** 文件预览地址 */
 export const filePreviewUrl = baseUrlApi("/file/preview");
+/** 公开文件预览地址 */
+export const filePublicPreviewUrl = baseUrlApi("/file/public/preview");
