@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, PropType, reactive } from "vue";
-import { Star, Share, ShoppingCart } from "@element-plus/icons-vue";
+import {
+  Star,
+  Share,
+  ShoppingCart,
+  Picture as IconPicture
+} from "@element-plus/icons-vue";
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
-import { useNav } from "@/layout/hooks/useNav";
-const { objectStorageAddress } = useNav();
 
 defineOptions({
   name: "MallProductCard"
@@ -21,6 +24,7 @@ interface CardProductType {
   remark: string;
   albumPics: string;
   quantity: number;
+  productImages: string[];
 }
 
 const props = defineProps({
@@ -37,7 +41,7 @@ const cardClass = computed(() => [
   { "list-card-item__disabled": false }
 ]);
 
-const cardLogoClass = computed(() => ["list-card-item"]);
+const cardLogoClass = computed(() => ["list-card-item", "block"]);
 
 /**
  * 商品加入购物车
@@ -64,19 +68,19 @@ function addOrder(product?: CardProductType) {
   <div :class="cardClass">
     <div class="list-card-item_detail bg-bg_color">
       <el-row justify="space-between">
-        <div
-          :class="cardLogoClass"
-          style="width: 278px; height: 278px; border: 1px solid #fff"
-        >
-          <img
+        <div :class="cardLogoClass">
+          <el-image
             :src="
-              objectStorageAddress +
-              (product.name === '磁吸充电宝'
-                ? '/home/100000001.png'
-                : '/home/iPhone16Pro.png')
+              product.productImages.length > 0 ? product.productImages[0] : ''
             "
             alt="商品图片"
-          />
+          >
+            <template #error>
+              <div class="image-slot">
+                <el-icon><icon-picture /></el-icon>
+              </div>
+            </template>
+          </el-image>
         </div>
         <div class="list-card-item_detail--operation">
           价格：
@@ -212,5 +216,45 @@ function addOrder(product?: CardProductType) {
       color: #bababa;
     }
   }
+}
+
+.block {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 278px;
+  padding: 0;
+  text-align: center;
+  vertical-align: top;
+  border: 1px solid var(--el-text-color-disabled);
+  border-radius: 10px;
+}
+
+.block .demonstration {
+  display: block;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.block .el-image {
+  width: 100%;
+  max-width: 300px;
+  height: 278px;
+  max-height: 278px;
+  padding: 5px 5px 0;
+}
+
+.block .image-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 30px;
+  color: var(--el-text-color-secondary);
+  background: var(--el-fill-color-light);
+}
+
+.block .image-slot .el-icon {
+  font-size: 30px;
 }
 </style>
