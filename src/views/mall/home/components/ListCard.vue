@@ -238,7 +238,7 @@ function addOrder(product?: CardProductType) {
 .block .el-image {
   width: 100%;
   max-width: 300px;
-  height: 278px;
+  height: 222px;
   max-height: 278px;
   padding: 5px 5px 0;
 }

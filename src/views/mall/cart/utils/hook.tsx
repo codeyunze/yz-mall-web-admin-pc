@@ -9,6 +9,8 @@ import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
 import { usePublicHooks } from "@/views/system/hooks";
+import { router } from "@/router";
+// import { tableData } from "@/views/table/base/data";
 const { tagStyle } = usePublicHooks();
 
 export { default as dayjs } from "dayjs";
@@ -57,8 +59,8 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "商品图片",
-      prop: "albumPics",
-      slot: "albumPics",
+      prop: "previewAddress",
+      slot: "previewAddress",
       width: 200
     },
     {
@@ -103,7 +105,14 @@ export function useColumns(tableRef: Ref) {
       "dark:hover:!text-primary"
     ];
   });
+  // 列表数据
   const dataList = ref([]);
+  /*const cloneData = clone(tableData, true);
+  const tableDataImage = cloneData.map((item, index) =>
+    Object.assign(item, {
+      image: `https://pure-admin.github.io/pure-admin-table/imgs/${index + 1}.jpg`
+    })
+  );*/
   /** 分页配置 */
   const pagination = reactive<PaginationProps>({
     pageSize: 20,
@@ -183,6 +192,7 @@ export function useColumns(tableRef: Ref) {
     message(`数据${curSelected}`, {
       type: "success"
     });
+    router.push({ name: "CompleteOrder" });
   }
 
   /** 取消选择 */
@@ -264,6 +274,7 @@ export function useColumns(tableRef: Ref) {
     loadingConfig,
     adaptiveConfig,
     buttonClass,
+    // tableDataImage,
     onSearch,
     resetForm,
     onSizeChange,

@@ -78,6 +78,10 @@ export function useColumns(tableRef: Ref) {
       prop: "receiverPhone"
     },
     {
+      label: "创建时间",
+      prop: "createdTime"
+    },
+    {
       label: "操作",
       fixed: "right",
       width: 200,
@@ -191,7 +195,7 @@ export function useColumns(tableRef: Ref) {
                 <el-button onClick={() => orderCancelHandle(options, index)}>
                   取消订单
                 </el-button>
-                <el-button onClick={() => orderCancelHandle(options, index)}>
+                <el-button onClick={() => handleOrderUpdate(options, index)}>
                   修改订单
                 </el-button>
                 <el-button
@@ -231,6 +235,15 @@ export function useColumns(tableRef: Ref) {
       onSearch();
       closeDrawer(options, index);
     });
+  }
+
+  /**
+   * 处理订单修改操作
+   * @param options
+   * @param index
+   */
+  function handleOrderUpdate(options, index) {
+    console.log(options, index);
   }
 
   /**
