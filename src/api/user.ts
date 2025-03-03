@@ -1,5 +1,6 @@
 import { http } from "@/utils/http";
 import { baseUrlApi } from "@/api/utils";
+import type { ResultTable } from "./type";
 
 export type UserResult = {
   code: number;
@@ -57,17 +58,6 @@ export type UserInfoResult = {
   code: number;
   success: boolean;
   data: UserInfo;
-};
-
-type ResultTable = {
-  code: number;
-  success: boolean;
-  data?: {
-    /** 列表数据 */
-    items: Array<any>;
-    /** 总条目数 */
-    total?: number;
-  };
 };
 
 /** 登录 */

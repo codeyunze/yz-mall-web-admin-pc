@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<FormProps>(), {
     receiverPhone: "",
     receiverProvince: "",
     receiverCity: "",
-    receiverRegion: "",
+    receiverDistrict: "",
     receiverAddress: "",
     email: ""
   })

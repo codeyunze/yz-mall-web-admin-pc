@@ -28,7 +28,7 @@ interface Order {
   receiverPhone: string;
   receiverProvince: string;
   receiverCity: string;
-  receiverRegion: string;
+  receiverDistrict: string;
   receiverAddress: string;
   email: string;
   products?: OrderProduct[];

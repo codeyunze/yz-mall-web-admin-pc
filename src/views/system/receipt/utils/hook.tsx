@@ -4,59 +4,58 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { pageUserInfo } from "@/api/user";
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
+import { ref, onMounted, reactive, h, computed } from "vue";
+import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
-import editForm from "@/views/system/user/form/index.vue";
-import type {
-  FormItemProps,
-  RoleFormItemProps
-} from "@/views/system/user/utils/types";
+import editForm from "../form/index.vue";
+import type { FormItemProps } from "./types";
 import { message } from "@/utils/message";
 import {
-  addUser,
-  bindRoleForUser,
-  deleteByUserId,
-  getRoleIds,
-  updateUserById
+  pageReceiptInfo,
+  addReceiptInfo,
+  updateReceiptInfo,
+  deleteReceiptInfo
 } from "@/api/system";
-import roleForm from "@/views/system/user/form/role.vue";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
   const loading = ref(true);
   const selectedNum = ref(0);
   const higherDeptOptions = ref();
-  const roleOptions = ref([]);
   const columns: TableColumnList = [
-    {
-      label: "勾选列", // 如果需要表格多选，此处label必须设置
-      type: "selection",
-      fixed: "left",
-      reserveSelection: true // 数据刷新后保留选项
-    },
     {
       label: "序号",
       type: "index",
       width: 90
     },
     {
-      label: "用户名称",
-      prop: "username",
+      label: "收货人",
+      prop: "receiverName",
       minWidth: 130
     },
     {
-      label: "手机号",
-      prop: "phone"
+      label: "收货手机号",
+      prop: "receiverPhone"
     },
     {
-      label: "邮件",
-      prop: "email"
+      label: "通知邮件",
+      prop: "receiverEmail"
     },
     {
-      label: "创建日期",
-      prop: "createTime"
+      label: "收货地址(省)",
+      prop: "receiverProvince"
+    },
+    {
+      label: "收货地址(市)",
+      prop: "receiverCity"
+    },
+    {
+      label: "收货地址(区/县)",
+      prop: "receiverDistrict"
+    },
+    {
+      label: "收货详细地址",
+      prop: "receiverAddress"
     },
     {
       label: "操作",
@@ -67,10 +66,13 @@ export function useColumns(tableRef: Ref) {
   ];
 
   const form = reactive({
-    phone: null,
-    email: null,
-    startTimeFilter: null,
-    endTimeFilter: null
+    receiverProvince: null,
+    receiverCity: null,
+    receiverDistrict: null,
+    receiverAddress: null,
+    receiverName: null,
+    receiverPhone: null,
+    receiverEmail: null
   });
   const formRef = ref();
   const buttonClass = computed(() => {
@@ -142,12 +144,10 @@ export function useColumns(tableRef: Ref) {
       current: pagination.currentPage,
       filter: form
     };
-    console.log("请求过滤" + JSON.stringify(queryFilter));
 
-    pageUserInfo(queryFilter).then(data => {
-      console.log("接口数据" + JSON.stringify(data));
+    pageReceiptInfo(queryFilter).then(data => {
       dataList.value = data.data.items;
-      pagination.total = data.data.total;
+      pagination.total = Number(data.data.total);
     });
     setTimeout(() => {
       loading.value = false;
@@ -162,19 +162,19 @@ export function useColumns(tableRef: Ref) {
 
   function openDialog(title = "新增", row?: FormItemProps) {
     addDialog({
-      title: `${title}用户信息`,
+      title: `${title}收货地址信息`,
       props: {
         formInline: {
           title,
           higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
           id: row?.id ?? 0,
-          username: row?.username ?? "",
-          password: row?.password ?? "",
-          phone: row?.phone ?? "",
-          email: row?.email ?? "",
-          sex: row?.sex ?? "",
-          status: row?.status ?? 1,
-          remark: row?.remark ?? ""
+          receiverName: row?.receiverName ?? "",
+          receiverPhone: row?.receiverPhone ?? "",
+          receiverEmail: row?.receiverEmail ?? "",
+          receiverProvince: row?.receiverProvince ?? "",
+          receiverCity: row?.receiverCity ?? "",
+          receiverDistrict: row?.receiverDistrict ?? "",
+          receiverAddress: row?.receiverAddress ?? ""
         }
       },
       width: "46%",
@@ -190,7 +190,7 @@ export function useColumns(tableRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了用户名称为${curData.username}的这条数据`, {
+          message(`您${title}一条收货信息`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -203,14 +203,14 @@ export function useColumns(tableRef: Ref) {
           // 表单规则校验通过
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
-            addUser(curData).then(res => {
+            addReceiptInfo(curData).then(res => {
               if (res.code === 0) {
                 chores();
               }
             });
           } else {
             // 实际开发先调用修改接口，再进行下面操作
-            updateUserById(curData).then(res => {
+            updateReceiptInfo(curData).then(res => {
               if (res.code === 0) {
                 chores();
               }
@@ -233,20 +233,6 @@ export function useColumns(tableRef: Ref) {
     return newTreeList;
   }
 
-  /** 取消选择 */
-  function onSelectionCancel() {
-    selectedNum.value = 0;
-    // 用于多选表格，清空用户的选择
-    tableRef.value.getTableRef().clearSelection();
-  }
-
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
-  }
-
   function handleSizeChange(val: number) {
     pagination.pageSize = val;
     pagination.currentPage = 1;
@@ -257,77 +243,26 @@ export function useColumns(tableRef: Ref) {
     console.log(`current page: ${val}`);
   }
 
-  /** 批量删除 */
-  function onBatchDel() {
-    // 返回当前选中的行
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
-    message(`已删除用户编号为 ${getKeyList(curSelected, "id")} 的数据`, {
-      type: "success"
-    });
-    tableRef.value.getTableRef().clearSelection();
-    onSearch();
-  }
-
   /**
-   * 删除用户信息
-   * @param row 用户信息
+   * 删除收货地址信息
+   * @param row 收货地址信息
    */
   function handleDelete(row) {
-    deleteByUserId(row.id).then(res => {
+    deleteReceiptInfo(row.id).then(res => {
       if (res.code === 0) {
         onSearch();
-        message(`您删除了用户名称为 [${row.username}] 的这条数据`, {
-          type: "success"
-        });
+        message(
+          `您删除了 [${row.receiverName}]-[${row.receiverPhone}] 的这条收货地址信息`,
+          {
+            type: "success"
+          }
+        );
       }
     });
   }
 
   function handleUpdate(row) {
     console.log(row);
-  }
-
-  /** 分配角色 */
-  async function handleRole(row) {
-    // 选中的角色列表
-    const ids = (await getRoleIds(row.id)).data ?? [];
-    addDialog({
-      title: `分配 [${row.username}] 用户的角色`,
-      props: {
-        formInline: {
-          username: row?.username ?? "",
-          roleOptions: roleOptions.value ?? [],
-          ids
-        }
-      },
-      width: "400px",
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () => h(roleForm),
-      beforeSure: (done, { options }) => {
-        const curData = options.props.formInline as RoleFormItemProps;
-
-        const bindRole = {
-          relationId: row.id,
-          type: 0,
-          roleIds: curData.ids
-        };
-
-        bindRoleForUser(bindRole).then(res => {
-          if (res.code === 0) {
-            message("角色分配成功", {
-              type: "success"
-            });
-            done(); // 关闭弹框
-          }
-        });
-        // 根据实际业务使用curData.ids和row里的某些字段去调用修改角色接口即可
-        done(); // 关闭弹框
-      }
-    });
   }
 
   onMounted(() => {
@@ -349,13 +284,9 @@ export function useColumns(tableRef: Ref) {
     onSizeChange,
     onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
-    onSelectionCancel,
-    onBatchDel,
     handleDelete,
-    handleUpdate,
-    handleRole
+    handleUpdate
   };
 }

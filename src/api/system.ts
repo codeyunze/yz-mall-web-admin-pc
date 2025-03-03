@@ -193,6 +193,35 @@ export const endTask = (data?: object) => {
   });
 };
 
+/** 收货地址信息-分页查询 */
+export const pageReceiptInfo = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/receipt/page"), {
+    data
+  });
+};
+
+/** 收货地址信息-新增 */
+export const addReceiptInfo = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/receipt/add"), {
+    data
+  });
+};
+
+/** 收货地址信息-修改 */
+export const updateReceiptInfo = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/receipt/update"), {
+    data
+  });
+};
+
+/** 收货地址信息-删除 */
+export const deleteReceiptInfo = (data?: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/receipt/delete/${data}`)
+  );
+};
+
 export type FileInfo = {
   // 0: 公开；1: 不公开；
   publicAccess: number;
