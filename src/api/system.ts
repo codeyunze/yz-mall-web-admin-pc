@@ -222,6 +222,11 @@ export const deleteReceiptInfo = (data?: object) => {
   );
 };
 
+/** 行政地区信息 */
+export const getArea = (data?: string) => {
+  return http.request<Result>("get", baseUrlApi(`/sys/area/get/${data}`));
+};
+
 export type FileInfo = {
   // 0: 公开；1: 不公开；
   publicAccess: number;

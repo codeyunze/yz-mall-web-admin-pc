@@ -189,6 +189,7 @@ export function useColumns() {
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
+        console.log(curData);
         function chores() {
           message(`您${title}一条收货信息`, {
             type: "success"

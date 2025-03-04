@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { Aim } from "@element-plus/icons-vue";
+import { onMounted, ref } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "../utils/rule";
 import { FormProps } from "../utils/types";
+import type { CascaderProps } from "element-plus";
+import { getArea } from "@/api/system";
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
@@ -19,6 +22,8 @@ const props = withDefaults(defineProps<FormProps>(), {
   })
 });
 
+const selectAddress = ref([]);
+
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 
@@ -26,7 +31,35 @@ function getRef() {
   return ruleFormRef.value;
 }
 
+let id = 0;
+const addressProps: CascaderProps = {
+  lazy: true,
+  lazyLoad(node, resolve) {
+    const { level, value } = node;
+    getArea(level === 0 ? "-1" : value + "").then(res => {
+      if (level == 2) {
+        res.data.forEach(item => {
+          item.leaf = true;
+        });
+      }
+      resolve(res.data);
+    });
+  }
+};
+
+const handleAddressChange = (values: any) => {
+  newFormInline.value.receiverProvince = values[0];
+  newFormInline.value.receiverCity = values[1];
+  newFormInline.value.receiverDistrict = values[2];
+};
+
 defineExpose({ getRef });
+
+onMounted(() => {
+  selectAddress.value[0] = newFormInline.value.receiverProvince;
+  selectAddress.value[1] = newFormInline.value.receiverCity;
+  selectAddress.value[2] = newFormInline.value.receiverDistrict;
+});
 </script>
 
 <template>
@@ -65,30 +98,15 @@ defineExpose({ getRef });
           />
         </el-form-item>
       </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
+      <re-col :value="24" :xs="24" :sm="24">
         <el-form-item label="收货地址" prop="receiverProvince">
-          <el-input
-            v-model="newFormInline.receiverProvince"
+          <el-cascader
+            v-model="selectAddress"
+            :props="addressProps"
+            class="w-full"
             clearable
             placeholder="请选择收货地址"
-          />
-        </el-form-item>
-      </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="收货地址" prop="receiverCity">
-          <el-input
-            v-model="newFormInline.receiverCity"
-            clearable
-            placeholder="请选择收货地址"
-          />
-        </el-form-item>
-      </re-col>
-      <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="收货地址" prop="receiverDistrict">
-          <el-input
-            v-model="newFormInline.receiverDistrict"
-            clearable
-            placeholder="请选择收货地址"
+            @change="handleAddressChange"
           />
         </el-form-item>
       </re-col>
