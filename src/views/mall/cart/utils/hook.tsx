@@ -9,8 +9,9 @@ import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
 import { usePublicHooks } from "@/views/system/hooks";
-import { router } from "@/router";
-// import { tableData } from "@/views/table/base/data";
+import { addDrawer } from "@/components/ReDrawer/index";
+import forms from "../generateOrder.vue";
+import type { OrderBaseInfo, ProductInfo } from "./orderInfo";
 const { tagStyle } = usePublicHooks();
 
 export { default as dayjs } from "dayjs";
@@ -187,12 +188,49 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog() {
+  function openDialog(row?: ProductInfo) {
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    message(`数据${curSelected}`, {
-      type: "success"
+    console.log("选择数据", curSelected);
+    console.log(row);
+    const cartItem: OrderBaseInfo = {
+      products: row ? [row] : []
+    };
+    if (curSelected) {
+      curSelected.forEach(item => {
+        if (item.productId != row.productId) {
+          cartItem.products.push(item);
+        }
+      });
+    }
+    // router.push({ name: "CompleteOrder" });
+    addDrawer({
+      size: "50%",
+      title: "生成订单",
+      contentRenderer: () => forms,
+      footerRenderer: ({ options, index }) => {
+        return (
+          <div>
+            <el-button onClick={() => console.log("取消订单", index)}>
+              取消订单
+            </el-button>
+            <el-button
+              onClick={() =>
+                console.log("确认订单", index, options.props.formInline)
+              }
+            >
+              确认订单
+            </el-button>
+          </div>
+        );
+      },
+      props: {
+        // 赋默认值
+        formInline: cartItem
+      },
+      closeCallBack: ({ options, args }) => {
+        console.log(options, args);
+      }
     });
-    router.push({ name: "CompleteOrder" });
   }
 
   /** 取消选择 */
@@ -239,8 +277,8 @@ export function useColumns(tableRef: Ref) {
   }
 
   /**
-   * 删除用户信息
-   * @param row 用户信息
+   * 删除信息
+   * @param row 信息
    */
   function handleDelete(row) {
     const ids = reactive({

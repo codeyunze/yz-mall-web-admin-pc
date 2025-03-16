@@ -54,7 +54,7 @@ const state = ref({
 const filterColumns: PlusColumn[] = [
   {
     label: "商品名称",
-    prop: "name"
+    prop: "productName"
   },
   {
     label: "商品标签",
@@ -93,7 +93,7 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  form.name = values.name;
+  form.productName = values.productName;
   form.titles = values.titles;
   form.publishStatus = values.publishStatus;
   form.verifyStatus = values.verifyStatus;
@@ -108,7 +108,7 @@ const handleSearch = (values: any) => {
   onSearch();
 };
 const handleRest = () => {
-  form.name = null;
+  form.productName = null;
   form.titles = null;
   form.publishStatus = null;
   form.verifyStatus = null;

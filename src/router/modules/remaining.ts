@@ -48,15 +48,5 @@ export default [
       showLink: false,
       rank: 104
     }
-  },
-  {
-    path: "/complete-order",
-    name: "CompleteOrder",
-    component: () => import("@/views/mall/cart/CompleteOrder.vue"),
-    meta: {
-      title: "订单信息完善",
-      showLink: false,
-      rank: 105
-    }
   }
 ] satisfies Array<RouteConfigsTable>;

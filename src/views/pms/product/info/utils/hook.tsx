@@ -37,7 +37,7 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "商品",
-      prop: "name",
+      prop: "productName",
       align: "left"
     },
     {
@@ -47,7 +47,7 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "售价（元）",
-      prop: "price",
+      prop: "productPrice",
       width: 100
     },
     {
@@ -103,7 +103,7 @@ export function useColumns(tableRef: Ref) {
 
   const formRef = ref();
   const form = reactive({
-    name: null,
+    productName: null,
     titles: null,
     publishStatus: null,
     verifyStatus: null,
@@ -198,10 +198,10 @@ export function useColumns(tableRef: Ref) {
         formInline: {
           title,
           id: row?.id ?? 0,
-          name: row?.name ?? "",
+          productName: row?.productName ?? "",
           remark: row?.remark ?? "",
           titles: row?.titles ?? "",
-          price: row?.price ?? "",
+          productPrice: row?.productPrice ?? "",
           publishStatus: row?.publishStatus ?? 1,
           verifyStatus: row?.verifyStatus ?? 1,
           albumPics: row?.albumPics ?? ""
@@ -221,7 +221,7 @@ export function useColumns(tableRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了商品名称为${curData.name}的这条数据`, {
+          message(`您${title}了商品名称为${curData.productName}的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -261,7 +261,7 @@ export function useColumns(tableRef: Ref) {
   function handlePublish(row) {
     publishProductById(row.id).then(res => {
       if (res.code === 0) {
-        message(`商品 [${row.name}] 上架成功`, {
+        message(`商品 [${row.productName}] 上架成功`, {
           type: "success"
         });
         onSearch();
@@ -276,7 +276,7 @@ export function useColumns(tableRef: Ref) {
   function handleDelisting(row) {
     delistingProductById(row.id).then(res => {
       if (res.code === 0) {
-        message(`商品 [${row.name}] 下架成功`, {
+        message(`商品 [${row.productName}] 下架成功`, {
           type: "success"
         });
         onSearch();

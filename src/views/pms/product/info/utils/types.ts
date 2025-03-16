@@ -2,10 +2,10 @@ interface FormItemProps {
   id?: number;
   /** 用于判断是`新增`还是`修改` */
   title: string;
-  name: string;
+  productName: string;
   titles: string;
   remark: string;
-  price: number;
+  productPrice: number;
   publishStatus: number;
   verifyStatus: number;
   albumPics: string;

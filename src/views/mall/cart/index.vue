@@ -151,7 +151,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(EditPen)"
-              @click="openDialog()"
+              @click="openDialog(row)"
             >
               结算
             </el-button>

@@ -13,8 +13,8 @@ import { message } from "@/utils/message";
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
     title: "新增",
-    name: "",
-    price: 0,
+    productName: "",
+    productPrice: 0,
     remark: "",
     titles: "",
     publishStatus: 0,
@@ -189,9 +189,9 @@ onMounted(() => {
     >
       <el-row :gutter="30">
         <re-col :value="12" :xs="24" :sm="24">
-          <el-form-item label="商品名称" prop="name">
+          <el-form-item label="商品名称" prop="productName">
             <el-input
-              v-model="newFormInline.name"
+              v-model="newFormInline.productName"
               clearable
               placeholder="请输入商品名称"
             />
@@ -199,9 +199,9 @@ onMounted(() => {
         </re-col>
 
         <re-col :value="12" :xs="24" :sm="24">
-          <el-form-item label="售价" prop="price">
+          <el-form-item label="售价" prop="productPrice">
             <el-input
-              v-model="newFormInline.price"
+              v-model="newFormInline.productPrice"
               clearable
               placeholder="请输入商品售价"
             />

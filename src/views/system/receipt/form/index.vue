@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Aim } from "@element-plus/icons-vue";
 import { onMounted, ref } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "../utils/rule";
@@ -31,7 +30,6 @@ function getRef() {
   return ruleFormRef.value;
 }
 
-let id = 0;
 const addressProps: CascaderProps = {
   lazy: true,
   lazyLoad(node, resolve) {
@@ -114,7 +112,7 @@ onMounted(() => {
         <el-form-item label="详细地址" prop="receiverAddress">
           <el-input
             v-model="newFormInline.receiverAddress"
-            placeholder="请输入备注信息"
+            placeholder="请输入详细信息"
             type="textarea"
           />
         </el-form-item>
