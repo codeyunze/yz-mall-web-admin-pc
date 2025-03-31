@@ -10,6 +10,7 @@ interface OrderProduct {
   productName: string;
   price: number;
   remark: string;
+  previewAddress: string;
 }
 
 interface Order {

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { Order } from "./utils/types";
-import { formRules } from "@/views/system/receipt/utils/rule";
-import ReCol from "@/components/ReCol";
 import type { CascaderProps } from "element-plus";
 import { getArea, pageReceiptInfo } from "@/api/system";
 
@@ -66,6 +64,7 @@ const handleAddressChange = (values: any) => {
 // 但该写法仅适用于 props.formInline 是一个对象类型的情况，原始类型需抛出事件
 // 推荐阅读：https://cn.vuejs.org/guide/components/props.html#one-way-data-flow
 const newFormInline = ref(props.formInline);
+const totalPrice = ref(0.0);
 
 onMounted(() => {
   const params = { filter: {} };
@@ -86,6 +85,10 @@ onMounted(() => {
     selectAddress.value[0] = newFormInline.value.receiverProvince;
     selectAddress.value[1] = newFormInline.value.receiverCity;
     selectAddress.value[2] = newFormInline.value.receiverDistrict;
+
+    newFormInline.value.products.forEach(product => {
+      totalPrice.value = totalPrice.value + product.price * product.quantity;
+    });
   });
 });
 </script>
@@ -137,35 +140,59 @@ onMounted(() => {
           <el-col :span="4">
             <el-image
               style="width: 100px; height: 100px"
-              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+              :src="product.previewAddress"
             />
           </el-col>
           <el-col :span="20">
-            <el-descriptions>
+            <el-row>
+              <el-col :span="16" class="colProduct"
+                >商品: {{ product.productName }}</el-col
+              >
+              <el-col :span="8" class="colProduct"
+                >原价:
+                <span style="color: red">￥ {{ product.price }}</span></el-col
+              >
+              <el-col :span="16" class="colProduct">SKU: XXX</el-col>
+              <el-col :span="8" class="colProduct"
+                >到手价: ￥ {{ product.realAmount }}</el-col
+              >
+              <el-col :span="8" class="colProduct"
+                >数量：{{ product.quantity }}</el-col
+              >
+              <el-col :span="8" class="colProduct"
+                >共减: ￥ {{ product.discountAmount }}</el-col
+              >
+              <el-col :span="8" class="colProduct"
+                >合计: ￥ {{ product.price * product.quantity }}</el-col
+              >
+            </el-row>
+            <!--<el-descriptions>
               <el-descriptions-item :span="2" label="商品: "
                 >{{ product.productName }}
               </el-descriptions-item>
               <el-descriptions-item label="原价: "
                 ><span style="color: red">￥ {{ product.price }}</span>
               </el-descriptions-item>
+
               <el-descriptions-item :span="2" label="SKU: "
                 >XXX
               </el-descriptions-item>
               <el-descriptions-item label="到手价: "
                 >￥0
-                <!--{{ product.realAmount }}-->
+                &lt;!&ndash;{{ product.realAmount }}&ndash;&gt;
               </el-descriptions-item>
+
               <el-descriptions-item label="数量: "
                 >{{ product.quantity }}
               </el-descriptions-item>
               <el-descriptions-item label="共减: "
-                >￥ 0<!--{{ product.discountAmount }}-->
+                >￥ 0&lt;!&ndash;{{ product.discountAmount }}&ndash;&gt;
               </el-descriptions-item>
               <el-descriptions-item label="合计: "
                 >￥
                 {{ product.price * product.quantity }}
               </el-descriptions-item>
-            </el-descriptions>
+            </el-descriptions>-->
           </el-col>
         </el-row>
       </el-card>
@@ -176,7 +203,7 @@ onMounted(() => {
     <div style="float: right; margin-top: 20px">
       合计
       <el-text type="danger" size="large" style="font-size: 24px"
-        >￥ XXX.XX</el-text
+        >￥ {{ totalPrice }}</el-text
       >
     </div>
   </div>
@@ -252,3 +279,10 @@ onMounted(() => {
     </el-row>
   </el-form>-->
 </template>
+
+<style scoped>
+.colProduct {
+  height: 40px;
+  line-height: 40px;
+}
+</style>

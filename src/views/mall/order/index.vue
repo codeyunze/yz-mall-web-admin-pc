@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns, dayjs } from "./utils/hook";
+import { useColumns } from "./utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 

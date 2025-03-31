@@ -6,8 +6,8 @@ interface OrderProduct {
   discountAmount: number;
   realAmount: number;
   productAttributes: string;
-  name: string;
-  price: number;
+  productName: string;
+  productPrice: number;
   remark: string;
 }
 

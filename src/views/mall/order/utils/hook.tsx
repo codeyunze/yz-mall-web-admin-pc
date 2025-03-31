@@ -79,7 +79,7 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "创建时间",
-      prop: "createdTime"
+      prop: "createTime"
     },
     {
       label: "操作",

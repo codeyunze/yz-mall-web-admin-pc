@@ -49,7 +49,7 @@ const state = ref({
 const filterColumns: PlusColumn[] = [
   {
     label: "商品名称",
-    prop: "name"
+    prop: "productName"
   },
   {
     label: "商品标签",
@@ -71,7 +71,7 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  form.name = values.name;
+  form.productName = values.productName;
   form.productId = values.productId;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
@@ -84,7 +84,7 @@ const handleSearch = (values: any) => {
   onSearch();
 };
 const handleRest = () => {
-  form.name = null;
+  form.productName = null;
   form.productId = 0;
   form.startTimeFilter = null;
   form.endTimeFilter = null;

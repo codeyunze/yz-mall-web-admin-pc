@@ -1,6 +1,6 @@
 interface FormItemProps {
   productId?: number;
-  name?: string;
+  productName?: string;
   quantity: number;
   remark: string;
 }

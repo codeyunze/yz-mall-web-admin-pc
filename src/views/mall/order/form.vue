@@ -42,126 +42,145 @@ const newFormInline = ref(props.formInline);
 </script>
 
 <template>
-  <el-descriptions :column="3" label-width="250px" border>
-    <el-descriptions-item label="订单编号:"
-      >{{ newFormInline.orderCode }}
-    </el-descriptions-item>
-    <el-descriptions-item label="订单状态:">
-      <el-tag v-if="newFormInline.orderStatus === 0" size="small" type="warning"
-        >待付款
-      </el-tag>
-      <el-tag v-if="newFormInline.orderStatus === 1" size="small" type="warning"
-        >待发货
-      </el-tag>
-      <el-tag v-if="newFormInline.orderStatus === 2" size="small"
-        >已发货</el-tag
-      >
-      <el-tag v-if="newFormInline.orderStatus === 3" size="small" type="danger"
-        >待收货
-      </el-tag>
-      <el-tag v-if="newFormInline.orderStatus === 4" size="small" type="success"
-        >已完成
-      </el-tag>
-      <el-tag v-if="newFormInline.orderStatus === 5" size="small" type="success"
-        >已取消
-      </el-tag>
-      <el-tag v-if="newFormInline.orderStatus === 6" size="small" type="info"
-        >无效订单
-      </el-tag>
-    </el-descriptions-item>
-    <el-descriptions-item label="订单类型:">
-      <el-tag v-if="newFormInline.orderType === 1" size="small" type="success"
-        >秒杀订单
-      </el-tag>
-      <el-tag v-else size="small">正常订单</el-tag>
-    </el-descriptions-item>
-    <el-descriptions-item label="支付方式:">
-      <el-tag v-if="newFormInline.payType === 0" size="small" type="warning"
-        >待支付
-      </el-tag>
-      <el-tag v-if="newFormInline.payType === 1" size="small">支付宝 </el-tag>
-      <el-tag v-if="newFormInline.payType === 2" size="small" type="success"
-        >微信</el-tag
-      >
-    </el-descriptions-item>
-    <el-descriptions-item label="收货状态:">
-      <el-tag
+  <div>
+    <el-descriptions :column="3" label-width="250px" border>
+      <el-descriptions-item label="订单编号:"
+        >{{ newFormInline.orderCode }}
+      </el-descriptions-item>
+      <el-descriptions-item label="订单状态:">
+        <el-tag
+          v-if="newFormInline.orderStatus === 0"
+          size="small"
+          type="warning"
+          >待付款
+        </el-tag>
+        <el-tag
+          v-if="newFormInline.orderStatus === 1"
+          size="small"
+          type="warning"
+          >待发货
+        </el-tag>
+        <el-tag v-if="newFormInline.orderStatus === 2" size="small"
+          >已发货
+        </el-tag>
+        <el-tag
+          v-if="newFormInline.orderStatus === 3"
+          size="small"
+          type="danger"
+          >待收货
+        </el-tag>
+        <el-tag
+          v-if="newFormInline.orderStatus === 4"
+          size="small"
+          type="success"
+          >已完成
+        </el-tag>
+        <el-tag
+          v-if="newFormInline.orderStatus === 5"
+          size="small"
+          type="success"
+          >已取消
+        </el-tag>
+        <el-tag v-if="newFormInline.orderStatus === 6" size="small" type="info"
+          >无效订单
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="订单类型:">
+        <el-tag v-if="newFormInline.orderType === 1" size="small" type="success"
+          >秒杀订单
+        </el-tag>
+        <el-tag v-else size="small">正常订单</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="支付方式:">
+        <el-tag v-if="newFormInline.payType === 0" size="small" type="warning"
+          >待支付
+        </el-tag>
+        <el-tag v-if="newFormInline.payType === 1" size="small">支付宝</el-tag>
+        <el-tag v-if="newFormInline.payType === 2" size="small" type="success"
+          >微信
+        </el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="收货状态:">
+        <el-tag
+          v-if="newFormInline.confirmStatus === 1"
+          size="small"
+          type="success"
+          >已收货
+        </el-tag>
+        <el-tag v-else size="small">未收货</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item
         v-if="newFormInline.confirmStatus === 1"
-        size="small"
-        type="success"
-        >已收货
-      </el-tag>
-      <el-tag v-else size="small">未收货</el-tag>
-    </el-descriptions-item>
-    <el-descriptions-item
-      v-if="newFormInline.confirmStatus === 1"
-      label="收货时间:"
-    >
-      {{ newFormInline.receiveTime }}
-    </el-descriptions-item>
-    <el-descriptions-item label="收货人:"
-      >{{ newFormInline.receiverName }}
-    </el-descriptions-item>
-    <el-descriptions-item label="收货手机:"
-      >{{ newFormInline.receiverPhone }}
-    </el-descriptions-item>
-    <el-descriptions-item :span="2" label="通知邮箱:"
-      >{{ newFormInline.email }}
-    </el-descriptions-item>
-    <el-descriptions-item :span="3" label="收货地址:"
-      >{{ newFormInline.receiverAddress }}
-    </el-descriptions-item>
-    <el-descriptions-item :span="3" label="订单备注:"
-      >{{ newFormInline.note }}
-    </el-descriptions-item>
-    <el-descriptions-item :span="3" label="实付款:"
-      >共减￥XXX.XX 合计￥XXX.XX
-    </el-descriptions-item>
-  </el-descriptions>
+        label="收货时间:"
+      >
+        {{ newFormInline.receiveTime }}
+      </el-descriptions-item>
+      <el-descriptions-item label="收货人:"
+        >{{ newFormInline.receiverName }}
+      </el-descriptions-item>
+      <el-descriptions-item label="收货手机:"
+        >{{ newFormInline.receiverPhone }}
+      </el-descriptions-item>
+      <el-descriptions-item :span="2" label="通知邮箱:"
+        >{{ newFormInline.email }}
+      </el-descriptions-item>
+      <el-descriptions-item :span="3" label="收货地址:"
+        >{{ newFormInline.receiverAddress }}
+      </el-descriptions-item>
+      <el-descriptions-item :span="3" label="订单备注:"
+        >{{ newFormInline.note }}
+      </el-descriptions-item>
+    </el-descriptions>
 
-  <div class="flex flex-wrap gap-4" style="margin-top: 20px">
-    <el-card
-      v-for="product in newFormInline.products"
-      :key="product.id"
-      style="width: 100%"
-      shadow="hover"
-    >
-      <el-row>
-        <el-col :span="4">
-          <el-image
-            style="width: 100px; height: 100px"
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          />
-        </el-col>
-        <el-col :span="20">
-          <el-descriptions>
-            <el-descriptions-item :span="2" label="商品: ">{{
-              product.productId
-            }}</el-descriptions-item>
-            <el-descriptions-item label="原价: "
-              >￥ {{ product.price }}</el-descriptions-item
-            >
-            <el-descriptions-item :span="2" label="SKU: "
-              >XXX</el-descriptions-item
-            >
-            <el-descriptions-item label="到手价: "
-              >￥ {{ product.realAmount }}</el-descriptions-item
-            >
-            <el-descriptions-item label="数量: ">{{
-              product.productQuantity
-            }}</el-descriptions-item>
-            <el-descriptions-item label="共减: "
-              >￥ {{ product.discountAmount }}</el-descriptions-item
-            >
-            <el-descriptions-item label="合计: "
-              >￥
-              {{
-                product.realAmount * product.productQuantity
-              }}</el-descriptions-item
-            >
-          </el-descriptions>
-        </el-col>
-      </el-row>
-    </el-card>
+    <div class="flex flex-wrap gap-4" style="margin-top: 20px">
+      <el-card
+        v-for="product in newFormInline.products"
+        :key="product.id"
+        style="width: 100%"
+        shadow="hover"
+      >
+        <el-row>
+          <el-col :span="4">
+            <el-image
+              style="width: 100px; height: 100px"
+              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+            />
+          </el-col>
+          <el-col :span="20">
+            <el-descriptions>
+              <el-descriptions-item :span="2" label="商品: "
+                >{{ product.productName }}
+              </el-descriptions-item>
+              <el-descriptions-item label="原价: "
+                >￥ {{ product.productPrice }}
+              </el-descriptions-item>
+              <el-descriptions-item :span="2" label="SKU: "
+                >XXX
+              </el-descriptions-item>
+              <el-descriptions-item label="到手价: "
+                >￥ {{ product.realAmount }}
+              </el-descriptions-item>
+              <el-descriptions-item label="数量: "
+                >{{ product.productQuantity }}
+              </el-descriptions-item>
+              <el-descriptions-item label="共减: "
+                >￥ {{ product.discountAmount }}
+              </el-descriptions-item>
+              <el-descriptions-item label="合计: "
+                >￥
+                {{ product.realAmount * product.productQuantity }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-col>
+        </el-row>
+      </el-card>
+    </div>
+
+    <div style="float: right; margin-top: 20px">
+      合计
+      <el-text type="danger" size="large" style="font-size: 24px"
+        >￥ XXX.XX
+      </el-text>
+    </div>
   </div>
 </template>

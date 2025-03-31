@@ -35,7 +35,7 @@ export type ProductInfo = {
   /** 购买数量 */
   quantity: number;
   /** 购买的价格 */
-  price: number;
+  productPrice: number;
 };
 
 export type OrderBaseInfo = ReceiptInfo & {

@@ -19,7 +19,7 @@ interface CardProductType {
   description: string;
   name: string;
   id: string;
-  price: number;
+  productPrice: number;
   titles: string;
   remark: string;
   albumPics: string;
@@ -85,9 +85,9 @@ function addOrder(product?: CardProductType) {
         <div class="list-card-item_detail--operation">
           价格：
           <!--<span style="margin: 0 5px; text-decoration: line-through"
-            >{{ product.price }}$</span
+            >{{ product.productPrice }}$</span
           >-->
-          <span style="margin: 0 5px">{{ product.price }}$</span>
+          <span style="margin: 0 5px">{{ product.productPrice }}$</span>
           <!--:color="product.isSetup ? '#00a870' : '#eee'"-->
           <el-tag
             :color="'#00a870'"

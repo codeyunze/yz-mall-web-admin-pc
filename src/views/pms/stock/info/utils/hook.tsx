@@ -29,7 +29,7 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "商品",
-      prop: "name",
+      prop: "productName",
       align: "left"
     },
     {
@@ -39,7 +39,7 @@ export function useColumns(tableRef: Ref) {
     },
     {
       label: "售价（元）",
-      prop: "price",
+      prop: "productPrice",
       width: 200
     },
     {
@@ -57,7 +57,7 @@ export function useColumns(tableRef: Ref) {
 
   const formRef = ref();
   const form = reactive({
-    name: "",
+    productName: "",
     productId: 0,
     quantity: 0,
     startTimeFilter: null,
@@ -146,10 +146,10 @@ export function useColumns(tableRef: Ref) {
 
   function openDialog(title = "入库", row?: FormItemProps) {
     addDialog({
-      title: `${row.name} 商品${title}`,
+      title: `${row.productName} 商品${title}`,
       props: {
         formInline: {
-          name: row.name,
+          productName: row.productName,
           productId: row.productId,
           quantity: 0
         }
@@ -167,9 +167,12 @@ export function useColumns(tableRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`商品 [${row.name}] 成功${title}数量 ${curData.quantity}`, {
-            type: "success"
-          });
+          message(
+            `商品 [${row.productName}] 成功${title}数量 ${curData.quantity}`,
+            {
+              type: "success"
+            }
+          );
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
@@ -236,7 +239,7 @@ export function useColumns(tableRef: Ref) {
     deleteProduct(row.id).then(res => {
       if (res.code === 0) {
         onSearch();
-        message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
+        message(`您删除了商品名称为 [${row.productName}] 的这条数据`, {
           type: "success"
         });
       }
