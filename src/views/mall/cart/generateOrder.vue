@@ -203,7 +203,7 @@ onMounted(() => {
     <div style="float: right; margin-top: 20px">
       合计
       <el-text type="danger" size="large" style="font-size: 24px"
-        >￥ {{ totalPrice }}</el-text
+        >￥{{ totalPrice }}</el-text
       >
     </div>
   </div>

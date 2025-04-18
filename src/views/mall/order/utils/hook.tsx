@@ -7,7 +7,7 @@ import type {
 import { ref, onMounted, reactive, computed, type Ref } from "vue";
 import { delay } from "@pureadmin/utils";
 import type { Order } from "./types";
-import { omsOrderCancel, omsOrderPage } from "@/api/oms";
+import { getOmsInfo, omsOrderCancel, omsOrderPage, omsPay } from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
 import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
 import forms from "../form.vue";
@@ -180,49 +180,66 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
+  /**
+   * 展开操作按钮
+   */
+  const showOperationButtons = ref(true);
+
   function openDialog(title = "订单详情", row?: Order) {
-    console.log(title, row);
-    addDrawer({
-      size: "50%",
-      title: title,
-      contentRenderer: () => forms,
-      footerRenderer: ({ options, index }) => {
-        const orderStatus = options.props.formInline.orderStatus;
-        return (
-          <div>
-            {orderStatus === 0 && (
-              <div>
-                <el-button onClick={() => orderCancelHandle(options, index)}>
-                  取消订单
-                </el-button>
-                <el-button onClick={() => handleOrderUpdate(options, index)}>
-                  修改订单
-                </el-button>
-                <el-button
-                  type="success"
-                  onClick={() => orderPayHandle(options, index)}
-                >
-                  去支付
-                </el-button>
-              </div>
-            )}
-            {(orderStatus === 1 || orderStatus === 2 || orderStatus === 3) && (
-              <el-button>申请退款</el-button>
-            )}
-            {orderStatus === 4 && <el-button>退款/售后</el-button>}
-            {(orderStatus === 4 || orderStatus === 5) && (
-              <el-button type="warning">再次购买</el-button>
-            )}
-          </div>
-        );
-      },
-      props: {
-        // 赋默认值
-        formInline: row
-      },
-      closeCallBack: ({ options, args }) => {
-        console.log(options, args);
+    const queryFilter = {
+      orderCode: row.orderCode
+    };
+    getOmsInfo(queryFilter).then(data => {
+      if (data.code !== 0) {
+        message(data.msg, {
+          type: "error"
+        });
+        return;
       }
+      console.log("订单详情数据", data.data);
+      addDrawer({
+        size: "50%",
+        title: title,
+        contentRenderer: () => forms,
+        props: {
+          // 赋默认值
+          formInline: data.data
+        },
+        footerRenderer: ({ options, index }) => {
+          const orderStatus = options.props.formInline.orderStatus;
+          return (
+            <div>
+              {orderStatus === 0 && showOperationButtons.value && (
+                <div>
+                  <el-button onClick={() => orderCancelHandle(options, index)}>
+                    取消订单
+                  </el-button>
+                  <el-button onClick={() => handleOrderUpdate(options, index)}>
+                    修改订单
+                  </el-button>
+                  <el-button
+                    type="success"
+                    onClick={() => orderPayHandle(options, index)}
+                  >
+                    去支付
+                  </el-button>
+                </div>
+              )}
+              {(orderStatus === 1 ||
+                orderStatus === 2 ||
+                orderStatus === 3 ||
+                !showOperationButtons.value) && <el-button>申请退款</el-button>}
+              {orderStatus === 4 && <el-button>退款/售后</el-button>}
+              {(orderStatus === 4 || orderStatus === 5) && (
+                <el-button type="warning">再次购买</el-button>
+              )}
+            </div>
+          );
+        },
+        closeCallBack: ({ options, args }) => {
+          console.log(options, args);
+        }
+      });
     });
   }
 
@@ -250,7 +267,19 @@ export function useColumns(tableRef: Ref) {
    * 订单支付
    */
   function orderPayHandle(options, index) {
-    console.log(options, index);
+    console.log(options.props.formInline.id, index);
+    const pay = {
+      businessId: options.props.formInline.id,
+      payType: 1
+    };
+    omsPay(pay).then(res => {
+      if (0 === res.code) {
+        message(res.msg, { type: "success" });
+        onSearch();
+        showOperationButtons.value = false;
+        console.log("按钮状态：", showOperationButtons);
+      }
+    });
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */

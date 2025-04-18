@@ -1,35 +1,96 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Order } from "./utils/types";
+import { onMounted, ref } from "vue";
+import { OmsOrderDetail } from "@/api/oms";
 
 // 声明 props 类型
 export interface FormProps {
-  formInline: Order;
+  formInline: OmsOrderDetail;
 }
 
 // 声明 props 默认值
 // 推荐阅读：https://cn.vuejs.org/guide/typescript/composition-api.html#typing-component-props
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
-    id: "",
-    orderCode: "",
+    /**
+     * 订单主键标识
+     */
+    id: 0,
+    /**
+     * 订单编号;省市区年月日000001
+     */
+    orderCode: 0,
+    /**
+     * 订单状态：0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消/已取消；6无效订单
+     */
     orderStatus: 0,
+    /**
+     * 订单类型：0正常订单；1秒杀订单
+     */
     orderType: 0,
-    deliveryTime: "",
-    confirmStatus: 0,
-    receiveTime: "",
-    payType: 0,
-    totalAmount: 0.0,
-    discountAmount: 0.0,
-    payAmount: 0.0,
-    note: "",
+    /**
+     * 订单总金额
+     */
+    totalAmount: 0,
+    /**
+     * 优惠金额
+     */
+    discountAmount: 0,
+    /**
+     * 订单实际应付金额
+     */
+    payAmount: 0,
+    /**
+     * 收货人姓名
+     */
     receiverName: "",
+    /**
+     * 收货人手机号
+     */
     receiverPhone: "",
+    /**
+     * 收货省
+     */
     receiverProvince: "",
+    /**
+     * 收货市
+     */
     receiverCity: "",
+    /**
+     * 收货区
+     */
     receiverDistrict: "",
+    /**
+     * 收货详细地址
+     */
     receiverAddress: "",
-    email: ""
+    /**
+     * 订单消息接收邮箱
+     */
+    email: "",
+    /**
+     * 订单创建时间
+     */
+    createTime: "",
+    /**
+     * 确认收货时间
+     */
+    receiveTime: "",
+    /**
+     * 支付方式：0未支付/待支付；1支付宝；2微信
+     */
+    payType: 0,
+    /**
+     * 收货状态：0未确认收货；1已确认收货
+     */
+    confirmStatus: 0,
+    /**
+     * 订单备注
+     */
+    note: "",
+    /**
+     * 订单商品
+     */
+    products: []
   })
 });
 
@@ -39,13 +100,29 @@ const props = withDefaults(defineProps<FormProps>(), {
 // 但该写法仅适用于 props.formInline 是一个对象类型的情况，原始类型需抛出事件
 // 推荐阅读：https://cn.vuejs.org/guide/components/props.html#one-way-data-flow
 const newFormInline = ref(props.formInline);
+// 合计
+const totalPrice = ref(0.0);
+
+onMounted(() => {
+  console.log("加载数据", newFormInline);
+  newFormInline.value.products.forEach(product => {
+    totalPrice.value =
+      totalPrice.value + product.productPrice * product.productQuantity;
+  });
+});
 </script>
 
 <template>
   <div>
-    <el-descriptions :column="3" label-width="250px" border>
+    <el-descriptions :column="3" label-width="200px" border>
       <el-descriptions-item label="订单编号:"
         >{{ newFormInline.orderCode }}
+      </el-descriptions-item>
+      <el-descriptions-item label="订单类型:">
+        <el-tag v-if="newFormInline.orderType === 1" size="small" type="success"
+          >秒杀订单
+        </el-tag>
+        <el-tag v-else size="small">正常订单</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="订单状态:">
         <el-tag
@@ -84,12 +161,6 @@ const newFormInline = ref(props.formInline);
         <el-tag v-if="newFormInline.orderStatus === 6" size="small" type="info"
           >无效订单
         </el-tag>
-      </el-descriptions-item>
-      <el-descriptions-item label="订单类型:">
-        <el-tag v-if="newFormInline.orderType === 1" size="small" type="success"
-          >秒杀订单
-        </el-tag>
-        <el-tag v-else size="small">正常订单</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="支付方式:">
         <el-tag v-if="newFormInline.payType === 0" size="small" type="warning"
@@ -147,30 +218,28 @@ const newFormInline = ref(props.formInline);
             />
           </el-col>
           <el-col :span="20">
-            <el-descriptions>
-              <el-descriptions-item :span="2" label="商品: "
-                >{{ product.productName }}
-              </el-descriptions-item>
-              <el-descriptions-item label="原价: "
-                >￥ {{ product.productPrice }}
-              </el-descriptions-item>
-              <el-descriptions-item :span="2" label="SKU: "
-                >XXX
-              </el-descriptions-item>
-              <el-descriptions-item label="到手价: "
-                >￥ {{ product.realAmount }}
-              </el-descriptions-item>
-              <el-descriptions-item label="数量: "
-                >{{ product.productQuantity }}
-              </el-descriptions-item>
-              <el-descriptions-item label="共减: "
-                >￥ {{ product.discountAmount }}
-              </el-descriptions-item>
-              <el-descriptions-item label="合计: "
-                >￥
-                {{ product.realAmount * product.productQuantity }}
-              </el-descriptions-item>
-            </el-descriptions>
+            <el-row>
+              <el-col :span="16" class="colProduct"
+                >商品: {{ product.productName }}
+              </el-col>
+              <el-col :span="8" class="colProduct"
+                >原价: ￥ {{ product.productPrice }}
+              </el-col>
+              <el-col :span="16" class="colProduct">SKU: XXX </el-col>
+              <el-col :span="8" class="colProduct"
+                >到手价: ￥ {{ product.realAmount }}
+              </el-col>
+              <el-col :span="8" class="colProduct"
+                >数量: {{ product.productQuantity }}
+              </el-col>
+              <el-col :span="8" class="colProduct"
+                >共减: ￥ {{ product.discountAmount }}
+              </el-col>
+              <el-col :span="8" class="colProduct"
+                >合计: ￥
+                {{ product.productPrice * product.productQuantity }}
+              </el-col>
+            </el-row>
           </el-col>
         </el-row>
       </el-card>
@@ -179,8 +248,15 @@ const newFormInline = ref(props.formInline);
     <div style="float: right; margin-top: 20px">
       合计
       <el-text type="danger" size="large" style="font-size: 24px"
-        >￥ XXX.XX
+        >￥{{ totalPrice }}
       </el-text>
     </div>
   </div>
 </template>
+
+<style scoped>
+.colProduct {
+  height: 40px;
+  line-height: 40px;
+}
+</style>
