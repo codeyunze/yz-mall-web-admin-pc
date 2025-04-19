@@ -3,12 +3,14 @@ interface OrderProduct {
   orderId: string;
   productId: string;
   productQuantity: number;
+  quantity: number;
   discountAmount: number;
   realAmount: number;
   productAttributes: string;
   productName: string;
-  productPrice: number;
+  price: number;
   remark: string;
+  previewAddress: string;
 }
 
 interface Order {

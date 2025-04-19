@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns, dayjs } from "./utils/hook";
+import { useColumns, dayjs } from "./utils/threeHook";
 
 import "plus-pro-components/es/components/search/style/css";
 
 import { type PlusColumn, PlusSearch } from "plus-pro-components";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import AddFill from "@iconify-icons/ri/add-circle-line";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Delete from "@iconify-icons/ep/delete";
+
 import { PureTableBar } from "@/components/RePureTableBar";
-import View from "@iconify-icons/ep/view";
 
 defineOptions({
-  name: "PmsStockOutPage"
+  name: "WebExampleThree"
 });
 
 const formRef = ref();
@@ -26,13 +29,12 @@ const {
   adaptiveConfig,
   buttonClass,
   onSearch,
-  resetForm,
-  onCurrentChange,
   openDialog,
-  handleSelectionChange,
   handleSizeChange,
-  handleCurrentChange
-} = useColumns(tableRef);
+  handleCurrentChange,
+  handleDelete,
+  handleUpdate
+} = useColumns();
 
 const state = ref({
   status: "0",
@@ -41,12 +43,31 @@ const state = ref({
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "商品名称",
-    prop: "productName"
+    label: "手机号",
+    prop: "phone"
   },
   {
-    label: "商品标签",
-    prop: "titles"
+    label: "邮件",
+    prop: "email"
+  },
+  {
+    label: "名称",
+    prop: "username"
+  },
+  {
+    label: "性别",
+    prop: "sex",
+    valueType: "select",
+    options: [
+      {
+        label: "男",
+        value: "0"
+      },
+      {
+        label: "女",
+        value: "1"
+      }
+    ]
   },
   {
     label: "创建时间",
@@ -64,8 +85,11 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  form.productName = values.productName;
-  form.productId = values.productId;
+  console.log("search");
+  console.log(JSON.stringify(JSON.stringify(values)));
+  form.phone = values.phone;
+  form.email = values.email;
+  console.log(values.createTime);
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -77,8 +101,9 @@ const handleSearch = (values: any) => {
   onSearch();
 };
 const handleRest = () => {
-  form.productName = null;
-  form.productId = 0;
+  console.log("handleRest");
+  form.phone = null;
+  form.email = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();
@@ -101,11 +126,20 @@ const handleRest = () => {
     />
 
     <PureTableBar
-      title="出库明细"
+      title="用户管理"
       :columns="columns"
       style="border-radius: 10px"
       @refresh="onSearch"
     >
+      <template #buttons>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(AddFill)"
+          @click="openDialog()"
+        >
+          新增用户
+        </el-button>
+      </template>
       <template v-slot="{ size, dynamicColumns }">
         <pure-table
           ref="tableRef"
@@ -123,7 +157,6 @@ const handleRest = () => {
             background: 'var(--el-fill-color-light)',
             color: 'var(--el-text-color-primary)'
           }"
-          @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
         >
@@ -133,11 +166,27 @@ const handleRest = () => {
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(View)"
-              @click="openDialog('入库', row)"
+              :icon="useRenderIcon(EditPen)"
+              @click="openDialog('修改', row)"
             >
-              详情
+              修改
             </el-button>
+            <el-popconfirm
+              :title="`是否确认删除用户名称为 [${row.username}] ，手机号为 [${row.phone}] 的这条数据`"
+              @confirm="handleDelete(row)"
+            >
+              <template #reference>
+                <el-button
+                  class="reset-margin"
+                  link
+                  type="primary"
+                  :size="size"
+                  :icon="useRenderIcon(Delete)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </pure-table>
       </template>

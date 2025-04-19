@@ -32,9 +32,9 @@ defineExpose({ getRef });
   >
     <el-row :gutter="30">
       <re-col :value="12" :xs="24" :sm="24">
-        <el-form-item label="商品" prop="name">
+        <el-form-item label="商品" prop="productName">
           <el-input
-            v-model="newFormInline.name"
+            v-model="newFormInline.productName"
             placeholder="请选择商品"
             readonly
           />

@@ -5,37 +5,20 @@ import type {
 } from "@pureadmin/table";
 
 import { pageUserInfo } from "@/api/user";
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection, getKeyList } from "@pureadmin/utils";
+import { ref, onMounted, reactive, h, computed } from "vue";
+import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/system/user/form/index.vue";
-import type {
-  FormItemProps,
-  RoleFormItemProps
-} from "@/views/system/user/utils/types";
+import type { FormItemProps } from "@/views/system/user/utils/types";
 import { message } from "@/utils/message";
-import {
-  addUser,
-  bindRoleForUser,
-  deleteByUserId,
-  getRoleIds,
-  updateUserById
-} from "@/api/system";
-import roleForm from "@/views/system/user/form/role.vue";
+import { addUser, deleteByUserId, updateUserById } from "@/api/system";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
   const loading = ref(true);
   const selectedNum = ref(0);
   const higherDeptOptions = ref();
-  const roleOptions = ref([]);
   const columns: TableColumnList = [
-    {
-      label: "勾选列", // 如果需要表格多选，此处label必须设置
-      type: "selection",
-      fixed: "left",
-      reserveSelection: true // 数据刷新后保留选项
-    },
     {
       label: "序号",
       type: "index",
@@ -233,20 +216,6 @@ export function useColumns(tableRef: Ref) {
     return newTreeList;
   }
 
-  /** 取消选择 */
-  function onSelectionCancel() {
-    selectedNum.value = 0;
-    // 用于多选表格，清空用户的选择
-    tableRef.value.getTableRef().clearSelection();
-  }
-
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
-  }
-
   function handleSizeChange(val: number) {
     pagination.pageSize = val;
     pagination.currentPage = 1;
@@ -255,18 +224,6 @@ export function useColumns(tableRef: Ref) {
 
   function handleCurrentChange(val: number) {
     console.log(`current page: ${val}`);
-  }
-
-  /** 批量删除 */
-  function onBatchDel() {
-    // 返回当前选中的行
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
-    message(`已删除用户编号为 ${getKeyList(curSelected, "id")} 的数据`, {
-      type: "success"
-    });
-    tableRef.value.getTableRef().clearSelection();
-    onSearch();
   }
 
   /**
@@ -288,48 +245,6 @@ export function useColumns(tableRef: Ref) {
     console.log(row);
   }
 
-  /** 分配角色 */
-  async function handleRole(row) {
-    // 选中的角色列表
-    const ids = (await getRoleIds(row.id)).data ?? [];
-    addDialog({
-      title: `分配 [${row.username}] 用户的角色`,
-      props: {
-        formInline: {
-          username: row?.username ?? "",
-          roleOptions: roleOptions.value ?? [],
-          ids
-        }
-      },
-      width: "400px",
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () => h(roleForm),
-      beforeSure: (done, { options }) => {
-        const curData = options.props.formInline as RoleFormItemProps;
-
-        const bindRole = {
-          relationId: row.id,
-          type: 0,
-          roleIds: curData.ids
-        };
-
-        bindRoleForUser(bindRole).then(res => {
-          if (res.code === 0) {
-            message("角色分配成功", {
-              type: "success"
-            });
-            done(); // 关闭弹框
-          }
-        });
-        // 根据实际业务使用curData.ids和row里的某些字段去调用修改角色接口即可
-        done(); // 关闭弹框
-      }
-    });
-  }
-
   onMounted(() => {
     onSearch();
   });
@@ -349,13 +264,9 @@ export function useColumns(tableRef: Ref) {
     onSizeChange,
     onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
-    onSelectionCancel,
-    onBatchDel,
     handleDelete,
-    handleUpdate,
-    handleRole
+    handleUpdate
   };
 }

@@ -4,7 +4,7 @@ import ListCard from "./components/ListCard.vue";
 import { pmsProductInfo } from "@/api/pms";
 
 defineOptions({
-  name: "MallHomePage"
+  productName: "MallHomePage"
 });
 
 const svg = `
@@ -19,7 +19,7 @@ const svg = `
       `;
 
 const INITIAL_DATA = {
-  name: "",
+  productName: "",
   status: "",
   description: "",
   type: "",
@@ -112,7 +112,7 @@ const load = () => {
               pagination.pageSize * pagination.current
             )
             .filter(v =>
-              v.name.toLowerCase().includes(searchValue.toLowerCase())
+              v.productName.toLowerCase().includes(searchValue.toLowerCase())
             ).length === 0
         "
         :description="`${searchValue} 产品不存在`"
@@ -126,7 +126,7 @@ const load = () => {
                 pagination.pageSize * pagination.current
               )
               .filter(v =>
-                v.name.toLowerCase().includes(searchValue.toLowerCase())
+                v.productName.toLowerCase().includes(searchValue.toLowerCase())
               )"
             :key="index"
             :xs="24"

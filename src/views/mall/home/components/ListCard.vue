@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, PropType, reactive } from "vue";
-import { Star, Share, ShoppingCart } from "@element-plus/icons-vue";
+import {
+  Star,
+  Share,
+  ShoppingCart,
+  Picture as IconPicture
+} from "@element-plus/icons-vue";
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
 
@@ -14,11 +19,12 @@ interface CardProductType {
   description: string;
   name: string;
   id: string;
-  price: number;
+  productPrice: number;
   titles: string;
   remark: string;
   albumPics: string;
   quantity: number;
+  productImages: string[];
 }
 
 const props = defineProps({
@@ -35,7 +41,7 @@ const cardClass = computed(() => [
   { "list-card-item__disabled": false }
 ]);
 
-const cardLogoClass = computed(() => ["list-card-item"]);
+const cardLogoClass = computed(() => ["list-card-item", "block"]);
 
 /**
  * 商品加入购物车
@@ -63,19 +69,25 @@ function addOrder(product?: CardProductType) {
     <div class="list-card-item_detail bg-bg_color">
       <el-row justify="space-between">
         <div :class="cardLogoClass">
-          <img
-            src="../img/iPhone16Pro.png"
-            height="846"
-            width="898"
+          <el-image
+            :src="
+              product.productImages.length > 0 ? product.productImages[0] : ''
+            "
             alt="商品图片"
-          />
+          >
+            <template #error>
+              <div class="image-slot">
+                <el-icon><icon-picture /></el-icon>
+              </div>
+            </template>
+          </el-image>
         </div>
         <div class="list-card-item_detail--operation">
           价格：
           <!--<span style="margin: 0 5px; text-decoration: line-through"
-            >{{ product.price }}$</span
+            >{{ product.productPrice }}$</span
           >-->
-          <span style="margin: 0 5px">{{ product.price }}$</span>
+          <span style="margin: 0 5px">{{ product.productPrice }}$</span>
           <!--:color="product.isSetup ? '#00a870' : '#eee'"-->
           <el-tag
             :color="'#00a870'"
@@ -204,5 +216,45 @@ function addOrder(product?: CardProductType) {
       color: #bababa;
     }
   }
+}
+
+.block {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 278px;
+  padding: 0;
+  text-align: center;
+  vertical-align: top;
+  border: 1px solid var(--el-text-color-disabled);
+  border-radius: 10px;
+}
+
+.block .demonstration {
+  display: block;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.block .el-image {
+  width: 100%;
+  max-width: 300px;
+  height: 222px;
+  max-height: 278px;
+  padding: 5px 5px 0;
+}
+
+.block .image-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 30px;
+  color: var(--el-text-color-secondary);
+  background: var(--el-fill-color-light);
+}
+
+.block .image-slot .el-icon {
+  font-size: 30px;
 }
 </style>

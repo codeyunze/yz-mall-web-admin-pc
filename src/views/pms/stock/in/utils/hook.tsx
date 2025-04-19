@@ -63,7 +63,7 @@ export function useColumns(tableRef: Ref) {
 
   const formRef = ref();
   const form = reactive({
-    name: "",
+    productName: "",
     productId: 0,
     quantity: 0,
     startTimeFilter: null,
@@ -155,7 +155,7 @@ export function useColumns(tableRef: Ref) {
       title: `${row.productName} 商品${title}`,
       props: {
         formInline: {
-          name: row.productName,
+          productName: row.productName,
           productId: row.productId,
           quantity: 0
         }

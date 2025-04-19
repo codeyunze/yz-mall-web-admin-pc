@@ -9,7 +9,7 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Delete from "@iconify-icons/ep/delete";
 import { PureTableBar } from "@/components/RePureTableBar";
-import { tableDataImage } from "@/views/table/base/data";
+// import { tableDataImage } from "@/views/table/base/data";
 
 defineOptions({
   name: "MallCartPage"
@@ -27,6 +27,7 @@ const {
   selectedNum,
   adaptiveConfig,
   buttonClass,
+  // tableDataImage,
   onSearch,
   resetForm,
   onCurrentChange,
@@ -150,7 +151,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(EditPen)"
-              @click="openDialog()"
+              @click="openDialog(row)"
             >
               结算
             </el-button>
@@ -171,12 +172,12 @@ const handleRest = () => {
               </template>
             </el-popconfirm>
           </template>
-          <template #albumPics="{ index }">
+          <!--:preview-src-list="tableDataImage.map(v => v.image)"-->
+          <template #previewAddress="{ row, index }">
             <el-image
               preview-teleported
               loading="lazy"
-              src="http://localhost:8899/src/views/mall/home/img/iPhone16Pro.png"
-              :preview-src-list="tableDataImage.map(v => v.image)"
+              :src="row.previewAddress"
               :initial-index="index"
               fit="cover"
               class="w-[100px] h-[100px]"

@@ -1,24 +1,6 @@
 import { http } from "@/utils/http";
 import { baseUrlApi } from "./utils";
-
-type Result = {
-  code: number;
-  success: boolean;
-  data?: Array<any>;
-  msg: string;
-};
-
-type ResultTable = {
-  code: number;
-  msg: string;
-  data?: {
-    list: Array<any>;
-    /** 列表数据 */
-    items: Array<any>;
-    /** 总条目数 */
-    total: number;
-  };
-};
+import type { Result, ResultTable } from "./type";
 
 /** 获取系统管理-用户管理列表 */
 export const getUserList = (data?: object) => {
@@ -210,3 +192,55 @@ export const endTask = (data?: object) => {
     data
   });
 };
+
+/** 收货地址信息-分页查询 */
+export const pageReceiptInfo = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/receipt/page"), {
+    data
+  });
+};
+
+/** 收货地址信息-新增 */
+export const addReceiptInfo = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/receipt/add"), {
+    data
+  });
+};
+
+/** 收货地址信息-修改 */
+export const updateReceiptInfo = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/receipt/update"), {
+    data
+  });
+};
+
+/** 收货地址信息-删除 */
+export const deleteReceiptInfo = (data?: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/receipt/delete/${data}`)
+  );
+};
+
+/** 行政地区信息 */
+export const getArea = (data?: string) => {
+  return http.request<Result>("get", baseUrlApi(`/sys/area/get/${data}`));
+};
+
+export type FileInfo = {
+  // 0: 公开；1: 不公开；
+  publicAccess: number;
+  // 存储模式: local、cos、oss
+  fileStorageMode: string;
+  // 存储站
+  fileStorageStation: string;
+  // 文件Id
+  fileId: string;
+};
+
+/** 文件上传地址 */
+export const fileUploadUrl = baseUrlApi("/file/upload");
+/** 文件预览地址 */
+export const filePreviewUrl = baseUrlApi("/file/preview");
+/** 公开文件预览地址 */
+export const filePublicPreviewUrl = baseUrlApi("/file/public/preview");

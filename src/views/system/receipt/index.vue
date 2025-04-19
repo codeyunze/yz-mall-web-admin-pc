@@ -6,11 +6,13 @@ import "plus-pro-components/es/components/search/style/css";
 
 import { type PlusColumn, PlusSearch } from "plus-pro-components";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import AddFill from "@iconify-icons/ri/add-circle-line";
+import EditPen from "@iconify-icons/ep/edit-pen";
+import Delete from "@iconify-icons/ep/delete";
 import { PureTableBar } from "@/components/RePureTableBar";
-import View from "@iconify-icons/ep/view";
 
 defineOptions({
-  name: "PmsStockOutPage"
+  name: "SystemReceipt"
 });
 
 const formRef = ref();
@@ -26,13 +28,12 @@ const {
   adaptiveConfig,
   buttonClass,
   onSearch,
-  resetForm,
-  onCurrentChange,
   openDialog,
-  handleSelectionChange,
   handleSizeChange,
-  handleCurrentChange
-} = useColumns(tableRef);
+  handleCurrentChange,
+  handleDelete,
+  handleUpdate
+} = useColumns();
 
 const state = ref({
   status: "0",
@@ -41,46 +42,27 @@ const state = ref({
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "商品名称",
-    prop: "productName"
+    label: "收货人",
+    prop: "receiverName"
   },
   {
-    label: "商品标签",
-    prop: "titles"
-  },
-  {
-    label: "创建时间",
-    prop: "createTime",
-    valueType: "date-picker",
-    fieldProps: {
-      type: "datetimerange",
-      startPlaceholder: "请选择",
-      endPlaceholder: "请选择"
-    }
+    label: "手机号",
+    prop: "receiverPhone"
   }
 ];
 
 const handleChange = (values: any) => {
   console.log(values, "change");
 };
+
 const handleSearch = (values: any) => {
-  form.productName = values.productName;
-  form.productId = values.productId;
-  if (values.createTime) {
-    form.startTimeFilter = dayjs(values.createTime[0]).format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
-    form.endTimeFilter = dayjs(values.createTime[1]).format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
-  }
+  form.receiverPhone = values.receiverPhone;
+  form.receiverName = values.receiverName;
   onSearch();
 };
 const handleRest = () => {
-  form.productName = null;
-  form.productId = 0;
-  form.startTimeFilter = null;
-  form.endTimeFilter = null;
+  form.receiverPhone = null;
+  form.receiverName = null;
   onSearch();
 };
 </script>
@@ -101,11 +83,20 @@ const handleRest = () => {
     />
 
     <PureTableBar
-      title="出库明细"
+      title="收货地址管理"
       :columns="columns"
       style="border-radius: 10px"
       @refresh="onSearch"
     >
+      <template #buttons>
+        <el-button
+          type="primary"
+          :icon="useRenderIcon(AddFill)"
+          @click="openDialog()"
+        >
+          新增收货地址
+        </el-button>
+      </template>
       <template v-slot="{ size, dynamicColumns }">
         <pure-table
           ref="tableRef"
@@ -123,7 +114,6 @@ const handleRest = () => {
             background: 'var(--el-fill-color-light)',
             color: 'var(--el-text-color-primary)'
           }"
-          @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
         >
@@ -133,11 +123,27 @@ const handleRest = () => {
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(View)"
-              @click="openDialog('入库', row)"
+              :icon="useRenderIcon(EditPen)"
+              @click="openDialog('修改', row)"
             >
-              详情
+              修改
             </el-button>
+            <el-popconfirm
+              :title="`是否确认删除 [${row.receiverName}]-[${row.receiverPhone}] 这条收货地址数据`"
+              @confirm="handleDelete(row)"
+            >
+              <template #reference>
+                <el-button
+                  class="reset-margin"
+                  link
+                  type="primary"
+                  :size="size"
+                  :icon="useRenderIcon(Delete)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </pure-table>
       </template>
