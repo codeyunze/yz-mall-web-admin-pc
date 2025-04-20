@@ -198,7 +198,7 @@ export function useColumns(tableRef: Ref) {
       }
       console.log("订单详情数据", data.data);
       addDrawer({
-        size: "50%",
+        size: "60%",
         title: title,
         contentRenderer: () => forms,
         props: {

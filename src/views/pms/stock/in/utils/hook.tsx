@@ -1,11 +1,7 @@
-import type {
-  LoadingConfig,
-  AdaptiveConfig,
-  PaginationProps
-} from "@pureadmin/table";
+import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection } from "@pureadmin/utils";
+import { ref, onMounted, reactive, h } from "vue";
+import { deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/stock/info/form/index.vue";
 import { message } from "@/utils/message";
@@ -17,7 +13,7 @@ import {
 import type { FormItemProps } from "@/views/pms/stock/info/utils/viewTypes";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
@@ -69,15 +65,7 @@ export function useColumns(tableRef: Ref) {
     startTimeFilter: null,
     endTimeFilter: null
   });
-  const buttonClass = computed(() => {
-    return [
-      "!h-[20px]",
-      "reset-margin",
-      "!text-gray-500",
-      "dark:!text-white",
-      "dark:hover:!text-primary"
-    ];
-  });
+
   const dataList = ref([]);
   /** 分页配置 */
   const pagination = reactive<PaginationProps>({
@@ -107,26 +95,6 @@ export function useColumns(tableRef: Ref) {
     // background: rgba()
   });
 
-  /** 撑满内容区自适应高度相关配置 */
-  const adaptiveConfig: AdaptiveConfig = {
-    /** 表格距离页面底部的偏移量，默认值为 `96` */
-    offsetBottom: 110,
-    /** 是否固定表头，默认值为 `true`（如果不想固定表头，fixHeader设置为false并且表格要设置table-layout="auto"） */
-    // fixHeader: true
-    /** 页面 `resize` 时的防抖时间，默认值为 `60` ms */
-    timeout: 200
-    /** 表头的 `z-index`，默认值为 `100` */
-    // zIndex: 100
-  };
-
-  function onCurrentChange(val) {
-    loadingConfig.text = `正在加载第${val}页...`;
-    loading.value = true;
-    delay(600).then(() => {
-      loading.value = false;
-    });
-  }
-
   function onSearch() {
     loading.value = true;
     const queryFilter = {
@@ -144,12 +112,6 @@ export function useColumns(tableRef: Ref) {
     }, 500);
   }
 
-  const resetForm = formEl => {
-    if (!formEl) return;
-    formEl.resetFields();
-    onSearch();
-  };
-
   function openDialog(title = "入库", row?: FormItemProps) {
     addDialog({
       title: `${row.productName} 商品${title}`,
@@ -157,7 +119,8 @@ export function useColumns(tableRef: Ref) {
         formInline: {
           productName: row.productName,
           productId: row.productId,
-          quantity: 0
+          quantity: 0,
+          remark: row.remark
         }
       },
       width: "46%",
@@ -204,13 +167,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
-  }
-
   /**
    * 设置一页数据量
    * @param val 一页展示的数据量
@@ -242,13 +198,8 @@ export function useColumns(tableRef: Ref) {
     pagination,
     selectedNum,
     loadingConfig,
-    adaptiveConfig,
-    buttonClass,
     onSearch,
-    resetForm,
-    onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
     handleCurrentChange
   };

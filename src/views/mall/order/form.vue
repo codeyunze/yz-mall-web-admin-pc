@@ -76,6 +76,14 @@ const props = withDefaults(defineProps<FormProps>(), {
      */
     receiveTime: "",
     /**
+     * 支付时间
+     */
+    payTime: "",
+    /**
+     * 发货时间
+     */
+    deliveryTime: "",
+    /**
      * 支付方式：0未支付/待支付；1支付宝；2微信
      */
     payType: 0,
@@ -114,17 +122,17 @@ onMounted(() => {
 
 <template>
   <div>
-    <el-descriptions :column="3" label-width="200px" border>
-      <el-descriptions-item label="订单编号:"
+    <el-descriptions :column="3" label-width="100px" border>
+      <el-descriptions-item label="订单编号:" :width="150"
         >{{ newFormInline.orderCode }}
       </el-descriptions-item>
-      <el-descriptions-item label="订单类型:">
+      <el-descriptions-item label="订单类型:" :width="150">
         <el-tag v-if="newFormInline.orderType === 1" size="small" type="success"
           >秒杀订单
         </el-tag>
         <el-tag v-else size="small">正常订单</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="订单状态:">
+      <el-descriptions-item label="订单状态:" :width="150">
         <el-tag
           v-if="newFormInline.orderStatus === 0"
           size="small"
@@ -162,7 +170,7 @@ onMounted(() => {
           >无效订单
         </el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="支付方式:">
+      <el-descriptions-item label="支付方式:" :width="150">
         <el-tag v-if="newFormInline.payType === 0" size="small" type="warning"
           >待支付
         </el-tag>
@@ -171,7 +179,7 @@ onMounted(() => {
           >微信
         </el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="收货状态:">
+      <el-descriptions-item label="收货状态:" :width="150">
         <el-tag
           v-if="newFormInline.confirmStatus === 1"
           size="small"
@@ -186,20 +194,38 @@ onMounted(() => {
       >
         {{ newFormInline.receiveTime }}
       </el-descriptions-item>
-      <el-descriptions-item label="收货人:"
+      <el-descriptions-item label="收货人:" :width="150"
         >{{ newFormInline.receiverName }}
       </el-descriptions-item>
-      <el-descriptions-item label="收货手机:"
+      <el-descriptions-item label="收货手机:" :width="150"
         >{{ newFormInline.receiverPhone }}
       </el-descriptions-item>
-      <el-descriptions-item :span="2" label="通知邮箱:"
+      <el-descriptions-item :span="2" label="通知邮箱:" :width="150"
         >{{ newFormInline.email }}
       </el-descriptions-item>
-      <el-descriptions-item :span="3" label="收货地址:"
+      <el-descriptions-item label="收货所属省:" :width="150"
+        >{{ newFormInline.receiverProvince }}
+      </el-descriptions-item>
+      <el-descriptions-item label="收货所属市:" :width="150"
+        >{{ newFormInline.receiverCity }}
+      </el-descriptions-item>
+      <el-descriptions-item label="收货所属区:" :width="150"
+        >{{ newFormInline.receiverDistrict }}
+      </el-descriptions-item>
+      <el-descriptions-item :span="3" label="收货地址:" :width="150"
         >{{ newFormInline.receiverAddress }}
       </el-descriptions-item>
-      <el-descriptions-item :span="3" label="订单备注:"
+      <el-descriptions-item :span="3" label="订单备注:" :width="150"
         >{{ newFormInline.note }}
+      </el-descriptions-item>
+      <el-descriptions-item label="下单时间:" :width="150">
+        {{ newFormInline.createTime }}
+      </el-descriptions-item>
+      <el-descriptions-item label="支付时间:" :width="150">
+        {{ newFormInline.payTime }}
+      </el-descriptions-item>
+      <el-descriptions-item label="发货时间:" :width="150">
+        {{ newFormInline.deliveryTime }}
       </el-descriptions-item>
     </el-descriptions>
 
@@ -213,8 +239,13 @@ onMounted(() => {
         <el-row>
           <el-col :span="4">
             <el-image
-              style="width: 100px; height: 100px"
-              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+              style="
+                width: 100px;
+                height: 100px;
+                border: 1px solid #c0c4cc;
+                border-radius: 8px;
+              "
+              :src="product.previewAddress"
             />
           </el-col>
           <el-col :span="20">

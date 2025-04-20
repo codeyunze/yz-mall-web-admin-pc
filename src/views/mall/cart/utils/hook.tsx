@@ -207,7 +207,7 @@ export function useColumns(tableRef: Ref) {
     }
     // router.push({ name: "CompleteOrder" });
     addDrawer({
-      size: "50%",
+      size: "60%",
       title: "生成订单",
       contentRenderer: () => forms,
       footerRenderer: ({ options, index }) => {

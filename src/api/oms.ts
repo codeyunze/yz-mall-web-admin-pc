@@ -142,6 +142,14 @@ export type OmsOrderDetail = {
    */
   createTime: string;
   /**
+   * 订单支付时间
+   */
+  payTime: string;
+  /**
+   * 发货时间
+   */
+  deliveryTime: string;
+  /**
    * 确认收货时间
    */
   receiveTime: string;
@@ -213,6 +221,11 @@ export type OmsOrderProductDetail = {
    * 商品备注信息
    */
   remark: string;
+
+  /**
+   * 商品预览地址
+   */
+  previewAddress: string;
 };
 
 export type OmsOrderPay = {

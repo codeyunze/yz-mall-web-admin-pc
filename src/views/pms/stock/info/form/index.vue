@@ -12,7 +12,6 @@ const props = withDefaults(defineProps<FormProps>(), {
   })
 });
 
-const formRef = ref();
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 
