@@ -2,7 +2,7 @@
 import { onMounted, ref } from "vue";
 import { Order } from "./utils/types";
 import type { CascaderProps } from "element-plus";
-import { getArea, pageReceiptInfo } from "@/api/system";
+import { getRegionByParent, pageReceiptInfo } from "@/api/system";
 
 // 声明 props 类型
 export interface FormProps {
@@ -30,6 +30,9 @@ const props = withDefaults(defineProps<FormProps>(), {
     receiverProvince: "",
     receiverCity: "",
     receiverDistrict: "",
+    receiverProvinceName: "",
+    receiverCityName: "",
+    receiverDistrictName: "",
     receiverAddress: "",
     email: ""
   })
@@ -41,7 +44,7 @@ const addressProps: CascaderProps = {
   lazy: true,
   lazyLoad(node, resolve) {
     const { level, value } = node;
-    getArea(level === 0 ? "-1" : value + "").then(res => {
+    getRegionByParent(level === 0 ? "-1" : value + "").then(res => {
       if (level == 2) {
         res.data.forEach(item => {
           item.leaf = true;
@@ -79,6 +82,9 @@ onMounted(() => {
     newFormInline.value.receiverProvince = item.receiverProvince;
     newFormInline.value.receiverCity = item.receiverCity;
     newFormInline.value.receiverDistrict = item.receiverDistrict;
+    newFormInline.value.receiverProvinceName = item.receiverProvinceName;
+    newFormInline.value.receiverCityName = item.receiverCityName;
+    newFormInline.value.receiverDistrictName = item.receiverDistrictName;
     newFormInline.value.receiverAddress = item.receiverAddress;
     newFormInline.value.email = item.email;
 
@@ -102,9 +108,9 @@ onMounted(() => {
             <el-descriptions :column="2">
               <el-descriptions-item :span="2" label="收货地址: "
                 >{{
-                  newFormInline.receiverProvince +
-                  newFormInline.receiverCity +
-                  newFormInline.receiverDistrict
+                  newFormInline.receiverProvinceName +
+                  newFormInline.receiverCityName +
+                  newFormInline.receiverDistrictName
                 }}
               </el-descriptions-item>
               <el-descriptions-item :span="2" label="详细地址: ">

@@ -32,6 +32,9 @@ interface Order {
   receiverCity: string;
   receiverDistrict: string;
   receiverAddress: string;
+  receiverProvinceName: string;
+  receiverCityName: string;
+  receiverDistrictName: string;
   email: string;
   products?: OrderProduct[];
 }

@@ -9,6 +9,7 @@ import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
 import { usePublicHooks } from "@/views/system/hooks";
+import { useColumns } from "@/views/mall/order/utils/hook";
 import {
   addDrawer,
   closeDrawer,
@@ -18,10 +19,12 @@ import forms from "../generateOrder.vue";
 import type { OrderBaseInfo, ProductInfo } from "./orderInfo";
 import { type OmsOrder, omsOrderGeneral } from "@/api/oms";
 const { tagStyle } = usePublicHooks();
+const tableRef = ref();
+const { openDialog } = useColumns(tableRef);
 
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function carUseColumns(tableRef: Ref) {
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
@@ -193,7 +196,7 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(row?: ProductInfo) {
+  function openDialogGenerateOrder(row?: ProductInfo) {
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     const cartItem: OrderBaseInfo = {
       products: row ? [row] : []
@@ -256,10 +259,10 @@ export function useColumns(tableRef: Ref) {
 
     // 提交订单信息
     omsOrderGeneral(params).then(res => {
-      console.log(res);
       if (res.data) {
         onSearch();
         closeDrawer(options, index);
+        openDialog("订单详情", res.data.orderCode);
       }
     });
   }
@@ -325,10 +328,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  function handleUpdate(row) {
-    console.log(row);
-  }
-
   onMounted(() => {
     onSearch();
   });
@@ -348,13 +347,12 @@ export function useColumns(tableRef: Ref) {
     resetForm,
     onSizeChange,
     onCurrentChange,
-    openDialog,
+    openDialog: openDialogGenerateOrder,
     handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
     onSelectionCancel,
     onBatchDel,
-    handleDelete,
-    handleUpdate
+    handleDelete
   };
 }

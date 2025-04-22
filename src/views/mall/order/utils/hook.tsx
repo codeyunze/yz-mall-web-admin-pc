@@ -6,7 +6,6 @@ import type {
 
 import { ref, onMounted, reactive, computed, type Ref } from "vue";
 import { delay } from "@pureadmin/utils";
-import type { Order } from "./types";
 import { getOmsInfo, omsOrderCancel, omsOrderPage, omsPay } from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
 import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
@@ -185,9 +184,9 @@ export function useColumns(tableRef: Ref) {
    */
   const showOperationButtons = ref(true);
 
-  function openDialog(title = "订单详情", row?: Order) {
+  function openDialog(title = "订单详情", orderCode?: string) {
     const queryFilter = {
-      orderCode: row.orderCode
+      orderCode
     };
     getOmsInfo(queryFilter).then(data => {
       if (data.code !== 0) {

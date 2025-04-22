@@ -130,6 +130,18 @@ export type OmsOrderDetail = {
    */
   receiverDistrict: string;
   /**
+   * 收货省
+   */
+  receiverProvinceName: string;
+  /**
+   * 收货市
+   */
+  receiverCityName: string;
+  /**
+   * 收货区
+   */
+  receiverDistrictName: string;
+  /**
    * 收货详细地址
    */
   receiverAddress: string;
@@ -239,6 +251,24 @@ export type OmsOrderPay = {
   payType: number;
 };
 
+export type GenerateOrderResult = {
+  code: number;
+  success: boolean;
+  data?: GenerateOrderVo;
+  msg: string;
+};
+
+export type GenerateOrderVo = {
+  /**
+   * 订单id
+   */
+  id: number;
+  /**
+   * 订单编号
+   */
+  orderCode: string;
+};
+
 /** 订单信息-分页查询 */
 export const omsOrderPage = (data?: object) => {
   return http.request<ResultTable>("post", baseUrlApi("/oms/order/page"), {
@@ -256,9 +286,13 @@ export const omsOrderCancel = (data?: object) => {
 
 /** 生成订单 */
 export const omsOrderGeneral = (data?: OmsOrder) => {
-  return http.request<Result>("post", baseUrlApi("/oms/order/generate"), {
-    data
-  });
+  return http.request<GenerateOrderResult>(
+    "post",
+    baseUrlApi("/oms/order/generate"),
+    {
+      data
+    }
+  );
 };
 
 /** 获取订单详情 */

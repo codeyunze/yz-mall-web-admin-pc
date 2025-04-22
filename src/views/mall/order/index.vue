@@ -13,7 +13,6 @@ defineOptions({
   name: "OmsOrderPage"
 });
 
-const formRef = ref();
 const tableRef = ref();
 
 const {
@@ -209,7 +208,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View)"
-              @click="openDialog('订单详情', row)"
+              @click="openDialog('订单详情', row.orderCode)"
             >
               详情
             </el-button>

@@ -60,6 +60,18 @@ const props = withDefaults(defineProps<FormProps>(), {
      */
     receiverDistrict: "",
     /**
+     * 收货省
+     */
+    receiverProvinceName: "",
+    /**
+     * 收货市
+     */
+    receiverCityName: "",
+    /**
+     * 收货区
+     */
+    receiverDistrictName: "",
+    /**
      * 收货详细地址
      */
     receiverAddress: "",
@@ -204,13 +216,13 @@ onMounted(() => {
         >{{ newFormInline.email }}
       </el-descriptions-item>
       <el-descriptions-item label="收货所属省:" :width="150"
-        >{{ newFormInline.receiverProvince }}
+        >{{ newFormInline.receiverProvinceName }}
       </el-descriptions-item>
       <el-descriptions-item label="收货所属市:" :width="150"
-        >{{ newFormInline.receiverCity }}
+        >{{ newFormInline.receiverCityName }}
       </el-descriptions-item>
       <el-descriptions-item label="收货所属区:" :width="150"
-        >{{ newFormInline.receiverDistrict }}
+        >{{ newFormInline.receiverDistrictName }}
       </el-descriptions-item>
       <el-descriptions-item :span="3" label="收货地址:" :width="150"
         >{{ newFormInline.receiverAddress }}
@@ -221,10 +233,27 @@ onMounted(() => {
       <el-descriptions-item label="下单时间:" :width="150">
         {{ newFormInline.createTime }}
       </el-descriptions-item>
-      <el-descriptions-item label="支付时间:" :width="150">
+      <el-descriptions-item
+        v-if="
+          newFormInline.orderStatus === 1 ||
+          newFormInline.orderStatus === 2 ||
+          newFormInline.orderStatus === 3 ||
+          newFormInline.orderStatus === 4
+        "
+        label="支付时间:"
+        :width="150"
+      >
         {{ newFormInline.payTime }}
       </el-descriptions-item>
-      <el-descriptions-item label="发货时间:" :width="150">
+      <el-descriptions-item
+        v-if="
+          newFormInline.orderStatus === 2 ||
+          newFormInline.orderStatus === 3 ||
+          newFormInline.orderStatus === 4
+        "
+        label="发货时间:"
+        :width="150"
+      >
         {{ newFormInline.deliveryTime }}
       </el-descriptions-item>
     </el-descriptions>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns, dayjs } from "./utils/hook";
+import { carUseColumns, dayjs } from "./utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 
@@ -15,7 +15,6 @@ defineOptions({
   name: "MallCartPage"
 });
 
-const formRef = ref();
 const tableRef = ref();
 
 const {
@@ -37,9 +36,8 @@ const {
   handleCurrentChange,
   onSelectionCancel,
   onBatchDel,
-  handleDelete,
-  handleUpdate
-} = useColumns(tableRef);
+  handleDelete
+} = carUseColumns(tableRef);
 
 const state = ref({
   status: "0",
