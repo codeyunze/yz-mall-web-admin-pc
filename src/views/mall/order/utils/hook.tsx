@@ -295,6 +295,7 @@ export function useColumns(tableRef: Ref) {
   function handleSizeChange(val: number) {
     pagination.pageSize = val;
     pagination.currentPage = 1;
+    onCurrentChange(val);
     onSearch();
   }
 
@@ -304,6 +305,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleCurrentChange(val: number) {
     pagination.currentPage = val;
+    onCurrentChange(val);
     onSearch();
   }
 
@@ -323,7 +325,6 @@ export function useColumns(tableRef: Ref) {
     buttonClass,
     onSearch,
     resetForm,
-    onCurrentChange,
     openDialog,
     handleSelectionChange,
     handleSizeChange,
