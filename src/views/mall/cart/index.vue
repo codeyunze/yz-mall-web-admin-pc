@@ -100,7 +100,7 @@ const handleRest = () => {
             class="mx-1"
             size="large"
             type="danger"
-            style=" padding: 0 20px;line-height: 32px"
+            style="padding: 0 20px; line-height: 32px"
           >
             合计：￥{{ selectProductTotalPrice }}
           </el-text>
