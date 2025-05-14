@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns, dayjs } from "./utils/hook";
+import { carUseColumns, dayjs } from "./utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 
@@ -15,7 +15,6 @@ defineOptions({
   name: "MallCartPage"
 });
 
-const formRef = ref();
 const tableRef = ref();
 
 const {
@@ -25,21 +24,19 @@ const {
   dataList,
   pagination,
   selectedNum,
+  selectProductTotalPrice,
   adaptiveConfig,
-  buttonClass,
   // tableDataImage,
   onSearch,
   resetForm,
-  onCurrentChange,
   openDialog,
   handleSelectionChange,
   handleSizeChange,
   handleCurrentChange,
   onSelectionCancel,
   onBatchDel,
-  handleDelete,
-  handleUpdate
-} = useColumns(tableRef);
+  handleDelete
+} = carUseColumns(tableRef, true);
 
 const state = ref({
   status: "0",
@@ -48,14 +45,13 @@ const state = ref({
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "手机号",
-    prop: "phone"
+    label: "商品名称",
+    prop: "productName"
   }
 ];
 
 const handleSearch = (values: any) => {
-  form.phone = values.phone;
-  form.email = values.email;
+  form.productName = values.productName;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -68,8 +64,7 @@ const handleSearch = (values: any) => {
 };
 const handleRest = () => {
   console.log("handleRest");
-  form.phone = null;
-  form.email = null;
+  form.productName = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();
@@ -97,7 +92,19 @@ const handleRest = () => {
       @refresh="onSearch"
     >
       <template #buttons>
-        <el-button type="danger" plain> 合计：1900 ￥ </el-button>
+        <!-- <el-button type="danger" plain>
+          合计：￥{{ selectProductTotalPrice }}
+        </el-button> -->
+        <div>
+          <el-text
+            class="mx-1"
+            size="large"
+            type="danger"
+            style="padding: 0 20px; line-height: 32px"
+          >
+            合计：￥{{ selectProductTotalPrice }}
+          </el-text>
+        </div>
         <el-button type="primary" @click="openDialog()"> 去结算 </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">

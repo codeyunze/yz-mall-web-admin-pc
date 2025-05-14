@@ -130,6 +130,18 @@ export type OmsOrderDetail = {
    */
   receiverDistrict: string;
   /**
+   * 收货省
+   */
+  receiverProvinceName: string;
+  /**
+   * 收货市
+   */
+  receiverCityName: string;
+  /**
+   * 收货区
+   */
+  receiverDistrictName: string;
+  /**
    * 收货详细地址
    */
   receiverAddress: string;
@@ -141,6 +153,14 @@ export type OmsOrderDetail = {
    * 订单创建时间
    */
   createTime: string;
+  /**
+   * 订单支付时间
+   */
+  payTime: string;
+  /**
+   * 发货时间
+   */
+  deliveryTime: string;
   /**
    * 确认收货时间
    */
@@ -213,6 +233,11 @@ export type OmsOrderProductDetail = {
    * 商品备注信息
    */
   remark: string;
+
+  /**
+   * 商品预览地址
+   */
+  previewAddress: string;
 };
 
 export type OmsOrderPay = {
@@ -224,6 +249,24 @@ export type OmsOrderPay = {
    * 支付方式：1支付宝；2微信
    */
   payType: number;
+};
+
+export type GenerateOrderResult = {
+  code: number;
+  success: boolean;
+  data?: GenerateOrderVo;
+  msg: string;
+};
+
+export type GenerateOrderVo = {
+  /**
+   * 订单id
+   */
+  id: number;
+  /**
+   * 订单编号
+   */
+  orderCode: string;
 };
 
 /** 订单信息-分页查询 */
@@ -243,9 +286,13 @@ export const omsOrderCancel = (data?: object) => {
 
 /** 生成订单 */
 export const omsOrderGeneral = (data?: OmsOrder) => {
-  return http.request<Result>("post", baseUrlApi("/oms/order/generate"), {
-    data
-  });
+  return http.request<GenerateOrderResult>(
+    "post",
+    baseUrlApi("/oms/order/generate"),
+    {
+      data
+    }
+  );
 };
 
 /** 获取订单详情 */

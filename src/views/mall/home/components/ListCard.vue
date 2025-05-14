@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, PropType, reactive } from "vue";
+import { computed, PropType, reactive, ref } from "vue";
 import {
   Star,
   Share,
@@ -8,6 +8,8 @@ import {
 } from "@element-plus/icons-vue";
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
+import { carUseColumns } from "@/views/mall/cart/utils/hook";
+import type { ProductInfo } from "@/views/mall/cart/utils/orderInfo";
 
 defineOptions({
   name: "MallProductCard"
@@ -17,7 +19,7 @@ interface CardProductType {
   type: number;
   isSetup: boolean;
   description: string;
-  name: string;
+  productName: string;
   id: string;
   productPrice: number;
   titles: string;
@@ -26,6 +28,9 @@ interface CardProductType {
   quantity: number;
   productImages: string[];
 }
+
+const tableRef = ref();
+const { openDialog } = carUseColumns(tableRef, false);
 
 const props = defineProps({
   product: {
@@ -48,7 +53,6 @@ const cardLogoClass = computed(() => ["list-card-item", "block"]);
  * @param productId 商品Id
  */
 function addToCart(productId) {
-  console.log("加入购物车: {}", productId);
   const cart = reactive({
     productId: productId
   });
@@ -60,7 +64,15 @@ function addToCart(productId) {
 }
 
 function addOrder(product?: CardProductType) {
-  console.log("立即购买: {}", product);
+  const param = {
+    productId: product.id,
+    productName: product.productName,
+    quantity: 1,
+    price: product.productPrice,
+    previewAddress: product.productImages[0]
+  };
+  console.log(param);
+  openDialog(param);
 }
 </script>
 
@@ -99,7 +111,7 @@ function addOrder(product?: CardProductType) {
         </div>
       </el-row>
       <p class="list-card-item_detail--name text-text_color_primary">
-        {{ product.name }}
+        {{ product.productName }}
       </p>
       <p class="list-card-item_detail--tag text-text_color_regular">
         <el-tag

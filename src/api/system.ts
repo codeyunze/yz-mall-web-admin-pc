@@ -222,8 +222,16 @@ export const deleteReceiptInfo = (data?: object) => {
   );
 };
 
-/** 行政地区信息 */
-export const getArea = (data?: string) => {
+/** 查询指定行政地区所下辖的行政区域 */
+export const getRegionByParent = (data?: string) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/area/getRegionByParent/${data}`)
+  );
+};
+
+/** 查询指定行政区域的信息 */
+export const getRegionById = (data?: string) => {
   return http.request<Result>("get", baseUrlApi(`/sys/area/get/${data}`));
 };
 

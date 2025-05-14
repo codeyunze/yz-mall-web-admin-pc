@@ -4,7 +4,7 @@ import ReCol from "@/components/ReCol";
 import { formRules } from "../utils/rule";
 import { FormProps } from "../utils/types";
 import type { CascaderProps } from "element-plus";
-import { getArea } from "@/api/system";
+import { getRegionByParent } from "@/api/system";
 
 const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
@@ -34,7 +34,7 @@ const addressProps: CascaderProps = {
   lazy: true,
   lazyLoad(node, resolve) {
     const { level, value } = node;
-    getArea(level === 0 ? "-1" : value + "").then(res => {
+    getRegionByParent(level === 0 ? "-1" : value + "").then(res => {
       if (level == 2) {
         res.data.forEach(item => {
           item.leaf = true;

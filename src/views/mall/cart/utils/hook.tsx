@@ -4,11 +4,11 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { computed, onMounted, reactive, ref, type Ref } from "vue";
+import { onMounted, reactive, ref, type Ref } from "vue";
 import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
-import { usePublicHooks } from "@/views/system/hooks";
+import { useColumns } from "@/views/mall/order/utils/hook";
 import {
   addDrawer,
   closeDrawer,
@@ -17,19 +17,24 @@ import {
 import forms from "../generateOrder.vue";
 import type { OrderBaseInfo, ProductInfo } from "./orderInfo";
 import { type OmsOrder, omsOrderGeneral } from "@/api/oms";
-const { tagStyle } = usePublicHooks();
+const tableRef = ref();
+const { openDialog } = useColumns(tableRef);
+// 按钮加载状态
+const btnLoading = ref(false);
 
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function carUseColumns(tableRef: Ref, initLoading: boolean) {
   const loading = ref(true);
   const selectedNum = ref(0);
+  const selectProductTotalPrice = ref(0);
   const columns: TableColumnList = [
     {
       label: "勾选列", // 如果需要表格多选，此处label必须设置
       type: "selection",
       fixed: "left",
-      reserveSelection: true // 数据刷新后保留选项
+      reserveSelection: true, // 数据刷新后保留选项
+      selectable: (row: any) => row.productStatus === 0
     },
     {
       label: "序号",
@@ -45,7 +50,28 @@ export function useColumns(tableRef: Ref) {
     {
       label: "商品名称",
       prop: "productName",
-      minWidth: 200
+      align: "left",
+      minWidth: 200,
+      cellRenderer: ({ row, props }) =>
+        row.productStatus === 0 ? (
+          row.productName
+        ) : (
+          <>
+            <el-tag
+              size={props.size}
+              type={row.productStatus === 1 ? "warning" : "danger"}
+              style="margin-right: 8px"
+            >
+              {row.productStatus === 1 ? "售罄" : "下架"}
+            </el-tag>
+            {row.productName}
+          </>
+        )
+    },
+    {
+      label: "价格",
+      prop: "price",
+      width: 150
     },
     {
       label: "数量",
@@ -65,30 +91,6 @@ export function useColumns(tableRef: Ref) {
       )
     },
     {
-      label: "价格",
-      prop: "price",
-      width: 150
-    },
-    {
-      label: "商品状态",
-      prop: "productStatus",
-      width: 130,
-      cellRenderer: ({ row, props }) => (
-        <el-tag
-          size={props.size}
-          style={
-            row.productStatus === 0 ? null : tagStyle.value(row.productStatus)
-          }
-        >
-          {row.productStatus === 1
-            ? "商品售罄"
-            : row.productStatus === 2
-              ? "商品下架"
-              : "商品正常"}
-        </el-tag>
-      )
-    },
-    {
       label: "操作",
       fixed: "right",
       width: 200,
@@ -97,19 +99,9 @@ export function useColumns(tableRef: Ref) {
   ];
 
   const form = reactive({
-    phone: null,
-    email: null,
+    productName: null,
     startTimeFilter: null,
     endTimeFilter: null
-  });
-  const buttonClass = computed(() => {
-    return [
-      "!h-[20px]",
-      "reset-margin",
-      "!text-gray-500",
-      "dark:!text-white",
-      "dark:hover:!text-primary"
-    ];
   });
   // 列表数据
   const dataList = ref([]);
@@ -193,11 +185,13 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   };
 
-  function openDialog(row?: ProductInfo) {
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
+  function openDialogGenerateOrder(row?: ProductInfo) {
+    const curSelected =
+      tableRef.value && tableRef.value.getTableRef().getSelectionRows();
     const cartItem: OrderBaseInfo = {
       products: row ? [row] : []
     };
+
     if (curSelected) {
       curSelected.forEach(item => {
         if (!row || item.productId != row.productId) {
@@ -205,19 +199,29 @@ export function useColumns(tableRef: Ref) {
         }
       });
     }
-    // router.push({ name: "CompleteOrder" });
+
+    // 检查商品是否为空
+    if (cartItem.products.length === 0) {
+      message("请选择要结算的商品", { type: "warning" });
+      return;
+    }
+
     addDrawer({
-      size: "50%",
+      size: "60%",
       title: "生成订单",
       contentRenderer: () => forms,
       footerRenderer: ({ options, index }) => {
         return (
           <div>
-            <el-button onClick={() => console.log("取消订单", index)}>
+            <el-button
+              loading={btnLoading.value}
+              onClick={() => handleCancelOrder(index)}
+            >
               取消订单
             </el-button>
             <el-button
               type="primary"
+              loading={btnLoading.value}
               onClick={() => handleConfirmOrder(options, index)}
             >
               确认订单
@@ -226,7 +230,6 @@ export function useColumns(tableRef: Ref) {
         );
       },
       props: {
-        // 赋默认值
         formInline: cartItem
       },
       closeCallBack: ({ options, args }) => {
@@ -235,7 +238,25 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
+  // 取消订单
+  function handleCancelOrder(index: number) {
+    if (btnLoading.value) return;
+
+    btnLoading.value = true;
+    console.log("取消订单", index);
+
+    // 5秒后恢复按钮状态
+    setTimeout(() => {
+      btnLoading.value = false;
+    }, 10000);
+  }
+
   function handleConfirmOrder(options: DrawerOptions, index: number) {
+    btnLoading.value = true;
+    delay(30000).then(() => {
+      btnLoading.value = false;
+    });
+
     const row = options.props.formInline;
     const params: OmsOrder = {
       orderType: 0,
@@ -256,10 +277,11 @@ export function useColumns(tableRef: Ref) {
 
     // 提交订单信息
     omsOrderGeneral(params).then(res => {
-      console.log(res);
       if (res.data) {
         onSearch();
         closeDrawer(options, index);
+        openDialog("订单详情", res.data.orderCode);
+        btnLoading.value = false;
       }
     });
   }
@@ -274,6 +296,13 @@ export function useColumns(tableRef: Ref) {
   /** 当CheckBox选择项发生变化时会触发该事件 */
   function handleSelectionChange(val) {
     selectedNum.value = val.length;
+    console.log("选择项发生变化", val);
+    selectProductTotalPrice.value = 0;
+    if (selectedNum.value > 0) {
+      val.forEach(item => {
+        selectProductTotalPrice.value += item.price * item.quantity;
+      });
+    }
     // 重置表格高度
     tableRef.value.setAdaptive();
   }
@@ -286,6 +315,7 @@ export function useColumns(tableRef: Ref) {
 
   function handleCurrentChange(val: number) {
     console.log(`current page: ${val}`);
+    onCurrentChange(val);
   }
 
   /** 批量删除 */
@@ -325,12 +355,10 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  function handleUpdate(row) {
-    console.log(row);
-  }
-
   onMounted(() => {
-    onSearch();
+    if (initLoading) {
+      onSearch();
+    }
   });
 
   return {
@@ -340,21 +368,19 @@ export function useColumns(tableRef: Ref) {
     dataList,
     pagination,
     selectedNum,
+    selectProductTotalPrice,
     loadingConfig,
     adaptiveConfig,
-    buttonClass,
     // tableDataImage,
     onSearch,
     resetForm,
     onSizeChange,
-    onCurrentChange,
-    openDialog,
+    openDialog: openDialogGenerateOrder,
     handleSelectionChange,
     handleSizeChange,
     handleCurrentChange,
     onSelectionCancel,
     onBatchDel,
-    handleDelete,
-    handleUpdate
+    handleDelete
   };
 }

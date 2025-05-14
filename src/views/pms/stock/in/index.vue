@@ -13,7 +13,6 @@ defineOptions({
   name: "PmsStockInPage"
 });
 
-const formRef = ref();
 const tableRef = ref();
 
 const {
@@ -22,17 +21,11 @@ const {
   form,
   dataList,
   pagination,
-  selectedNum,
-  adaptiveConfig,
-  buttonClass,
   onSearch,
-  resetForm,
-  onCurrentChange,
   openDialog,
-  handleSelectionChange,
   handleSizeChange,
   handleCurrentChange
-} = useColumns(tableRef);
+} = useColumns();
 
 const state = ref({
   status: "0",
@@ -111,7 +104,6 @@ const handleRest = () => {
           ref="tableRef"
           row-key="id"
           adaptive
-          :adaptiveConfig="{ offsetBottom: 108 }"
           align-whole="center"
           table-layout="auto"
           :loading="loading"
@@ -123,7 +115,6 @@ const handleRest = () => {
             background: 'var(--el-fill-color-light)',
             color: 'var(--el-text-color-primary)'
           }"
-          @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
         >
