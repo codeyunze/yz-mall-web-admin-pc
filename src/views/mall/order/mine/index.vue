@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns } from "./utils/hook";
+import { useColumns } from "../utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 
@@ -10,7 +10,7 @@ import { PureTableBar } from "@/components/RePureTableBar";
 import View from "@iconify-icons/ep/view";
 
 defineOptions({
-  name: "OmsOrderPage"
+  name: "OmsOrderMinePage"
 });
 
 const tableRef = ref();
@@ -173,7 +173,7 @@ const handleRest = () => {
     />
 
     <PureTableBar
-      title="全部订单"
+      title="我的订单"
       :columns="columns"
       style="border-radius: 10px"
       @refresh="onSearch"

@@ -164,7 +164,6 @@ menus:
   pureList: 列表页面
   pureCardList: 卡片列表页
   pureDebounce: 防抖节流
-  pureFormDesign: 表单设计器
   pureBarcode: 条形码
   pureQrcode: 二维码
   pureCascader: 区域级联选择器
