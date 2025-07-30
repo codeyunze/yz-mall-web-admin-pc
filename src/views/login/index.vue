@@ -63,7 +63,7 @@ const {
 const { locale, translationCh, translationEn } = useTranslationLang();
 
 const ruleForm = reactive({
-  username: "15316666668",
+  account: "15316666668",
   password: "a1234567",
   verifyCode: ""
 });
@@ -75,7 +75,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
       loading.value = true;
       useUserStoreHook()
         .loginByUsername({
-          username: ruleForm.username,
+          account: ruleForm.account,
           password: ruleForm.password
         })
         .then(res => {
@@ -203,10 +203,10 @@ watch(loginDay, value => {
                     trigger: 'blur'
                   }
                 ]"
-                prop="username"
+                prop="account"
               >
                 <el-input
-                  v-model="ruleForm.username"
+                  v-model="ruleForm.account"
                   clearable
                   :placeholder="t('login.pureUsername')"
                   :prefix-icon="useRenderIcon(User)"

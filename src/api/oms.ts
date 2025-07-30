@@ -269,9 +269,16 @@ export type GenerateOrderVo = {
   orderCode: string;
 };
 
-/** 订单信息-分页查询 */
-export const omsOrderPage = (data?: object) => {
-  return http.request<ResultTable>("post", baseUrlApi("/oms/order/page"), {
+/** 订单信息-我的订单-分页查询 */
+export const omsOrderMinePage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/oms/order/mine/page"), {
+    data
+  });
+};
+
+/** 订单信息-订单管理-分页查询 */
+export const omsOrderMgrPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/oms/order/mgr/page"), {
     data
   });
 };

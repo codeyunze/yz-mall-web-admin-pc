@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns } from "../utils/hook";
+import { useColumns } from "@/views/mall/order/mine/utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 
@@ -21,8 +21,6 @@ const {
   form,
   dataList,
   pagination,
-  adaptiveConfig,
-  buttonClass,
   onSearch,
   resetForm,
   openDialog,
