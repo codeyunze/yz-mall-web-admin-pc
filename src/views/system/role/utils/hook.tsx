@@ -15,7 +15,7 @@ import {
   hideTextAtIndex,
   cloneDeep
 } from "@pureadmin/utils";
-// import { tableDataMore } from "../../../table/base/data";
+
 import {
   addRole,
   bindMenuForRole,
@@ -173,7 +173,14 @@ export function useRole(treeRef: Ref) {
     if (!currentRoleId.value) {
       return;
     }
-    currentPage.value++;
+
+    if (tableData.value.length < 15) {
+      currentPage.value = 1;
+      tableData.value = [];
+    } else {
+      currentPage.value++;
+    }
+
     const param = {
       filter: {
         roleId: currentRoleId.value,

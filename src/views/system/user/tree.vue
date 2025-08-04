@@ -151,7 +151,7 @@ defineExpose({ onTreeReset });
       </el-dropdown>
     </div>
     <el-divider />
-    <el-scrollbar height="calc(90vh - 88px)">
+    <el-scrollbar height="calc(90vh - 88px - 34px)">
       <el-tree
         ref="treeRef"
         :data="treeData"

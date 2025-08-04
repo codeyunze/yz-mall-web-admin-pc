@@ -97,7 +97,7 @@ const {
             <el-option label="已停用" value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item style="float: right">
           <el-button
             type="primary"
             :icon="useRenderIcon('ri:search-line')"
