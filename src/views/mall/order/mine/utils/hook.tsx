@@ -1,15 +1,16 @@
-import type {
-  LoadingConfig,
-  AdaptiveConfig,
-  PaginationProps
-} from "@pureadmin/table";
+import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, computed, type Ref } from "vue";
+import { ref, onMounted, reactive, type Ref } from "vue";
 import { delay } from "@pureadmin/utils";
-import { getOmsInfo, omsOrderCancel, omsOrderPage, omsPay } from "@/api/oms";
+import {
+  getOmsInfo,
+  omsOrderCancel,
+  omsOrderMinePage,
+  omsPay
+} from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
 import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
-import forms from "../form.vue";
+import forms from "../../form.vue";
 import { message } from "@/utils/message";
 export { default as dayjs } from "dayjs";
 
@@ -98,15 +99,6 @@ export function useColumns(tableRef: Ref) {
     startTimeFilter: null,
     endTimeFilter: null
   });
-  const buttonClass = computed(() => {
-    return [
-      "!h-[20px]",
-      "reset-margin",
-      "!text-gray-500",
-      "dark:!text-white",
-      "dark:hover:!text-primary"
-    ];
-  });
   const dataList = ref([]);
   /** 分页配置 */
   const pagination = reactive<PaginationProps>({
@@ -136,18 +128,6 @@ export function useColumns(tableRef: Ref) {
     // background: rgba()
   });
 
-  /** 撑满内容区自适应高度相关配置 */
-  const adaptiveConfig: AdaptiveConfig = {
-    /** 表格距离页面底部的偏移量，默认值为 `96` */
-    offsetBottom: 110,
-    /** 是否固定表头，默认值为 `true`（如果不想固定表头，fixHeader设置为false并且表格要设置table-layout="auto"） */
-    // fixHeader: true
-    /** 页面 `resize` 时的防抖时间，默认值为 `60` ms */
-    timeout: 200
-    /** 表头的 `z-index`，默认值为 `100` */
-    // zIndex: 100
-  };
-
   function onCurrentChange(val) {
     loadingConfig.text = `正在加载第${val}页...`;
     loading.value = true;
@@ -164,7 +144,7 @@ export function useColumns(tableRef: Ref) {
       filter: form
     };
 
-    omsOrderPage(queryFilter).then(data => {
+    omsOrderMinePage(queryFilter).then(data => {
       dataList.value = data.data.items;
       pagination.total = Number(data.data.total);
     });
@@ -190,9 +170,6 @@ export function useColumns(tableRef: Ref) {
     };
     getOmsInfo(queryFilter).then(data => {
       if (data.code !== 0) {
-        message(data.msg, {
-          type: "error"
-        });
         return;
       }
       console.log("订单详情数据", data.data);
@@ -321,8 +298,6 @@ export function useColumns(tableRef: Ref) {
     pagination,
     selectedNum,
     loadingConfig,
-    adaptiveConfig,
-    buttonClass,
     onSearch,
     resetForm,
     openDialog,

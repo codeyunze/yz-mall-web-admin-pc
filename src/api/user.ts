@@ -14,7 +14,7 @@ export type UserResult = {
     /** 当前登录用户的角色 */
     roles: Array<string>;
     /** 按钮级别权限 */
-    permissions: Array<string>;
+    btnPermissions: Array<string>;
     /** `token` */
     accessToken: string;
     /** 用于调用刷新`accessToken`的接口时所需的`token` */
@@ -62,19 +62,25 @@ export type UserInfoResult = {
 
 /** 登录 */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", baseUrlApi("/login"), { data });
+  return http.request<UserResult>("post", baseUrlApi("/authentication/login"), {
+    data
+  });
 };
 
 /** 登出 */
 export const logout = () => {
-  return http.request("get", baseUrlApi("/logout"));
+  return http.request("get", baseUrlApi("/authentication/logout"));
 };
 
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
-  return http.request<RefreshTokenResult>("post", baseUrlApi("/refreshToken"), {
-    data
-  });
+  return http.request<RefreshTokenResult>(
+    "post",
+    baseUrlApi("/authentication/refreshToken"),
+    {
+      data
+    }
+  );
 };
 
 /** 账户设置-个人信息 */

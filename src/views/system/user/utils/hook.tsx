@@ -102,7 +102,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     {
       label: "用户名称",
       prop: "username",
-      minWidth: 130
+      minWidth: 150
     },
     {
       label: "性别",
@@ -268,7 +268,8 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function handleCurrentChange(val: number) {
-    console.log(`current page: ${val}`);
+    pagination.currentPage = val;
+    onSearch();
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */

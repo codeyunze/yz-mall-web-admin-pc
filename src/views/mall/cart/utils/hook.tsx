@@ -8,7 +8,7 @@ import { onMounted, reactive, ref, type Ref } from "vue";
 import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
-import { useColumns } from "@/views/mall/order/utils/hook";
+import { useColumns } from "@/views/mall/order/mine/utils/hook";
 import {
   addDrawer,
   closeDrawer,

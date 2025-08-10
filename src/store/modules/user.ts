@@ -86,17 +86,13 @@ export const useUserStore = defineStore({
     },
     /** 登入 */
     async loginByUsername(data) {
-      return new Promise<UserResult>((resolve, reject) => {
-        getLogin(data)
-          .then(res => {
-            if (res?.code === 0) {
-              setToken(toRaw(res.data));
-            }
-            resolve(res);
-          })
-          .catch(error => {
-            reject(error);
-          });
+      return new Promise<UserResult>(resolve => {
+        getLogin(data).then(res => {
+          if (res?.code === 0) {
+            setToken(toRaw(res.data));
+          }
+          resolve(res);
+        });
       });
     },
     /** 前端登出（不调用接口） */

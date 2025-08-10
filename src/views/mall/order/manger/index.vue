@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useColumns, dayjs } from "@/views/system/au/utils/hook";
+import { useColumns } from "@/views/mall/order/manger/utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
 
 import { type PlusColumn, PlusSearch } from "plus-pro-components";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import AddFill from "@iconify-icons/ri/add-circle-line";
-import Delete from "@iconify-icons/ep/delete";
 import { PureTableBar } from "@/components/RePureTableBar";
 import View from "@iconify-icons/ep/view";
-import Edit from "@iconify-icons/ep/edit";
 
 defineOptions({
-  name: "SystemGold"
+  name: "OmsOrderMangerPage"
 });
 
-const formRef = ref();
 const tableRef = ref();
 
 const {
@@ -25,18 +21,12 @@ const {
   form,
   dataList,
   pagination,
-  selectedNum,
-  adaptiveConfig,
-  buttonClass,
   onSearch,
   resetForm,
-  onCurrentChange,
   openDialog,
   handleSelectionChange,
   handleSizeChange,
-  handleCurrentChange,
-  handleDelete,
-  handleUpdate
+  handleCurrentChange
 } = useColumns(tableRef);
 
 const state = ref({
@@ -46,35 +36,99 @@ const state = ref({
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "交易类型",
-    prop: "transactionType",
-    valueType: "plus-radio",
+    label: "订单编号",
+    prop: "orderCode"
+  },
+  {
+    // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单
+    label: "订单状态",
+    prop: "orderStatus",
+    valueType: "select",
     options: [
       {
-        label: "买入",
-        value: "0",
-        color: "blue"
+        label: "待付款",
+        value: "0"
       },
       {
-        label: "卖出",
-        value: "1",
-        color: "red"
+        label: "待发货",
+        value: "1"
+      },
+      {
+        label: "已发货",
+        value: "2"
+      },
+      {
+        label: "待收货",
+        value: "3"
+      },
+      {
+        label: "已完成",
+        value: "4"
+      },
+      {
+        label: "已取消",
+        value: "5"
+      },
+      {
+        label: "无效订单",
+        value: "6"
       }
     ]
   },
   {
-    label: "交易时间",
-    prop: "transactionTime",
-    valueType: "date-picker",
-    fieldProps: {
-      type: "datetimerange",
-      startPlaceholder: "请选择",
-      endPlaceholder: "请选择"
-    }
+    label: "订单类型",
+    prop: "orderType",
+    valueType: "select",
+    options: [
+      {
+        label: "正常订单",
+        value: "0"
+      },
+      {
+        label: "秒杀订单",
+        value: "1"
+      }
+    ]
   },
   {
-    label: "ID",
-    prop: "id"
+    // 0未确认收货；1已确认收货
+    label: "收货状态",
+    prop: "confirmStatus",
+    valueType: "select",
+    options: [
+      {
+        label: "未收货",
+        value: "0"
+      },
+      {
+        label: "已收货",
+        value: "1"
+      }
+    ]
+  },
+  {
+    // 0未支付/待支付；1支付宝；2微信
+    label: "支付方式",
+    prop: "payType",
+    valueType: "select",
+    options: [
+      {
+        label: "待支付",
+        value: "0"
+      },
+      {
+        label: "支付宝支付",
+        value: "1"
+      },
+      {
+        label: "微信支付",
+        value: "1"
+      }
+    ]
+  },
+  {
+    label: "收货手机",
+    prop: "receiverPhone"
   }
 ];
 
@@ -82,26 +136,23 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 const handleSearch = (values: any) => {
-  form.transactionType = values.transactionType;
-  form.id = values.id;
-  if (values.transactionTime) {
-    form.startTimeFilter = dayjs(values.transactionTime[0]).format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
-    form.endTimeFilter = dayjs(values.transactionTime[1]).format(
-      "YYYY-MM-DD HH:mm:ss"
-    );
-  }
+  form.orderCode = values.orderCode;
+  form.orderStatus = values.orderStatus;
+  form.orderType = values.orderType;
+  form.confirmStatus = values.confirmStatus;
+  form.payType = values.payType;
+  form.receiverPhone = values.receiverPhone;
   onSearch();
 };
-const handleRest = () => {
-  form.transactionType = null;
-  form.relationId = null;
-  form.startTimeFilter = null;
-  form.endTimeFilter = null;
-  form.id = null;
+/*const handleRest = () => {
+  form.orderCode = null;
+  form.orderStatus = null;
+  form.orderType = null;
+  form.confirmStatus = null;
+  form.payType = null;
+  form.receiverPhone = null;
   onSearch();
-};
+};*/
 </script>
 
 <template>
@@ -116,30 +167,20 @@ const handleRest = () => {
       label-position="right"
       @change="handleChange"
       @search="handleSearch"
-      @reset="handleRest"
+      @reset="resetForm"
     />
 
     <PureTableBar
-      title="黄金交易"
+      title="订单管理"
       :columns="columns"
       style="border-radius: 10px"
       @refresh="onSearch"
     >
-      <template #buttons>
-        <el-button
-          type="primary"
-          :icon="useRenderIcon(AddFill)"
-          @click="openDialog()"
-        >
-          新增交易记录
-        </el-button>
-      </template>
       <template v-slot="{ size, dynamicColumns }">
         <pure-table
           ref="tableRef"
           row-key="id"
           adaptive
-          :adaptiveConfig="{ offsetBottom: 108 }"
           align-whole="center"
           table-layout="auto"
           :loading="loading"
@@ -162,36 +203,10 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View)"
-              @click="openDialog('查看', row)"
+              @click="openDialog('订单详情', row.orderCode)"
             >
               详情
             </el-button>
-            <el-button
-              class="reset-margin"
-              link
-              type="primary"
-              :size="size"
-              :icon="useRenderIcon(Edit)"
-              @click="openDialog('编辑', row)"
-            >
-              编辑
-            </el-button>
-            <el-popconfirm
-              :title="`是否确认删除交易数量 [${row.quantity}] 克，价格为 [${row.price}] 的这条交易数据`"
-              @confirm="handleDelete(row)"
-            >
-              <template #reference>
-                <el-button
-                  class="reset-margin"
-                  link
-                  type="primary"
-                  :size="size"
-                  :icon="useRenderIcon(Delete)"
-                >
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
           </template>
         </pure-table>
       </template>
