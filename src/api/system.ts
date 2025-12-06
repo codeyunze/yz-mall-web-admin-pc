@@ -235,6 +235,42 @@ export const getRegionById = (data?: string) => {
   return http.request<Result>("get", baseUrlApi(`/sys/area/get/${data}`));
 };
 
+/** 数据字典-分页查询 */
+export const getDictionaryPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/dictionary/page"), {
+    data
+  });
+};
+
+/** 数据字典-新增 */
+export const addDictionary = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/dictionary/add"), {
+    data
+  });
+};
+
+/** 数据字典-更新 */
+export const updateDictionaryById = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/dictionary/update"), {
+    data
+  });
+};
+
+/** 数据字典-删除 */
+export const deleteDictionaryById = (data?: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/dictionary/delete/${data}`)
+  );
+};
+
+/** 数据字典-获取所有列表（用于下拉选择） */
+export const getAllDictionaryList = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/dictionary/list"), {
+    data
+  });
+};
+
 export type FileInfo = {
   // 0: 公开；1: 不公开；
   publicAccess: number;
