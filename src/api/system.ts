@@ -271,6 +271,11 @@ export const getAllDictionaryList = (data?: object) => {
   });
 };
 
+/** 数据字典-根据id获取单个字典信息 */
+export const getDictionaryById = (id?: string | number) => {
+  return http.request<Result>("get", baseUrlApi(`/sys/dictionary/get/${id}`));
+};
+
 export type FileInfo = {
   // 0: 公开；1: 不公开；
   publicAccess: number;

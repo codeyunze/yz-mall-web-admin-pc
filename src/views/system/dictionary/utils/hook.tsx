@@ -5,6 +5,7 @@ import {
   addDictionary,
   deleteDictionaryById,
   getAllDictionaryList,
+  getDictionaryById,
   getDictionaryPage,
   updateDictionaryById
 } from "@/api/system";
@@ -281,88 +282,115 @@ export function useDictionary(tableRef: Ref) {
   );
 
   function openDialog(title = "新增", row?: Partial<FormItemProps>) {
-    // 获取所有字典列表用于上级字典选择
-    getAllDictionaryList({}).then(res => {
-      let higherOptions = [];
-      if (res.code === 0 && res.data) {
-        const hasParentId = res.data.some(
-          item => item.parentId && item.parentId !== "0"
-        );
-        if (hasParentId) {
-          const treeData = handleTree(res.data);
-          higherOptions = formatHigherDictionaryOptions(cloneDeep(treeData));
-        } else {
-          higherOptions = res.data.map(item => ({
-            ...item,
-            label: item.dictionaryValue,
-            value: item.id
-          }));
-        }
-      }
-
-      addDialog({
-        title: `${title}字典`,
-        props: {
-          formInline: {
-            id: row?.id ?? 0,
-            ancestorId: row?.ancestorId ?? "0",
-            parentId: row?.parentId ?? "0",
-            dictionaryKey: row?.dictionaryKey ?? "",
-            dictionaryValue: row?.dictionaryValue ?? "",
-            sortOrder: row?.sortOrder ?? 0,
-            invalid: row?.invalid ?? "0",
-            higherDictionaryOptions: higherOptions
+    // 如果是修改操作，只调用 getDictionaryById 获取数据，不请求 list 接口
+    if (title === "修改" && row?.id) {
+      getDictionaryById(row.id).then(dictRes => {
+        if (dictRes.code === 0 && dictRes.data) {
+          // 使用从接口获取的最新数据
+          let dictData = dictRes.data;
+          // 检查返回数据是否为数组，如果是数组则取第一个元素
+          if (Array.isArray(dictData)) {
+            dictData = dictData[0];
           }
-        },
-        width: "45%",
-        style: {
-          "border-radius": "12px"
-        },
-        draggable: true,
-        fullscreen: deviceDetection(),
-        fullscreenIcon: true,
-        closeOnClickModal: false,
-        contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-        beforeSure: (done, { options }) => {
-          const FormRef = formRef.value.getRef();
-          const curData = options.props.formInline as FormItemProps;
-          FormRef.validate(valid => {
-            if (valid) {
-              // 表单规则校验通过
-              // 处理 parentId，如果为空或未选择，设置为 "0"
-              const submitData = {
-                ...curData,
-                parentId:
-                  curData.parentId && curData.parentId !== ""
-                    ? curData.parentId
-                    : "0",
-                ancestorId:
-                  curData.ancestorId && curData.ancestorId !== ""
-                    ? curData.ancestorId
-                    : "0"
-              };
-              dictionaryParam.value = submitData;
-              if (title === "新增") {
-                (
-                  debounceHandleAddDictionary as (
-                    operation: string,
-                    dictionaryValue: string,
-                    done: () => void
-                  ) => void
-                )(title, curData.dictionaryValue, done as () => void);
-              } else {
-                (
-                  debounceHandleUpdateDictionary as (
-                    operation: string,
-                    dictionaryValue: string,
-                    done: () => void
-                  ) => void
-                )(title, curData.dictionaryValue, done as () => void);
-              }
-            }
-          });
+          // 修改操作不需要上级字典选项，传空数组
+          openDialogWithData(dictData as Partial<FormItemProps>, [], title);
+        } else {
+          message("获取字典数据失败", { type: "error" });
         }
       });
+    } else {
+      // 新增操作，获取所有字典列表用于上级字典选择
+      getAllDictionaryList({}).then(res => {
+        let higherOptions = [];
+        if (res.code === 0 && res.data) {
+          const hasParentId = res.data.some(
+            item => item.parentId && item.parentId !== "0"
+          );
+          if (hasParentId) {
+            const treeData = handleTree(res.data);
+            higherOptions = formatHigherDictionaryOptions(cloneDeep(treeData));
+          } else {
+            higherOptions = res.data.map(item => ({
+              ...item,
+              label: item.dictionaryValue,
+              value: item.id
+            }));
+          }
+        }
+        // 新增操作，直接使用传入的row数据
+        openDialogWithData(row, higherOptions, title);
+      });
+    }
+  }
+
+  /** 打开对话框的公共函数 */
+  function openDialogWithData(
+    row?: Partial<FormItemProps>,
+    higherOptions = [],
+    title = "新增"
+  ) {
+    addDialog({
+      title: `${title}字典`,
+      props: {
+        formInline: {
+          id: row?.id ?? 0,
+          ancestorId: row?.ancestorId ?? "0",
+          parentId: row?.parentId ?? "0",
+          dictionaryKey: row?.dictionaryKey ?? "",
+          dictionaryValue: row?.dictionaryValue ?? "",
+          sortOrder: row?.sortOrder ?? 0,
+          invalid: row?.invalid ?? "0",
+          higherDictionaryOptions: higherOptions
+        }
+      },
+      width: "45%",
+      style: {
+        "border-radius": "12px"
+      },
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+      beforeSure: (done, { options }) => {
+        const FormRef = formRef.value.getRef();
+        const curData = options.props.formInline as FormItemProps;
+        FormRef.validate(valid => {
+          if (valid) {
+            // 表单规则校验通过
+            // 处理 parentId，如果为空或未选择，设置为 "0"
+            const submitData = {
+              ...curData,
+              parentId:
+                curData.parentId && curData.parentId !== ""
+                  ? curData.parentId
+                  : "0",
+              ancestorId:
+                curData.ancestorId && curData.ancestorId !== ""
+                  ? curData.ancestorId
+                  : "0"
+            };
+            dictionaryParam.value = submitData;
+            if (title === "新增") {
+              (
+                debounceHandleAddDictionary as (
+                  operation: string,
+                  dictionaryValue: string,
+                  done: () => void
+                ) => void
+              )(title, curData.dictionaryValue, done as () => void);
+            } else {
+              (
+                debounceHandleUpdateDictionary as (
+                  operation: string,
+                  dictionaryValue: string,
+                  done: () => void
+                ) => void
+              )(title, curData.dictionaryValue, done as () => void);
+            }
+          }
+        });
+      }
     });
   }
 
