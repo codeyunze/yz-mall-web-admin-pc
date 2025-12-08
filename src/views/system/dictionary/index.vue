@@ -33,8 +33,7 @@ const {
   handleSizeChange,
   handleCurrentChange,
   onSelectionCancel,
-  onBatchDel,
-  loadChildren
+  onBatchDel
 } = useDictionary(tableRef);
 
 const state = ref({
@@ -148,7 +147,7 @@ function onFullscreen() {
       <template #buttons>
         <el-button
           type="primary"
-          :icon="useRenderIcon(AddFill)"
+          :icon="useRenderIcon(AddFill as any)"
           @click="openDialog()"
         >
           新增字典
@@ -194,13 +193,12 @@ function onFullscreen() {
             color: 'var(--el-text-color-primary)'
           }"
           showOverflowTooltip
-          lazy
-          :load="loadChildren"
-          :tree-props="{
-            hasChildren: 'hasChildren',
-            children: 'children',
-            checkStrictly: false
-          }"
+          :tree-props="
+            {
+              children: 'children',
+              checkStrictly: false
+            } as any
+          "
           @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
@@ -211,24 +209,23 @@ function onFullscreen() {
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(EditPen)"
+              :icon="useRenderIcon(EditPen as any)"
               @click="openDialog('修改', row)"
             >
               修改
             </el-button>
             <el-button
-              v-show="!row.children || row.children.length === 0"
               class="reset-margin"
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(AddFill)"
-              @click="openDialog('新增', { parentId: row.id })"
+              :icon="useRenderIcon(AddFill as any)"
+              @click="openDialog('新增', row)"
             >
               新增
             </el-button>
             <el-popconfirm
-              :title="`是否确认删除字典值为${row.dictionaryValue}的这条数据${row?.children?.length > 0 ? '。注意下级字典也会一并删除，请谨慎操作' : ''}`"
+              :title="`删除后将连同其下所有字典一并删除，是否确认删除字典值为${row.dictionaryValue}的这条数据？`"
               @confirm="handleDelete(row)"
             >
               <template #reference>
@@ -237,7 +234,7 @@ function onFullscreen() {
                   link
                   type="primary"
                   :size="size"
-                  :icon="useRenderIcon(Delete)"
+                  :icon="useRenderIcon(Delete as any)"
                 >
                   删除
                 </el-button>

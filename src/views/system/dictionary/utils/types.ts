@@ -15,6 +15,8 @@ interface FormItemProps {
   invalid: string | number;
   /** 上级字典选项（用于级联选择） */
   higherDictionaryOptions?: Record<string, unknown>[];
+  /** 子节点（树形结构） */
+  children?: FormItemProps[] | null;
 }
 
 interface FormProps {

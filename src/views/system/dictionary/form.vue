@@ -36,25 +36,6 @@ defineExpose({ getRef });
   >
     <el-row :gutter="30">
       <re-col>
-        <el-form-item label="上级字典">
-          <el-cascader
-            v-model="newFormInline.parentId"
-            class="w-full"
-            :options="newFormInline.higherDictionaryOptions"
-            :props="{
-              value: 'id',
-              label: 'label',
-              emitPath: false,
-              checkStrictly: true
-            }"
-            clearable
-            filterable
-            placeholder="请选择上级字典（不选则为顶级）"
-          />
-        </el-form-item>
-      </re-col>
-
-      <re-col>
         <el-form-item label="字典键" prop="dictionaryKey">
           <el-input
             v-model="newFormInline.dictionaryKey"

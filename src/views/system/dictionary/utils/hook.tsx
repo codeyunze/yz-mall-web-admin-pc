@@ -1,10 +1,8 @@
 import editForm from "../form.vue";
-import { handleTree } from "@/utils/tree";
 import { message } from "@/utils/message";
 import {
   addDictionary,
   deleteDictionaryById,
-  getAllDictionaryList,
   getDictionaryById,
   getDictionaryPage,
   updateDictionaryById
@@ -12,7 +10,7 @@ import {
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h, type Ref } from "vue";
 import type { FormItemProps } from "./types";
-import { cloneDeep, deviceDetection, debounce } from "@pureadmin/utils";
+import { deviceDetection, debounce } from "@pureadmin/utils";
 import type {
   LoadingConfig,
   AdaptiveConfig,
@@ -73,11 +71,6 @@ export function useDictionary(tableRef: Ref) {
       type: "selection",
       fixed: "left",
       reserveSelection: true // 数据刷新后保留选项
-    },
-    {
-      label: "序号",
-      type: "index",
-      width: 90
     },
     {
       label: "字典键",
@@ -150,11 +143,31 @@ export function useDictionary(tableRef: Ref) {
     try {
       const { data } = await getDictionaryPage(queryFilter);
       if (data?.items) {
-        // 为第一层级数据添加 hasChildren 属性，用于显示展开图标
-        dataList.value = data.items.map(item => ({
-          ...item,
-          hasChildren: true // 假设第一层级都有子项，实际可以根据业务判断
-        }));
+        // 接口返回的数据已经是树形结构，children属性下就是子节点
+        // 处理children为null的情况，转换为undefined（Element Plus需要undefined而不是null）
+        const processTree = (
+          items: (FormItemProps & { children?: FormItemProps[] | null })[]
+        ): FormItemProps[] => {
+          return items.map(item => {
+            const processedItem: FormItemProps = { ...item };
+            if (
+              item.children &&
+              Array.isArray(item.children) &&
+              item.children.length > 0
+            ) {
+              processedItem.children = processTree(item.children);
+            } else {
+              // children为null或空数组时，设置为undefined，Element Plus会自动判断是否显示展开图标
+              processedItem.children = undefined;
+            }
+            return processedItem;
+          });
+        };
+        dataList.value = processTree(
+          data.items as (FormItemProps & {
+            children?: FormItemProps[] | null;
+          })[]
+        );
         pagination.total = Number(data.total || 0);
       } else {
         dataList.value = [];
@@ -171,70 +184,6 @@ export function useDictionary(tableRef: Ref) {
     }
   }
 
-  /**
-   * 懒加载子节点数据（支持无限层级）
-   * @param row 当前行数据
-   * @param treeNode 树节点
-   * @param resolve 回调函数，用于返回子节点数据
-   */
-  async function loadChildren(
-    row: FormItemProps & { hasChildren?: boolean },
-    treeNode: unknown,
-    resolve: (data: FormItemProps[]) => void
-  ) {
-    try {
-      const queryFilter = {
-        filter: {
-          parentId: row.id // 子节点数据，parentId为父节点的id
-        }
-      };
-      const { data } = await getDictionaryPage(queryFilter);
-      if (data?.items && data.items.length > 0) {
-        // 为每个子节点都设置 hasChildren: true，支持继续展开下一层级
-        // 当用户点击展开时，如果没有子节点，会在下一次 loadChildren 调用时返回空数组并更新 hasChildren
-        const children = data.items.map(item => ({
-          ...item,
-          hasChildren: true // 支持无限层级，每个节点都假设可能有子节点
-        }));
-        resolve(children);
-      } else {
-        // 如果没有子节点，更新当前行的 hasChildren 为 false
-        if (row.hasChildren !== undefined) {
-          row.hasChildren = false;
-        }
-        resolve([]);
-      }
-    } catch (error) {
-      console.error("加载子节点失败:", error);
-      // 加载失败时也更新 hasChildren
-      if (row.hasChildren !== undefined) {
-        row.hasChildren = false;
-      }
-      resolve([]);
-    }
-  }
-
-  function formatHigherDictionaryOptions(
-    treeList: Array<Record<string, unknown>>
-  ): Array<Record<string, unknown>> {
-    if (!treeList || !treeList.length) return [];
-    const newTreeList: Array<Record<string, unknown>> = [];
-    for (let i = 0; i < treeList.length; i++) {
-      const item: Record<string, unknown> = {
-        ...treeList[i],
-        label: treeList[i].dictionaryValue,
-        value: treeList[i].id
-      };
-      if (treeList[i].children) {
-        item.children = formatHigherDictionaryOptions(
-          treeList[i].children as Array<Record<string, unknown>>
-        );
-      }
-      newTreeList.push(item);
-    }
-    return newTreeList;
-  }
-
   const dictionaryParam = ref({});
 
   /**
@@ -248,11 +197,7 @@ export function useDictionary(tableRef: Ref) {
             type: "success"
           });
           done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        } else {
-          message(res.msg, {
-            type: "error"
-          });
+          onSearch(); // 刷新表格数据，参考菜单管理的实现
         }
       });
     },
@@ -271,9 +216,7 @@ export function useDictionary(tableRef: Ref) {
             type: "success"
           });
           done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        } else {
-          message(res.msg, { type: "error" });
+          onSearch(); // 刷新表格数据，参考菜单管理的实现
         }
       });
     },
@@ -282,65 +225,64 @@ export function useDictionary(tableRef: Ref) {
   );
 
   function openDialog(title = "新增", row?: Partial<FormItemProps>) {
-    // 如果是修改操作，只调用 getDictionaryById 获取数据，不请求 list 接口
+    // 修改：仅调用 getDictionaryById 获取数据，不再请求 list
     if (title === "修改" && row?.id) {
       getDictionaryById(row.id).then(dictRes => {
         if (dictRes.code === 0 && dictRes.data) {
-          // 使用从接口获取的最新数据
           let dictData = dictRes.data;
-          // 检查返回数据是否为数组，如果是数组则取第一个元素
           if (Array.isArray(dictData)) {
             dictData = dictData[0];
           }
-          // 修改操作不需要上级字典选项，传空数组
-          openDialogWithData(dictData as Partial<FormItemProps>, [], title);
+          openDialogWithData(
+            dictData as Partial<FormItemProps>,
+            title,
+            row as FormItemProps
+          );
         } else {
           message("获取字典数据失败", { type: "error" });
         }
       });
     } else {
-      // 新增操作，获取所有字典列表用于上级字典选择
-      getAllDictionaryList({}).then(res => {
-        let higherOptions = [];
-        if (res.code === 0 && res.data) {
-          const hasParentId = res.data.some(
-            item => item.parentId && item.parentId !== "0"
-          );
-          if (hasParentId) {
-            const treeData = handleTree(res.data);
-            higherOptions = formatHigherDictionaryOptions(cloneDeep(treeData));
-          } else {
-            higherOptions = res.data.map(item => ({
-              ...item,
-              label: item.dictionaryValue,
-              value: item.id
-            }));
-          }
-        }
-        // 新增操作，直接使用传入的row数据
-        openDialogWithData(row, higherOptions, title);
-      });
+      // 新增：直接使用传入的 parentId 或默认 0
+      openDialogWithData(
+        {
+          id: 0,
+          ancestorId: "0",
+          parentId: row?.id ?? "0",
+          dictionaryKey: "",
+          dictionaryValue: "",
+          sortOrder: 0,
+          invalid: "0"
+        },
+        title,
+        row as FormItemProps
+      );
     }
   }
 
   /** 打开对话框的公共函数 */
   function openDialogWithData(
     row?: Partial<FormItemProps>,
-    higherOptions = [],
-    title = "新增"
+    title = "新增",
+    contextRow?: FormItemProps
   ) {
+    const computedParentId =
+      title === "新增" && contextRow?.id
+        ? contextRow.id
+        : (row?.parentId ?? "0");
+
     addDialog({
       title: `${title}字典`,
       props: {
         formInline: {
           id: row?.id ?? 0,
           ancestorId: row?.ancestorId ?? "0",
-          parentId: row?.parentId ?? "0",
+          parentId: computedParentId,
           dictionaryKey: row?.dictionaryKey ?? "",
           dictionaryValue: row?.dictionaryValue ?? "",
           sortOrder: row?.sortOrder ?? 0,
           invalid: row?.invalid ?? "0",
-          higherDictionaryOptions: higherOptions
+          higherDictionaryOptions: []
         }
       },
       width: "45%",
@@ -372,21 +314,35 @@ export function useDictionary(tableRef: Ref) {
             };
             dictionaryParam.value = submitData;
             if (title === "新增") {
+              // 参考菜单管理的实现，刷新逻辑在防抖函数内部处理
               (
                 debounceHandleAddDictionary as (
                   operation: string,
                   dictionaryValue: string,
-                  done: () => void
+                  done: () => void,
+                  parentId?: string | number
                 ) => void
-              )(title, curData.dictionaryValue, done as () => void);
+              )(
+                title,
+                curData.dictionaryValue,
+                done as () => void,
+                submitData.parentId
+              );
             } else {
+              // 参考菜单管理的实现，刷新逻辑在防抖函数内部处理
               (
                 debounceHandleUpdateDictionary as (
                   operation: string,
                   dictionaryValue: string,
-                  done: () => void
+                  done: () => void,
+                  parentId?: string | number
                 ) => void
-              )(title, curData.dictionaryValue, done as () => void);
+              )(
+                title,
+                curData.dictionaryValue,
+                done as () => void,
+                submitData.parentId
+              );
             }
           }
         });
@@ -486,7 +442,6 @@ export function useDictionary(tableRef: Ref) {
     onSelectionCancel,
     handleSizeChange,
     handleCurrentChange,
-    onBatchDel,
-    loadChildren
+    onBatchDel
   };
 }
