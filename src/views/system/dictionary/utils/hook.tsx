@@ -23,9 +23,9 @@ export function useDictionary(tableRef: Ref) {
   const form = reactive({
     dictionaryKey: null,
     dictionaryValue: null,
-    invalid: null,
-    startTimeFilter: null,
-    endTimeFilter: null
+    dictionaryEnable: null,
+    createTimeFrom: null,
+    createTimeTo: null
   });
 
   const formRef = ref();
@@ -85,9 +85,19 @@ export function useDictionary(tableRef: Ref) {
       minWidth: 150
     },
     {
+      label: "状态",
+      prop: "dictionaryEnable",
+      minWidth: 80,
+      cellRenderer: ({ row }) => (
+        <el-tag type={row.dictionaryEnable === 0 ? "primary" : "danger"}>
+          {row.dictionaryEnable === 0 ? "启用" : "禁用"}
+        </el-tag>
+      )
+    },
+    {
       label: "排序",
       prop: "sortOrder",
-      width: 100
+      minWidth: 80
     },
     {
       label: "创建时间",
@@ -119,9 +129,9 @@ export function useDictionary(tableRef: Ref) {
     formEl.resetFields();
     form.dictionaryKey = null;
     form.dictionaryValue = null;
-    form.invalid = null;
-    form.startTimeFilter = null;
-    form.endTimeFilter = null;
+    form.dictionaryEnable = null;
+    form.createTimeFrom = null;
+    form.createTimeTo = null;
     onSearch();
   }
 
@@ -134,9 +144,9 @@ export function useDictionary(tableRef: Ref) {
         parentId: "0", // 第一层级数据，parentId为0
         dictionaryKey: form.dictionaryKey || null,
         dictionaryValue: form.dictionaryValue || null,
-        invalid: form.invalid || null,
-        startTimeFilter: form.startTimeFilter || null,
-        endTimeFilter: form.endTimeFilter || null
+        dictionaryEnable: form.dictionaryEnable || null,
+        createTimeFrom: form.createTimeFrom || null,
+        createTimeTo: form.createTimeTo || null
       }
     };
 
@@ -252,7 +262,7 @@ export function useDictionary(tableRef: Ref) {
           dictionaryKey: "",
           dictionaryValue: "",
           sortOrder: 0,
-          invalid: "0"
+          dictionaryEnable: "0"
         },
         title,
         row as FormItemProps
@@ -281,7 +291,11 @@ export function useDictionary(tableRef: Ref) {
           dictionaryKey: row?.dictionaryKey ?? "",
           dictionaryValue: row?.dictionaryValue ?? "",
           sortOrder: row?.sortOrder ?? 0,
-          invalid: row?.invalid ?? "0",
+          dictionaryEnable:
+            row?.dictionaryEnable !== undefined &&
+            row?.dictionaryEnable !== null
+              ? String(row.dictionaryEnable)
+              : 0,
           higherDictionaryOptions: []
         }
       },
@@ -294,23 +308,30 @@ export function useDictionary(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
+      beforeSure: done => {
         const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
+        // 从表单组件中获取实际的数据，而不是使用初始的 props
+        const formData = formRef.value.getFormData();
         FormRef.validate(valid => {
           if (valid) {
             // 表单规则校验通过
             // 处理 parentId，如果为空或未选择，设置为 "0"
             const submitData = {
-              ...curData,
+              ...formData,
               parentId:
-                curData.parentId && curData.parentId !== ""
-                  ? curData.parentId
+                formData.parentId && formData.parentId !== ""
+                  ? formData.parentId
                   : "0",
               ancestorId:
-                curData.ancestorId && curData.ancestorId !== ""
-                  ? curData.ancestorId
-                  : "0"
+                formData.ancestorId && formData.ancestorId !== ""
+                  ? formData.ancestorId
+                  : "0",
+              // 确保 dictionaryEnable 是字符串类型
+              dictionaryEnable:
+                formData.dictionaryEnable !== undefined &&
+                formData.dictionaryEnable !== null
+                  ? String(formData.dictionaryEnable)
+                  : 0
             };
             dictionaryParam.value = submitData;
             if (title === "新增") {
@@ -324,7 +345,7 @@ export function useDictionary(tableRef: Ref) {
                 ) => void
               )(
                 title,
-                curData.dictionaryValue,
+                formData.dictionaryValue,
                 done as () => void,
                 submitData.parentId
               );
@@ -339,7 +360,7 @@ export function useDictionary(tableRef: Ref) {
                 ) => void
               )(
                 title,
-                curData.dictionaryValue,
+                formData.dictionaryValue,
                 done as () => void,
                 submitData.parentId
               );

@@ -39,7 +39,7 @@ const {
 const state = ref({
   dictionaryKey: "",
   dictionaryValue: "",
-  invalid: "",
+  dictionaryEnable: "",
   createTime: null
 });
 
@@ -54,16 +54,16 @@ const filterColumns: PlusColumn[] = [
   },
   {
     label: "状态",
-    prop: "invalid",
+    prop: "dictionaryEnable",
     valueType: "select",
     options: [
       {
-        label: "有效",
+        label: "启用",
         value: "0",
         color: "green"
       },
       {
-        label: "无效",
+        label: "禁用",
         value: "1",
         color: "red"
       }
@@ -88,17 +88,17 @@ const handleChange = (_values: Record<string, unknown>) => {
 const handleSearch = (values: Record<string, unknown>) => {
   form.dictionaryKey = values.dictionaryKey || null;
   form.dictionaryValue = values.dictionaryValue || null;
-  form.invalid = values.invalid || null;
+  form.dictionaryEnable = values.dictionaryEnable || null;
   if (values.createTime) {
-    form.startTimeFilter = dayjs(values.createTime[0]).format(
+    form.createTimeFrom = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
     );
-    form.endTimeFilter = dayjs(values.createTime[1]).format(
+    form.createTimeTo = dayjs(values.createTime[1]).format(
       "YYYY-MM-DD HH:mm:ss"
     );
   } else {
-    form.startTimeFilter = null;
-    form.endTimeFilter = null;
+    form.createTimeFrom = null;
+    form.createTimeTo = null;
   }
   pagination.currentPage = 1;
   onSearch();
@@ -107,9 +107,9 @@ const handleSearch = (values: Record<string, unknown>) => {
 const handleRest = () => {
   form.dictionaryKey = null;
   form.dictionaryValue = null;
-  form.invalid = null;
-  form.startTimeFilter = null;
-  form.endTimeFilter = null;
+  form.dictionaryEnable = null;
+  form.createTimeFrom = null;
+  form.createTimeTo = null;
   pagination.currentPage = 1;
   onSearch();
 };
