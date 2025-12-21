@@ -145,7 +145,7 @@ export function useDept() {
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
               addDept(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 } else {
                   message(res.msg, {
@@ -156,7 +156,7 @@ export function useDept() {
             } else {
               // 实际开发先调用修改接口，再进行下面操作
               updateDept(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 } else {
                   message(res.msg, {
@@ -173,7 +173,7 @@ export function useDept() {
 
   function handleDelete(row) {
     deleteDept(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了部门名称为${row.orgName}的这条数据`, {
           type: "success"

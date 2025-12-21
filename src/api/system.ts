@@ -288,8 +288,32 @@ export type FileInfo = {
 };
 
 /** 文件上传地址 */
-export const fileUploadUrl = baseUrlApi("/file/upload");
+export const fileUploadUrl = baseUrlApi("/sys/file/upload");
 /** 文件预览地址 */
-export const filePreviewUrl = baseUrlApi("/file/preview");
+export const filePreviewUrl = (fileId?: string | number) => {
+  return http.request<Result>("get", baseUrlApi(`/sys/file/preview/${fileId}`));
+};
+/** 文件预览地址 */
+export const fileDownloadUrl = (fileId?: string | number) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/file/download/${fileId}`)
+  );
+};
 /** 公开文件预览地址 */
-export const filePublicPreviewUrl = baseUrlApi("/file/public/preview");
+export const filePublicPreviewUrl = baseUrlApi("/sys/file/public/preview");
+
+/** 文件管理-分页查询 */
+export const getFilePage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/file/page"), {
+    data
+  });
+};
+
+/** 文件管理-删除文件 */
+export const deleteFileById = (fileId?: string | number) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/file/delete/${fileId}`)
+  );
+};

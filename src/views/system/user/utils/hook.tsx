@@ -214,7 +214,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         );
 
         switchUserStatus(row.id).then(res => {
-          if (res.code === 0) {
+          if (res.code === 200) {
             switchLoadMap.value[index] = Object.assign(
               {},
               switchLoadMap.value[index],
@@ -252,7 +252,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
    */
   function handleDelete(row) {
     deleteByUserId(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了用户名称为 [${row.username}] 的这条数据`, {
           type: "success"
@@ -307,7 +307,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     };
 
     getUserList(toRaw(param)).then(data => {
-      if (data.code === 0) {
+      if (data.code === 200) {
         dataList.value = data.data.items;
         pagination.total = Number(data.data.total);
         loading.value = false;
@@ -391,14 +391,14 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
               addUser(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 }
               });
             } else {
               // 实际开发先调用修改接口，再进行下面操作
               updateUserById(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 }
               });
@@ -508,7 +508,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
               password: pwdForm.newPwd
             };
             resetPassword(resetParams).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 // 表单规则校验通过
                 message(`已成功重置 ${row.username} 用户的密码`, {
                   type: "success"
@@ -552,7 +552,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
         };
 
         bindRoleForUser(bindRole).then(res => {
-          if (res.code === 0) {
+          if (res.code === 200) {
             message("角色分配成功", {
               type: "success"
             });

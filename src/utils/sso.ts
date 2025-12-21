@@ -40,7 +40,7 @@ import { getUserInfo } from "@/api/user";
     // 保存新信息到本地
     setToken(params);
     getUserInfo().then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         removeToken();
         setToken(res.data);
       }

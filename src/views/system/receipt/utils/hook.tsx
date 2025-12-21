@@ -205,14 +205,14 @@ export function useColumns() {
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
             addReceiptInfo(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
           } else {
             // 实际开发先调用修改接口，再进行下面操作
             updateReceiptInfo(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
@@ -250,7 +250,7 @@ export function useColumns() {
    */
   function handleDelete(row) {
     deleteReceiptInfo(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(
           `您删除了 [${row.receiverName}]-[${row.receiverPhone}] 的这条收货地址信息`,

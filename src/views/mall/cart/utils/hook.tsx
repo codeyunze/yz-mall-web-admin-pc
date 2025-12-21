@@ -327,7 +327,7 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
       ids: getKeyList(curSelected, "id")
     });
     deleteCart(ids).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         tableRef.value.getTableRef().clearSelection();
         message(`您删除了购物车多个商品`, {
@@ -346,7 +346,7 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
       ids: [row.id]
     });
     deleteCart(ids).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了购物车商品 [${row.productName}]`, {
           type: "success"

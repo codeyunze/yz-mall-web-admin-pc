@@ -235,7 +235,7 @@ export function useRole(treeRef: Ref) {
           }
         );
         switchRoleStatus(row.id).then(res => {
-          if (res.code === 0) {
+          if (res.code === 200) {
             switchLoadMap.value[index] = Object.assign(
               {},
               switchLoadMap.value[index],
@@ -264,7 +264,7 @@ export function useRole(treeRef: Ref) {
 
   function handleDelete(row) {
     deleteRoleById(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了角色名称为${row.roleName}的这条数据`, {
           type: "success"
@@ -356,14 +356,14 @@ export function useRole(treeRef: Ref) {
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
               addRole(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 }
               });
             } else {
               // 实际开发先调用修改接口，再进行下面操作
               updateRoleById(curData).then(res => {
-                if (res.code === 0) {
+                if (res.code === 200) {
                   chores();
                 }
               });
@@ -422,7 +422,7 @@ export function useRole(treeRef: Ref) {
       current: currentPage.value
     };
     getUserList(toRaw(param)).then(data => {
-      if (data.code === 0) {
+      if (data.code === 200) {
         tableData.value = data.data.items;
         setTimeout(() => {
           userLoading.value = false;
@@ -447,7 +447,7 @@ export function useRole(treeRef: Ref) {
       roleId: id,
       menuIds: treeRef.value.getCheckedKeys()
     }).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         message(`角色名称为 [${roleName}] 的菜单权限修改成功`, {
           type: "success"
         });
@@ -477,7 +477,7 @@ export function useRole(treeRef: Ref) {
       current: currentPage.value
     };
     getUserList(toRaw(param)).then(data => {
-      if (data.code === 0) {
+      if (data.code === 200) {
         tableData.value = data.data.items;
         setTimeout(() => {
           userLoading.value = false;

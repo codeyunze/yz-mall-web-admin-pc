@@ -182,13 +182,13 @@ export function useColumns(tableRef: Ref) {
           }
           if (title === "入库") {
             pmsProductStockIn(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
           } else {
             pmsProductStockOut(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
@@ -237,7 +237,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelete(row) {
     deleteProduct(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了商品名称为 [${row.productName}] 的这条数据`, {
           type: "success"

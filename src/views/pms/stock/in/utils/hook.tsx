@@ -151,13 +151,13 @@ export function useColumns() {
           }
           if (title === "入库") {
             pmsProductStockIn(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
           } else {
             pmsProductStockOut(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });

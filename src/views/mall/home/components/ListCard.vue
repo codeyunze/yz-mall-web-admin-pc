@@ -57,7 +57,7 @@ function addToCart(productId) {
     productId: productId
   });
   addCart(cart).then(res => {
-    if (res.code === 0) {
+    if (res.code === 200) {
       message("商品加入购物车成功", { type: "success" });
     }
   });

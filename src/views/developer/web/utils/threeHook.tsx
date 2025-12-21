@@ -187,14 +187,14 @@ export function useColumns() {
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
             addUser(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
           } else {
             // 实际开发先调用修改接口，再进行下面操作
             updateUserById(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
@@ -232,7 +232,7 @@ export function useColumns() {
    */
   function handleDelete(row) {
     deleteByUserId(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了用户名称为 [${row.username}] 的这条数据`, {
           type: "success"

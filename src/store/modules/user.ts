@@ -88,7 +88,7 @@ export const useUserStore = defineStore({
     async loginByUsername(data) {
       return new Promise<UserResult>(resolve => {
         getLogin(data).then(res => {
-          if (res?.code === 0) {
+          if (res?.code === 200) {
             setToken(toRaw(res.data));
           }
           resolve(res);
@@ -112,7 +112,7 @@ export const useUserStore = defineStore({
       return new Promise<RefreshTokenResult>((resolve, reject) => {
         refreshTokenApi(data)
           .then(res => {
-            if (res.code === 0) {
+            if (res.code === 200) {
               setToken(toRaw(res.data));
               resolve(res);
             } else {

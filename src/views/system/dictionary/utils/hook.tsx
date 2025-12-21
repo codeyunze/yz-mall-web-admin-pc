@@ -202,7 +202,7 @@ export function useDictionary(tableRef: Ref) {
   const debounceHandleAddDictionary = debounce(
     (operation: string, dictionaryValue: string, done: () => void) => {
       addDictionary(dictionaryParam.value).then(res => {
-        if (res.code === 0) {
+        if (res.code === 200) {
           message(`您${operation}了字典值为 [${dictionaryValue}] 的这条数据`, {
             type: "success"
           });
@@ -221,7 +221,7 @@ export function useDictionary(tableRef: Ref) {
   const debounceHandleUpdateDictionary = debounce(
     (operation: string, dictionaryValue: string, done: () => void) => {
       updateDictionaryById(dictionaryParam.value).then(res => {
-        if (res.code === 0) {
+        if (res.code === 200) {
           message(`您${operation}了字典值为 [${dictionaryValue}] 的这条数据`, {
             type: "success"
           });
@@ -238,7 +238,7 @@ export function useDictionary(tableRef: Ref) {
     // 修改：仅调用 getDictionaryById 获取数据，不再请求 list
     if (title === "修改" && row?.id) {
       getDictionaryById(row.id).then(dictRes => {
-        if (dictRes.code === 0 && dictRes.data) {
+        if (dictRes.code === 200 && dictRes.data) {
           let dictData = dictRes.data;
           if (Array.isArray(dictData)) {
             dictData = dictData[0];
@@ -373,7 +373,7 @@ export function useDictionary(tableRef: Ref) {
 
   function handleDelete(row: FormItemProps) {
     deleteDictionaryById(row.id as unknown as object).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         message(`您删除了字典值为${row.dictionaryValue}的这条数据`, {
           type: "success"
         });
@@ -422,7 +422,7 @@ export function useDictionary(tableRef: Ref) {
     // 批量删除逻辑
     Promise.all(curSelected.map(item => deleteDictionaryById(item.id))).then(
       results => {
-        const successCount = results.filter(res => res.code === 0).length;
+        const successCount = results.filter(res => res.code === 200).length;
         if (successCount === curSelected.length) {
           message(`已删除 ${successCount} 条数据`, {
             type: "success"

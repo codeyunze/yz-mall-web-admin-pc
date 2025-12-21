@@ -236,7 +236,7 @@ export function useColumns(tableRef: Ref) {
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
             addProduct(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
@@ -244,7 +244,7 @@ export function useColumns(tableRef: Ref) {
             console.log(curData);
             // 实际开发先调用修改接口，再进行下面操作
             updateProductById(curData).then(res => {
-              if (res.code === 0) {
+              if (res.code === 200) {
                 chores();
               }
             });
@@ -260,7 +260,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handlePublish(row) {
     publishProductById(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         message(`商品 [${row.productName}] 上架成功`, {
           type: "success"
         });
@@ -275,7 +275,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelisting(row) {
     delistingProductById(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         message(`商品 [${row.productName}] 下架成功`, {
           type: "success"
         });
@@ -335,7 +335,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelete(row) {
     deleteProduct(row.id).then(res => {
-      if (res.code === 0) {
+      if (res.code === 200) {
         onSearch();
         message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
           type: "success"
