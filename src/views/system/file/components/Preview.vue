@@ -2,10 +2,10 @@
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import VuePdfEmbed from "vue-pdf-embed";
-import { filePreviewUrl } from "@/api/system";
 import { baseUrlApi } from "@/api/utils";
-import { getToken, formatToken } from "@/utils/auth";
+import { getToken } from "@/utils/auth";
 import axios from "axios";
+import { message } from "@/utils/message";
 
 defineOptions({
   name: "FilePreview"
@@ -31,39 +31,49 @@ const previewUrl = ref("");
 const isImage = ref(false);
 const isPdf = ref(false);
 
-// 判断文件类型
+// 判断文件类型（兼容后端返回 MIME 类型或扩展名）
 const checkFileType = () => {
-  const type = props.fileType.toLowerCase();
-  isImage.value = type.startsWith("image/");
+  const type = (props.fileType || "").toLowerCase();
+  const name = (props.fileName || "").toLowerCase();
+
+  // 图片：MIME 以 image/ 开头，或者文件名后缀是常见图片格式
+  isImage.value =
+    type.startsWith("image/") ||
+    type.includes("image") ||
+    /\.(png|jpe?g|gif|bmp|webp|svg)$/.test(name);
+
+  // PDF：MIME 含 pdf 或文件名以 .pdf 结尾
   isPdf.value =
-    type === "application/pdf" || props.fileName.toLowerCase().endsWith(".pdf");
+    type === "application/pdf" || type.includes("pdf") || name.endsWith(".pdf");
 };
 
-// 获取预览 URL
+// 获取预览 URL：先请求 /sys/file/preview/{id}?token=...，只在成功时生成可用地址
 const getPreviewUrl = async () => {
+  loading.value = true;
   try {
-    loading.value = true;
     const token = getToken();
-    // 使用 filePreviewUrl 接口获取预览地址
-    // 由于接口返回的是 Result 类型，我们需要直接请求文件流
-    const url = baseUrlApi(`/sys/file/preview/${props.fileId}`);
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: token ? formatToken(token.accessToken) : ""
-      },
-      responseType: "blob"
-    });
+    const accessToken = token?.accessToken || "";
 
-    // 如果是图片或 PDF，创建 blob URL
+    const url =
+      baseUrlApi(`/sys/file/preview/${props.fileId}`) +
+      (accessToken ? `?token=${accessToken}` : "");
+
+    const { data } = await axios.get(url, { responseType: "blob" });
+
+    // 如果是图片或 PDF，创建 blob URL；否则可按需降级处理
     if (isImage.value || isPdf.value) {
-      const blob = new Blob([response.data], { type: props.fileType });
+      const blob = new Blob([data], { type: props.fileType });
       previewUrl.value = URL.createObjectURL(blob);
     } else {
-      // 其他文件类型，可能需要特殊处理
-      previewUrl.value = url;
+      previewUrl.value = "";
     }
   } catch (error) {
     console.error("获取预览地址失败:", error);
+    const status = (error as any)?.response?.status;
+    if (status === 403) {
+      message("文件访问被拒绝", { type: "error" });
+    }
+    previewUrl.value = "";
   } finally {
     loading.value = false;
   }

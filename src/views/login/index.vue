@@ -70,35 +70,52 @@ const ruleForm = reactive({
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  await formEl.validate(valid => {
-    if (valid) {
-      loading.value = true;
-      useUserStoreHook()
-        .loginByUsername({
-          account: ruleForm.account,
-          password: ruleForm.password
-        })
-        .then(res => {
-          if (res.code === 200) {
-            // 获取后端路由
-            return initRouter().then(() => {
-              disabled.value = true;
-              router
-                .push(getTopMenu(true).path)
-                .then(() => {
-                  message("登录成功", { type: "success" });
-                })
-                .finally(() => (disabled.value = false));
-            });
-          } else {
-            loading.value = false;
-            disabled.value = false;
-            message(res.msg, { type: "error" });
-          }
-        })
-        .finally(() => (loading.value = false));
+
+  // 使用 Promise 形式，避免回调中异常导致状态无法恢复
+  const valid = await formEl.validate().catch(() => false);
+  if (!valid) return;
+
+  loading.value = true;
+  disabled.value = true;
+
+  try {
+    const loginPromise = useUserStoreHook().loginByUsername({
+      account: ruleForm.account,
+      password: ruleForm.password
+    });
+
+    // 增加登录超时保护，防止 Promise 一直不结束导致按钮一直 loading
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error("LOGIN_TIMEOUT"));
+      }, 15000); // 15 秒超时，可按需调整
+    });
+
+    const res: any = await Promise.race([loginPromise, timeoutPromise]);
+
+    if (timeoutId) clearTimeout(timeoutId);
+
+    if (res.code === 200) {
+      // 获取后端路由并跳转
+      await initRouter();
+      await router.push(getTopMenu(true).path);
+      message("登录成功", { type: "success" });
+    } else {
+      message(res.msg, { type: "error" });
     }
-  });
+  } catch (error: any) {
+    // 请求异常（包含超时）时提示
+    if (error?.message === "LOGIN_TIMEOUT") {
+      message("登录超时，请检查网络后重试", { type: "error" });
+    } else {
+      message("登录失败，请稍后重试", { type: "error" });
+    }
+  } finally {
+    // 无论成功、失败还是异常，都允许用户重新点击登录
+    loading.value = false;
+    disabled.value = false;
+  }
 };
 
 const immediateDebounce: any = debounce(

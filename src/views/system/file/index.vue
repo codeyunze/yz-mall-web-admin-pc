@@ -10,6 +10,10 @@ import Delete from "@iconify-icons/ep/delete";
 import Download from "@iconify-icons/ri/download-2-line";
 import View from "@iconify-icons/ep/view";
 import { PureTableBar } from "@/components/RePureTableBar";
+import { baseUrlApi } from "@/api/utils";
+import { getToken } from "@/utils/auth";
+import axios from "axios";
+import { message } from "@/utils/message";
 
 defineOptions({
   name: "SystemFileManager"
@@ -45,6 +49,59 @@ const state = ref({
   fileStorageMode: "",
   createTime: null
 });
+
+// 图片预览（仅在点击“预览”按钮时触发）
+const imagePreviewVisible = ref(false);
+const imagePreviewUrls = ref<string[]>([]);
+const imagePreviewIndex = ref(0);
+
+const isImageRow = (row: Record<string, unknown>) => {
+  const type = ((row.fileType as string) || "").toLowerCase();
+  const name = ((row.fileName as string) || "").toLowerCase();
+
+  return (
+    type.startsWith("image/") ||
+    type.includes("image") ||
+    /\.(png|jpe?g|gif|bmp|webp|svg)$/.test(name)
+  );
+};
+
+const handleRowPreview = (row: Record<string, unknown>) => {
+  // 图片类型：使用 el-image-viewer 预览，不弹业务弹窗
+  if (isImageRow(row)) {
+    const token = getToken();
+    const accessToken = token?.accessToken || "";
+
+    const url =
+      baseUrlApi(`/sys/file/preview/${row.id}`) +
+      (accessToken ? `?token=${accessToken}` : "");
+
+    // 只请求当前这一张图片，成功后再打开预览
+    axios
+      .get(url, { responseType: "blob" })
+      .then(({ data }) => {
+        const blobUrl = URL.createObjectURL(data);
+        imagePreviewUrls.value = [blobUrl];
+        imagePreviewIndex.value = 0;
+        imagePreviewVisible.value = true;
+      })
+      .catch(error => {
+        console.error("预览图片失败:", error);
+        const status = error?.response?.status;
+        if (status === 403) {
+          message("文件访问被拒绝", { type: "error" });
+        } else {
+          message("预览图片失败，请稍后重试", { type: "error" });
+        }
+        imagePreviewVisible.value = false;
+      });
+
+    return;
+  }
+
+  // 非图片类型：走原有的预览弹窗逻辑（PDF 等）
+  handlePreview(row as any);
+};
 
 const filterColumns: PlusColumn[] = [
   {
@@ -132,6 +189,13 @@ function onFullscreen() {
 
 <template>
   <div class="main">
+    <!-- 图片预览 Viewer，仅在点击“预览”按钮后显示 -->
+    <el-image-viewer
+      v-if="imagePreviewVisible"
+      :url-list="imagePreviewUrls"
+      :initial-index="imagePreviewIndex"
+      @close="imagePreviewVisible = false"
+    />
     <PlusSearch
       v-model="state"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
@@ -203,7 +267,7 @@ function onFullscreen() {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View as any)"
-              @click="handlePreview(row)"
+              @click="handleRowPreview(row)"
             >
               预览
             </el-button>
