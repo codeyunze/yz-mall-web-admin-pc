@@ -89,8 +89,11 @@ const dialogVisible = ref(false);
  * 删除图片
  */
 const handleRemove: UploadProps["onRemove"] = uploadFile => {
-  const fileId = parseFileId(uploadFile.url);
-  console.log(uploadFile.url);
+  let fileId = parseFileId(uploadFile.url);
+  if (!fileId && uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    fileId = file.data;
+  }
   console.log(fileId);
   deleteFileById(fileId);
   // 删除albumPics里的图片id
