@@ -6,7 +6,7 @@ import { FormProps } from "@/views/pms/product/info/utils/types";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps, UploadUserFile } from "element-plus";
 import { formatToken, getToken } from "@/utils/auth";
-import { filePublicPreviewUrl, fileUploadUrl } from "@/api/system";
+import { filePreviewUrl, fileUploadUrl, deleteFileById } from "@/api/system";
 import type { ImageInstance } from "element-plus";
 import { message } from "@/utils/message";
 
@@ -54,7 +54,7 @@ const getFileList = () => {
     previewSelectedFileUrl.value = assembleFileUrl(
       newFormInline.value.albumPics
     );
-    previewFilesUrl.value.push(newFormInline.value.albumPics);
+    previewFilesUrl.value.push(assembleFileUrl(newFormInline.value.albumPics));
     return [
       {
         url: assembleFileUrl(newFormInline.value.albumPics)
@@ -80,13 +80,7 @@ const getFileList = () => {
  * @param fileId 文件唯一Id
  */
 function assembleFileUrl(fileId) {
-  return (
-    getRequestAddress() +
-    filePublicPreviewUrl +
-    "?fileId=" +
-    fileId +
-    "&fileStorageMode=cos&fileStorageStation=mall"
-  );
+  return getRequestAddress() + filePreviewUrl(fileId, getToken().accessToken);
 }
 
 const dialogVisible = ref(false);
@@ -94,8 +88,11 @@ const dialogVisible = ref(false);
 /**
  * 删除图片
  */
-const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
+const handleRemove: UploadProps["onRemove"] = uploadFile => {
   const fileId = parseFileId(uploadFile.url);
+  console.log(uploadFile.url);
+  console.log(fileId);
+  deleteFileById(fileId);
   // 删除albumPics里的图片id
   const fileIds = newFormInline.value.albumPics.split(",");
   let albumPics = "";
@@ -123,11 +120,13 @@ const handleRemove: UploadProps["onRemove"] = (uploadFile, uploadFiles) => {
 
 /**
  * 解析图片预览Url获取图片Id
- * @param fileUrl 片预览Url
+ * @param fileUrl 片预览Url 样例：http://127.0.0.1:8899/api/sys/file/preview/1896206422350864384?token=xxxx
+ * @return 图片Id 样例：1896206422350864384
  */
 function parseFileId(fileUrl) {
-  const first = fileUrl.substring(fileUrl.indexOf("fileId=") + 7);
-  return first.substring(0, first.indexOf("&"));
+  const pattern = /\/preview\/([^/?]+)/;
+  const match = fileUrl.match(pattern);
+  return match ? match[1] : "";
 }
 
 const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
@@ -149,7 +148,7 @@ const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
  * @param uploadFile 响应信息
  */
 const handleUploadSuccess: UploadProps["onSuccess"] = uploadFile => {
-  if (0 !== uploadFile.code) {
+  if (200 !== uploadFile.code) {
     return;
   }
   if (newFormInline.value.albumPics === "") {
@@ -245,7 +244,7 @@ onMounted(() => {
               "
               list-type="picture-card"
               accept="image/jpeg,image/png,image/jpg"
-              method="PUT"
+              method="POST"
               name="uploadfile"
               :disabled="
                 newFormInline.title !== '新增' && newFormInline.title !== '编辑'

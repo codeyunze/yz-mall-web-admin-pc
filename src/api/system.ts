@@ -290,18 +290,16 @@ export type FileInfo = {
 /** 文件上传地址 */
 export const fileUploadUrl = baseUrlApi("/sys/file/upload");
 /** 文件预览地址 */
-export const filePreviewUrl = (fileId?: string | number) => {
-  return http.request<Result>("get", baseUrlApi(`/sys/file/preview/${fileId}`));
+export const filePreviewUrl = (fileId?: string | number, token?: string) => {
+  return baseUrlApi(`/sys/file/preview/${fileId}?token=${token}`);
 };
-/** 文件预览地址 */
+/** 文件下载地址 */
 export const fileDownloadUrl = (fileId?: string | number) => {
   return http.request<Result>(
     "get",
     baseUrlApi(`/sys/file/download/${fileId}`)
   );
 };
-/** 公开文件预览地址 */
-export const filePublicPreviewUrl = baseUrlApi("/sys/file/public/preview");
 
 /** 文件管理-分页查询 */
 export const getFilePage = (data?: object) => {
