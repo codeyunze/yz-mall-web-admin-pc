@@ -315,3 +315,15 @@ export const deleteFileById = (fileId?: string | number) => {
     baseUrlApi(`/sys/file/delete/${fileId}`)
   );
 };
+
+/** 登录日志管理-分页查询 */
+export const getLoginLogPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/loginLog/page"), {
+    data
+  });
+};
+
+/** 登录日志管理-清空日志 */
+export const clearLoginLog = () => {
+  return http.request<Result>("post", baseUrlApi("/sys/loginLog/clear"));
+};
