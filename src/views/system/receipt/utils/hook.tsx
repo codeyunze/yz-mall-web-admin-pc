@@ -26,12 +26,14 @@ export function useColumns() {
     {
       label: "序号",
       type: "index",
-      width: 90
+      width: 90,
+      fixed: "left"
     },
     {
       label: "收货人",
       prop: "receiverName",
-      minWidth: 130
+      minWidth: 180,
+      fixed: "left"
     },
     {
       label: "收货手机号",
@@ -55,7 +57,8 @@ export function useColumns() {
     },
     {
       label: "收货详细地址",
-      prop: "receiverAddress"
+      prop: "receiverAddress",
+      minWidth: 250
     },
     {
       label: "操作",

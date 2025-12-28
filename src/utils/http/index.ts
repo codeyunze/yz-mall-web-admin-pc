@@ -175,7 +175,16 @@ class PureHttp {
           }
 
           // 只在认证相关的错误码时才退出登录，500 是服务器内部错误，不应退出登录
-          if (result.code === 50000 || result.code === 50001) {
+          if (
+            result.code === 50000 ||
+            result.code === 50001 ||
+            result.code === 11011 ||
+            result.code === 11012 ||
+            result.code === 11013 ||
+            result.code === 11014 ||
+            result.code === 11015 ||
+            result.code === 11016
+          ) {
             useUserStoreHook().logOut();
           }
         })
