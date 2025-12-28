@@ -327,3 +327,18 @@ export const getLoginLogPage = (data?: object) => {
 export const clearLoginLog = () => {
   return http.request<Result>("post", baseUrlApi("/sys/loginLog/clear"));
 };
+
+/** 在线用户管理-分页查询 */
+export const getOnlineUserList = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/onlineUser/list"), {
+    data
+  });
+};
+
+/** 在线用户管理-踢下线 */
+export const kickoutOnlineUser = (userId: string | number) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/sys/onlineUser/kickoutByUserId/${userId}`)
+  );
+};
