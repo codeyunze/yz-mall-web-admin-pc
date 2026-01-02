@@ -211,7 +211,7 @@ export function useColumns(tableRef: Ref) {
       style: {
         "border-radius": "12px"
       },
-      draggable: true,
+      draggable: false,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,

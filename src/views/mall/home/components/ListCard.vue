@@ -83,7 +83,11 @@ function addOrder(product?: CardProductType) {
         <div :class="cardLogoClass">
           <el-image
             :src="
-              product.productImages.length > 0 ? product.productImages[0] : ''
+              product &&
+              product.productImages &&
+              product.productImages.length > 0
+                ? product.productImages[0]
+                : ''
             "
             alt="商品图片"
           >
