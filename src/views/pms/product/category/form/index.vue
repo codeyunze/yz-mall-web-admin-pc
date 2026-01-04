@@ -86,7 +86,7 @@ defineExpose({ getRef, getFormData });
               :render-after-expand="false"
               style="width: 100%"
             />
-            <div style=" margin-top: 5px; font-size: 12px;color: #909399">
+            <div style="margin-top: 5px; font-size: 12px; color: #909399">
               不选择父分类则创建顶级分类
             </div>
           </el-form-item>
@@ -111,7 +111,7 @@ defineExpose({ getRef, getFormData });
               placeholder="数值越大排序越靠前"
               style="width: 100%"
             />
-            <div style=" margin-top: 5px; font-size: 12px;color: #909399">
+            <div style="margin-top: 5px; font-size: 12px; color: #909399">
               数值越大排序越靠前，默认为0
             </div>
           </el-form-item>
