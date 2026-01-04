@@ -109,3 +109,50 @@ export const deleteCart = (data?: object) => {
     data
   });
 };
+
+/** 商品分类-分页查询 */
+export const getCategoryPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/category/page"), {
+    data
+  });
+};
+
+/** 商品分类-查询树形结构 */
+export const getCategoryTree = () => {
+  return http.request<Result>("get", baseUrlApi("/pms/category/tree"));
+};
+
+/** 商品分类-根据父分类ID查询子分类列表 */
+export const getCategoryListByParentId = (parentId?: number) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/pms/category/list?parentId=${parentId || 0}`)
+  );
+};
+
+/** 商品分类-新增 */
+export const addCategory = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/category/add"), {
+    data
+  });
+};
+
+/** 商品分类-更新 */
+export const updateCategory = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/category/update"), {
+    data
+  });
+};
+
+/** 商品分类-删除 */
+export const deleteCategory = (id?: number) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/pms/category/delete/${id}`)
+  );
+};
+
+/** 商品分类-详情查询 */
+export const getCategoryDetail = (id?: number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/category/get/${id}`));
+};
