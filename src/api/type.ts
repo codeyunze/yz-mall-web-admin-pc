@@ -10,9 +10,9 @@ export type ResultTable = {
   };
 };
 
-export type Result = {
+export type Result<T = any> = {
   code: number;
   success: boolean;
-  data?: Array<any>;
+  data?: T;
   msg: string;
 };

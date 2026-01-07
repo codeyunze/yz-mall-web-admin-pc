@@ -145,6 +145,20 @@ export const getSystemLogsDetail = (data?: object) => {
   return http.request<Result>("post", "/system-logs-detail", { data });
 };
 
+/** 获取系统管理-消息重试列表 */
+export const getMsgRetryList = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/msgRetry/page"), {
+    data
+  });
+};
+
+/** 获取系统管理-消息重试详情 */
+export const getMsgRetryDetail = (id: number | string) => {
+  return http.request<
+    Result<import("@/views/system/msgretry/utils/types").MsgRetryItemProps>
+  >("get", baseUrlApi(`/sys/msgRetry/get/${id}`));
+};
+
 /** 获取角色管理-权限-菜单权限 */
 export const getRoleMenu = (data?: object) => {
   return http.request<Result>("post", baseUrlApi("/sys/menu/listSlim"), {
