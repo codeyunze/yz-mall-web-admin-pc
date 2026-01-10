@@ -215,7 +215,7 @@ const handleRest = () => {
             </el-button>
             <el-popconfirm
               v-else
-              :title="`是否确认删除用户名称为 [${row.username}] ，手机号为 [${row.phone}] 的这条数据`"
+              :title="`是否确认删除产品名称为 [${row.productName}] 的这条数据`"
               @confirm="handleDelete(row)"
             >
               <template #reference>
