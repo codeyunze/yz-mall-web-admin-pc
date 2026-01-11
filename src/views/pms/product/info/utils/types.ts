@@ -9,6 +9,8 @@ interface FormItemProps {
   publishStatus: number;
   verifyStatus: number;
   albumPics: string;
+  categoryId?: number;
+  categoryTreeOptions?: any[];
 }
 interface FormProps {
   formInline: FormItemProps;

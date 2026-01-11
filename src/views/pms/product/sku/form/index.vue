@@ -499,7 +499,7 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
       <div v-loading="presetAttrLoading">
         <div
           v-if="presetAttrs.length === 0"
-          style=" padding: 40px; color: #909399;text-align: center"
+          style="padding: 40px; color: #909399; text-align: center"
         >
           该商品暂无预设属性
         </div>
@@ -535,7 +535,7 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
             }}</span>
             <span
               v-if="attr.attrDesc"
-              style=" margin-right: 15px; font-size: 12px;color: #909399"
+              style="margin-right: 15px; font-size: 12px; color: #909399"
             >
               {{ attr.attrDesc }}
             </span>

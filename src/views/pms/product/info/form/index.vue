@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "@/views/pms/product/info/utils/rule";
 import { FormProps } from "@/views/pms/product/info/utils/types";
@@ -10,22 +10,54 @@ import { filePreviewUrl, fileUploadUrl, deleteFileById } from "@/api/system";
 import type { ImageInstance } from "element-plus";
 import { message } from "@/utils/message";
 
+interface ExtendedFormItemProps {
+  id?: number;
+  title: string;
+  productName: string;
+  productPrice: number;
+  remark: string;
+  titles: string;
+  publishStatus: number;
+  verifyStatus: number;
+  albumPics: string;
+  categoryId?: number;
+  categoryTreeOptions?: any[];
+}
+
 const props = withDefaults(defineProps<FormProps>(), {
-  formInline: () => ({
-    title: "新增",
-    productName: "",
-    productPrice: 0,
-    remark: "",
-    titles: "",
-    publishStatus: 0,
-    verifyStatus: 1,
-    albumPics: ""
-  })
+  formInline: () =>
+    ({
+      title: "新增",
+      productName: "",
+      productPrice: 0,
+      remark: "",
+      titles: "",
+      publishStatus: 0,
+      verifyStatus: 1,
+      albumPics: "",
+      categoryId: null,
+      categoryTreeOptions: []
+    }) as ExtendedFormItemProps
 });
 
 const ruleFormRef = ref();
-const newFormInline = ref(props.formInline);
+const newFormInline = ref(props.formInline as ExtendedFormItemProps);
 const imageRef = ref<ImageInstance>();
+// 分类树形选项
+const categoryTreeOptions = ref([]);
+
+// 监听formInline变化，更新分类树选项
+watch(
+  () => props.formInline,
+  newVal => {
+    const extendedVal = newVal as ExtendedFormItemProps;
+    newFormInline.value = { ...extendedVal };
+    if (extendedVal.categoryTreeOptions) {
+      categoryTreeOptions.value = extendedVal.categoryTreeOptions;
+    }
+  },
+  { deep: true, immediate: true }
+);
 // 预览图片列表
 const previewFilesUrl = ref([]);
 // 选中预览图片地址
@@ -39,7 +71,11 @@ function getRef() {
   return ruleFormRef.value;
 }
 
-defineExpose({ getRef });
+function getFormData() {
+  return newFormInline.value;
+}
+
+defineExpose({ getRef, getFormData });
 
 function getRequestAddress() {
   return window.location.href.substring(0, window.location.href.indexOf("/#"));
@@ -196,6 +232,25 @@ onMounted(() => {
               v-model="newFormInline.productName"
               clearable
               placeholder="请输入商品名称"
+            />
+          </el-form-item>
+        </re-col>
+
+        <re-col :value="12" :xs="24" :sm="24">
+          <el-form-item label="商品分类" prop="categoryId">
+            <el-tree-select
+              v-model="newFormInline.categoryId"
+              :data="categoryTreeOptions"
+              :props="{
+                label: 'categoryName',
+                value: 'id',
+                children: 'children'
+              }"
+              placeholder="请选择商品分类"
+              clearable
+              check-strictly
+              :render-after-expand="false"
+              style="width: 100%"
             />
           </el-form-item>
         </re-col>

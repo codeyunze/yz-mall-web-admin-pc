@@ -155,7 +155,7 @@ export function useColumns(tableRef: Ref) {
       props: {
         formInline: {
           productName: row.productName,
-          productId: row.productId,
+          productId: row.skuId,
           quantity: 0
         }
       },

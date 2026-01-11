@@ -15,7 +15,8 @@ import {
   delistingProductById,
   getProductPage,
   publishProductById,
-  updateProductById
+  updateProductById,
+  getCategoryTree
 } from "@/api/pms";
 import type { FormItemProps } from "@/views/pms/product/info/utils/types";
 export { default as dayjs } from "dayjs";
@@ -110,6 +111,8 @@ export function useColumns(tableRef: Ref) {
     startTimeFilter: null,
     endTimeFilter: null
   });
+  // 分类树形选项
+  const categoryTreeOptions = ref([]);
   const buttonClass = computed(() => {
     return [
       "!h-[20px]",
@@ -204,7 +207,9 @@ export function useColumns(tableRef: Ref) {
           productPrice: row?.productPrice ?? "",
           publishStatus: row?.publishStatus ?? 1,
           verifyStatus: row?.verifyStatus ?? 1,
-          albumPics: row?.albumPics ?? ""
+          albumPics: row?.albumPics ?? "",
+          categoryId: row?.categoryId ?? null,
+          categoryTreeOptions: categoryTreeOptions.value
         }
       },
       width: "46%",
@@ -217,11 +222,12 @@ export function useColumns(tableRef: Ref) {
       closeOnClickModal: false,
       hideFooter: title !== "编辑" && title !== "新增",
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
+      beforeSure: done => {
         const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
+        // 从表单组件中获取实际的数据，而不是使用初始的 props
+        const formData = formRef.value.getFormData();
         function chores() {
-          message(`您${title}了商品名称为${curData.productName}的这条数据`, {
+          message(`您${title}了商品名称为${formData.productName}的这条数据`, {
             type: "success"
           });
           done(); // 关闭弹框
@@ -232,18 +238,32 @@ export function useColumns(tableRef: Ref) {
             return;
           }
 
+          // 清理数据，只保留后端需要的字段
+          const submitData: any = {
+            productName: formData.productName,
+            productPrice: formData.productPrice,
+            titles: formData.titles || "",
+            remark: formData.remark || "",
+            albumPics: formData.albumPics || "",
+            categoryId: formData.categoryId
+          };
+
+          // 如果是编辑，需要添加id字段
+          if (title === "编辑" && formData.id) {
+            submitData.id = formData.id;
+          }
+
           // 表单规则校验通过
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
-            addProduct(curData).then(res => {
+            addProduct(submitData).then(res => {
               if (res.code === 200) {
                 chores();
               }
             });
           } else {
-            console.log(curData);
             // 实际开发先调用修改接口，再进行下面操作
-            updateProductById(curData).then(res => {
+            updateProductById(submitData).then(res => {
               if (res.code === 200) {
                 chores();
               }
@@ -348,7 +368,17 @@ export function useColumns(tableRef: Ref) {
     console.log(row);
   }
 
+  // 加载分类树
+  function loadCategoryTree() {
+    getCategoryTree().then(data => {
+      if (data.code === 200) {
+        categoryTreeOptions.value = data.data || [];
+      }
+    });
+  }
+
   onMounted(() => {
+    loadCategoryTree();
     onSearch();
   });
 

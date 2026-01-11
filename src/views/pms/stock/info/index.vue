@@ -72,7 +72,7 @@ const handleChange = (values: any) => {
 };
 const handleSearch = (values: any) => {
   form.productName = values.productName;
-  form.productId = values.productId;
+  form.skuId = values.skuId;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -85,7 +85,7 @@ const handleSearch = (values: any) => {
 };
 const handleRest = () => {
   form.productName = null;
-  form.productId = 0;
+  form.skuId = 0;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();

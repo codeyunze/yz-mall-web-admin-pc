@@ -58,7 +58,7 @@ export function useColumns(tableRef: Ref) {
   const formRef = ref();
   const form = reactive({
     productName: "",
-    productId: 0,
+    skuId: 0,
     quantity: 0,
     startTimeFilter: null,
     endTimeFilter: null
@@ -149,9 +149,11 @@ export function useColumns(tableRef: Ref) {
       title: `${row.productName} 商品${title}`,
       props: {
         formInline: {
-          productName: row.productName,
           productId: row.productId,
-          quantity: 0
+          productName: row.productName,
+          skuId: row.skuId,
+          quantity: 0,
+          remark: ""
         }
       },
       width: "46%",
@@ -163,12 +165,13 @@ export function useColumns(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
+      beforeSure: done => {
         const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
+        // 从表单组件中获取实际的数据，而不是使用初始的 props
+        const formData = formRef.value.getFormData();
         function chores() {
           message(
-            `商品 [${row.productName}] 成功${title}数量 ${curData.quantity}`,
+            `商品 [${row.productName}] 成功${title}数量 ${formData.quantity}`,
             {
               type: "success"
             }
@@ -180,14 +183,21 @@ export function useColumns(tableRef: Ref) {
           if (!valid) {
             return;
           }
+          // 清理数据，只保留后端需要的字段
+          const submitData: any = {
+            productId: formData.productId,
+            skuId: formData.skuId,
+            quantity: formData.quantity,
+            remark: formData.remark || ""
+          };
           if (title === "入库") {
-            pmsProductStockIn(curData).then(res => {
+            pmsProductStockIn(submitData).then(res => {
               if (res.code === 200) {
                 chores();
               }
             });
           } else {
-            pmsProductStockOut(curData).then(res => {
+            pmsProductStockOut(submitData).then(res => {
               if (res.code === 200) {
                 chores();
               }

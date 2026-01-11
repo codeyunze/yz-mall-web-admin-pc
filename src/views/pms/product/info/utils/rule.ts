@@ -10,5 +10,8 @@ export const formRules = reactive(<FormRules>{
     { required: true, message: "商品售价为必填项", trigger: "blur" }
   ],
   titles: [{ required: true, message: "商品标签为必填项", trigger: "blur" }],
-  albumPics: [{ required: true, message: "商品图片为必传项", trigger: "blur" }]
+  albumPics: [{ required: true, message: "商品图片为必传项", trigger: "blur" }],
+  categoryId: [
+    { required: true, message: "商品分类为必填项", trigger: "change" }
+  ]
 });
