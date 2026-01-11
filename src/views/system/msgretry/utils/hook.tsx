@@ -36,9 +36,9 @@ export function useMsgRetry() {
       minWidth: 150
     },
     {
-      label: "标签",
+      label: "Tag标签",
       prop: "tags",
-      minWidth: 120
+      minWidth: 150
     },
     {
       label: "消费者组",

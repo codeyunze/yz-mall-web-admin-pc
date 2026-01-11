@@ -187,3 +187,13 @@
     background: rgb(199 201 203); /* 滑块hover颜色 */
   }
 }
+
+/* 消息重试详情弹窗宽度 */
+.msg-retry-detail-dialog {
+  width: max(800px, 50vw) !important;
+  max-width: 90vw !important;
+
+  .el-message-box__content {
+    max-width: 100%;
+  }
+}

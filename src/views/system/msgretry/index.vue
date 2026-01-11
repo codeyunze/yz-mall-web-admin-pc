@@ -46,7 +46,7 @@ const filterColumns: PlusColumn[] = [
     prop: "topic"
   },
   {
-    label: "标签",
+    label: "Tag标签",
     prop: "tags"
   },
   {

@@ -156,3 +156,75 @@ export const deleteCategory = (id?: number) => {
 export const getCategoryDetail = (id?: number) => {
   return http.request<Result>("get", baseUrlApi(`/pms/category/get/${id}`));
 };
+
+/** 商品属性-分页查询 */
+export const getAttrPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/attr/page"), {
+    data
+  });
+};
+
+/** 商品属性-新增 */
+export const addAttr = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/attr/add"), {
+    data
+  });
+};
+
+/** 商品属性-更新 */
+export const updateAttr = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/attr/update"), {
+    data
+  });
+};
+
+/** 商品属性-删除 */
+export const deleteAttr = (id?: number) => {
+  return http.request<Result>("delete", baseUrlApi(`/pms/attr/delete/${id}`));
+};
+
+/** 商品属性-详情查询 */
+export const getAttrDetail = (id?: number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/attr/get/${id}`));
+};
+
+/** 商品属性-根据关联ID查询属性列表 */
+export const getAttrListByRelatedId = (relatedId?: number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/attr/list/${relatedId}`));
+};
+
+/** 商品SKU-分页查询 */
+export const getSkuPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/pms/sku/page"), {
+    data
+  });
+};
+
+/** 商品SKU-新增 */
+export const addSku = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/sku/add"), {
+    data
+  });
+};
+
+/** 商品SKU-更新 */
+export const updateSku = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/pms/sku/update"), {
+    data
+  });
+};
+
+/** 商品SKU-删除 */
+export const deleteSku = (id?: number) => {
+  return http.request<Result>("delete", baseUrlApi(`/pms/sku/delete/${id}`));
+};
+
+/** 商品SKU-详情查询 */
+export const getSkuDetail = (id?: number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/sku/get/${id}`));
+};
+
+/** 商品SKU-根据商品ID查询SKU列表 */
+export const getSkuListByProductId = (productId?: number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/sku/list/${productId}`));
+};
