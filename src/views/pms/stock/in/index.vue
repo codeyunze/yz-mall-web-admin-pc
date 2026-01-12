@@ -21,6 +21,7 @@ const {
   form,
   dataList,
   pagination,
+  categoryOptions,
   onSearch,
   openDialog,
   handleSizeChange,
@@ -38,8 +39,14 @@ const filterColumns: PlusColumn[] = [
     prop: "productName"
   },
   {
-    label: "商品标签",
-    prop: "titles"
+    label: "SKU名称",
+    prop: "skuName"
+  },
+  {
+    label: "商品分类",
+    prop: "categoryId",
+    valueType: "select",
+    options: categoryOptions.value
   },
   {
     label: "创建时间",
@@ -59,6 +66,8 @@ const handleChange = (values: any) => {
 const handleSearch = (values: any) => {
   form.productName = values.productName;
   form.productId = values.productId;
+  form.skuName = values.skuName;
+  form.categoryId = values.categoryId;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -72,6 +81,8 @@ const handleSearch = (values: any) => {
 const handleRest = () => {
   form.productName = null;
   form.productId = 0;
+  form.skuName = null;
+  form.categoryId = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();

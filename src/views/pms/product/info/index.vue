@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useColumns, dayjs } from "@/views/pms/product/info/utils/hook";
 
 import "plus-pro-components/es/components/search/style/css";
@@ -31,6 +31,7 @@ const {
   selectedNum,
   adaptiveConfig,
   buttonClass,
+  categoryOptions,
   onSearch,
   resetForm,
   onCurrentChange,
@@ -59,6 +60,16 @@ const filterColumns: PlusColumn[] = [
   {
     label: "商品标签",
     prop: "titles"
+  },
+  {
+    label: "商品分类",
+    prop: "categoryId",
+    valueType: "select",
+    options: computed(() => categoryOptions.value),
+    fieldProps: {
+      placeholder: "请选择商品分类",
+      clearable: true
+    }
   },
   {
     label: "上架状态",
@@ -95,6 +106,7 @@ const handleChange = (values: any) => {
 const handleSearch = (values: any) => {
   form.productName = values.productName;
   form.titles = values.titles;
+  form.categoryId = values.categoryId;
   form.publishStatus = values.publishStatus;
   form.verifyStatus = values.verifyStatus;
   if (values.createTime) {
@@ -110,6 +122,7 @@ const handleSearch = (values: any) => {
 const handleRest = () => {
   form.productName = null;
   form.titles = null;
+  form.categoryId = null;
   form.publishStatus = null;
   form.verifyStatus = null;
   form.startTimeFilter = null;
@@ -213,8 +226,9 @@ const handleRest = () => {
             >
               下架
             </el-button>
+            <!-- 审核通过且上架状态不允许删除 -->
             <el-popconfirm
-              v-else
+              v-else-if="!(row.verifyStatus === 1 && row.publishStatus === 1)"
               :title="`是否确认删除产品名称为 [${row.productName}] 的这条数据`"
               @confirm="handleDelete(row)"
             >

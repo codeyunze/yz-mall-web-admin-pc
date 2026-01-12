@@ -1,6 +1,27 @@
 import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
 import { ref, onMounted, reactive, h } from "vue";
+
+// 将树形数据转换为扁平列表
+function flattenCategoryTree(
+  tree: any[],
+  prefix = ""
+): Array<{ label: string; value: number }> {
+  const result: Array<{ label: string; value: number }> = [];
+  tree.forEach(item => {
+    const label = prefix
+      ? `${prefix} / ${item.categoryName}`
+      : item.categoryName;
+    result.push({
+      label,
+      value: item.id
+    });
+    if (item.children && item.children.length > 0) {
+      result.push(...flattenCategoryTree(item.children, label));
+    }
+  });
+  return result;
+}
 import { deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/stock/info/form/index.vue";
@@ -8,7 +29,8 @@ import { message } from "@/utils/message";
 import {
   pmsStockInPage,
   pmsProductStockIn,
-  pmsProductStockOut
+  pmsProductStockOut,
+  getCategoryTree
 } from "@/api/pms";
 import type { FormItemProps } from "@/views/pms/stock/info/utils/viewTypes";
 export { default as dayjs } from "dayjs";
@@ -32,9 +54,14 @@ export function useColumns() {
       align: "left"
     },
     {
-      label: "标签",
-      prop: "titles",
-      minWidth: 200
+      label: "SKU名称",
+      prop: "skuName",
+      align: "left"
+    },
+    {
+      label: "商品分类",
+      prop: "categoryName",
+      align: "left"
     },
     {
       label: "供应商名称",
@@ -62,6 +89,8 @@ export function useColumns() {
     productName: "",
     productId: 0,
     quantity: 0,
+    skuName: null,
+    categoryId: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
@@ -186,7 +215,20 @@ export function useColumns() {
     onSearch();
   }
 
+  // 分类选项（扁平列表）
+  const categoryOptions = ref<Array<{ label: string; value: number }>>([]);
+
+  // 加载分类树
+  function loadCategoryTree() {
+    getCategoryTree().then(data => {
+      if (data.code === 200) {
+        categoryOptions.value = flattenCategoryTree(data.data || []);
+      }
+    });
+  }
+
   onMounted(() => {
+    loadCategoryTree();
     onSearch();
   });
 
@@ -198,6 +240,7 @@ export function useColumns() {
     pagination,
     selectedNum,
     loadingConfig,
+    categoryOptions,
     onSearch,
     openDialog,
     handleSizeChange,

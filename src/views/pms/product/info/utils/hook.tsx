@@ -108,11 +108,45 @@ export function useColumns(tableRef: Ref) {
     titles: null,
     publishStatus: null,
     verifyStatus: null,
+    categoryId: null,
     startTimeFilter: null,
     endTimeFilter: null
   });
   // 分类树形选项
   const categoryTreeOptions = ref([]);
+  // 分类扁平列表（用于下拉选择）
+  const categoryOptions = ref<Array<{ label: string; value: number }>>([]);
+  // 将树形数据转换为扁平列表
+  function flattenCategoryTree(
+    tree: any[],
+    prefix = ""
+  ): Array<{ label: string; value: number }> {
+    const result: Array<{ label: string; value: number }> = [];
+    tree.forEach(item => {
+      const label = prefix
+        ? `${prefix} / ${item.categoryName}`
+        : item.categoryName;
+      result.push({
+        label,
+        value: item.id
+      });
+      if (item.children && item.children.length > 0) {
+        result.push(...flattenCategoryTree(item.children, label));
+      }
+    });
+    return result;
+  }
+
+  // 加载分类树形数据
+  function loadCategoryTree() {
+    getCategoryTree().then(data => {
+      if (data.code === 200) {
+        categoryTreeOptions.value = data.data || [];
+        // 转换为扁平列表用于下拉选择
+        categoryOptions.value = flattenCategoryTree(data.data || []);
+      }
+    });
+  }
   const buttonClass = computed(() => {
     return [
       "!h-[20px]",
@@ -368,15 +402,6 @@ export function useColumns(tableRef: Ref) {
     console.log(row);
   }
 
-  // 加载分类树
-  function loadCategoryTree() {
-    getCategoryTree().then(data => {
-      if (data.code === 200) {
-        categoryTreeOptions.value = data.data || [];
-      }
-    });
-  }
-
   onMounted(() => {
     loadCategoryTree();
     onSearch();
@@ -392,6 +417,8 @@ export function useColumns(tableRef: Ref) {
     loadingConfig,
     adaptiveConfig,
     buttonClass,
+    categoryTreeOptions,
+    categoryOptions,
     onSearch,
     resetForm,
     onCurrentChange,
