@@ -22,21 +22,10 @@ export function useColumns() {
       width: 90
     },
     {
-      label: "属性ID",
-      prop: "id",
-      width: 120
-    },
-    {
       label: "属性名称",
       prop: "attrName",
       align: "left",
       minWidth: 150
-    },
-    {
-      label: "关联ID",
-      prop: "relatedId",
-      width: 120,
-      cellRenderer: ({ row }) => <span>{row.relatedId || "无"}</span>
     },
     {
       label: "属性值",

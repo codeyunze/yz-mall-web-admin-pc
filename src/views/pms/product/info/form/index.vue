@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "@/views/pms/product/info/utils/rule";
 import { FormProps } from "@/views/pms/product/info/utils/types";
@@ -45,6 +45,11 @@ const newFormInline = ref(props.formInline as ExtendedFormItemProps);
 const imageRef = ref<ImageInstance>();
 // 分类树形选项
 const categoryTreeOptions = ref([]);
+
+// 判断是否为查看模式
+const isViewMode = computed(() => {
+  return newFormInline.value.title === "查看";
+});
 
 // 监听formInline变化，更新分类树选项
 watch(
@@ -230,6 +235,7 @@ onMounted(() => {
           <el-form-item label="商品名称" prop="productName">
             <el-input
               v-model="newFormInline.productName"
+              :disabled="isViewMode"
               clearable
               placeholder="请输入商品名称"
             />
@@ -246,6 +252,7 @@ onMounted(() => {
                 value: 'id',
                 children: 'children'
               }"
+              :disabled="isViewMode"
               placeholder="请选择商品分类"
               clearable
               check-strictly
@@ -259,6 +266,7 @@ onMounted(() => {
           <el-form-item label="售价" prop="productPrice">
             <el-input
               v-model="newFormInline.productPrice"
+              :disabled="isViewMode"
               clearable
               placeholder="请输入商品售价"
             />
@@ -269,6 +277,7 @@ onMounted(() => {
           <el-form-item label="标签" prop="titles">
             <el-input
               v-model="newFormInline.titles"
+              :disabled="isViewMode"
               clearable
               placeholder="请输入商品标签"
             />
@@ -279,6 +288,7 @@ onMounted(() => {
           <el-form-item label="商品备注">
             <el-input
               v-model="newFormInline.remark"
+              :disabled="isViewMode"
               placeholder="请输入商品说明信息"
               type="textarea"
             />
@@ -287,7 +297,10 @@ onMounted(() => {
 
         <re-col :value="24" :xs="24" :sm="24">
           <el-form-item label="图片" prop="albumPics">
-            <el-input v-model="newFormInline.albumPics" />
+            <el-input
+              v-model="newFormInline.albumPics"
+              :disabled="isViewMode"
+            />
           </el-form-item>
         </re-col>
 
@@ -304,9 +317,7 @@ onMounted(() => {
               accept="image/jpeg,image/png,image/jpg"
               method="POST"
               name="uploadfile"
-              :disabled="
-                newFormInline.title !== '新增' && newFormInline.title !== '编辑'
-              "
+              :disabled="isViewMode"
               :limit="7"
               :headers="{ Authorization: formatToken(getToken().accessToken) }"
               :on-preview="handlePictureCardPreview"
@@ -314,8 +325,9 @@ onMounted(() => {
               :on-success="handleUploadSuccess"
               :on-exceed="handleUploadExceed"
               :on-progress="handleUploadProgress"
+              :class="{ 'view-mode-upload': isViewMode }"
             >
-              <el-icon>
+              <el-icon v-if="!isViewMode">
                 <Plus />
               </el-icon>
             </el-upload>
@@ -340,3 +352,12 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style scoped lang="scss">
+/* 查看模式下隐藏上传按钮 */
+.view-mode-upload {
+  :deep(.el-upload-list--picture-card .el-upload--picture-card) {
+    display: none !important;
+  }
+}
+</style>
