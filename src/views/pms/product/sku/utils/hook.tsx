@@ -275,7 +275,14 @@ export function useColumns() {
           } else {
             updateSku(submitData).then(res => {
               if (res.code === 200) {
-                chores();
+                // 编辑模式下，如果有待添加的属性，也需要保存
+                if (formRef.value.saveAttrs && formData.id) {
+                  formRef.value.saveAttrs(formData.id).then(() => {
+                    chores();
+                  });
+                } else {
+                  chores();
+                }
               }
             });
           }

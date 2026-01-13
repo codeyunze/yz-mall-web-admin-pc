@@ -9,7 +9,13 @@ import { delay } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/product/attr/form/index.vue";
 import { message } from "@/utils/message";
-import { addAttr, deleteAttr, getAttrPage, updateAttr } from "@/api/pms";
+import {
+  addAttr,
+  deleteAttr,
+  getAttrPage,
+  updateAttr,
+  getProductPage
+} from "@/api/pms";
 import type { FormItemProps } from "@/views/pms/product/attr/utils/types";
 export { default as dayjs } from "dayjs";
 
@@ -20,6 +26,34 @@ export function useColumns() {
       label: "序号",
       type: "index",
       width: 90
+    },
+    {
+      label: "属性类型",
+      prop: "attrType",
+      width: 120,
+      cellRenderer: ({ row }) => (
+        <el-tag
+          size="small"
+          type={row.attrType === 0 ? "success" : "info"}
+          effect="plain"
+        >
+          {row.attrType === 0 ? "商品" : "SKU"}
+        </el-tag>
+      )
+    },
+    {
+      label: "必选属性",
+      prop: "attrRequired",
+      width: 120,
+      cellRenderer: ({ row }) => (
+        <el-tag
+          size="small"
+          type={row.attrRequired === 1 ? "danger" : "info"}
+          effect="plain"
+        >
+          {row.attrRequired === 1 ? "必选" : "可选"}
+        </el-tag>
+      )
     },
     {
       label: "属性名称",
@@ -99,6 +133,25 @@ export function useColumns() {
     offsetBottom: 110
   };
 
+  // 商品列表（用于选择商品）
+  const productOptions = ref<Array<{ label: string; value: number }>>([]);
+
+  // 加载商品列表
+  function loadProductList(): Promise<void> {
+    return getProductPage({
+      size: 1000,
+      current: 1,
+      filter: {}
+    }).then(data => {
+      if (data.code === 200) {
+        productOptions.value = (data.data.items || []).map(item => ({
+          label: item.productName,
+          value: item.id
+        }));
+      }
+    });
+  }
+
   function onCurrentChange(val) {
     loadingConfig.text = `正在加载第${val}页...`;
     loading.value = true;
@@ -131,73 +184,82 @@ export function useColumns() {
   };
 
   function openDialog(title = "新增", row?: FormItemProps) {
-    addDialog({
-      title: `${title}商品属性`,
-      props: {
-        formInline: {
-          title,
-          id: row?.id ?? 0,
-          relatedId: row?.relatedId ?? null,
-          attrName: row?.attrName ?? "",
-          attrValue: row?.attrValue ?? "",
-          attrDesc: row?.attrDesc ?? ""
-        }
-      },
-      width: "46%",
-      style: {
-        "border-radius": "12px"
-      },
-      draggable: false,
-      fullscreen: false,
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      hideFooter: title !== "编辑" && title !== "新增",
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: done => {
-        const FormRef = formRef.value.getRef();
-        // 从表单组件中获取实际的数据，而不是使用初始的 props
-        const formData = formRef.value.getFormData();
-        function chores() {
-          message(`您${title}了属性名称为${formData.attrName}的这条数据`, {
-            type: "success"
+    // 加载商品列表用于选择商品
+    loadProductList().then(() => {
+      addDialog({
+        title: `${title}商品属性`,
+        props: {
+          formInline: {
+            title,
+            id: row?.id ?? 0,
+            relatedId: row?.relatedId ?? null,
+            attrType: 0, // 固定为商品属性
+            attrRequired: row?.attrRequired ?? 0,
+            productId: row?.attrType === 0 ? (row?.relatedId ?? null) : null,
+            attrName: row?.attrName ?? "",
+            attrValue: row?.attrValue ?? "",
+            attrDesc: row?.attrDesc ?? "",
+            productOptions: productOptions.value
+          }
+        },
+        width: "46%",
+        style: {
+          "border-radius": "12px"
+        },
+        draggable: false,
+        fullscreen: false,
+        fullscreenIcon: true,
+        closeOnClickModal: false,
+        hideFooter: title !== "编辑" && title !== "新增",
+        contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+        beforeSure: done => {
+          const FormRef = formRef.value.getRef();
+          // 从表单组件中获取实际的数据，而不是使用初始的 props
+          const formData = formRef.value.getFormData();
+          function chores() {
+            message(`您${title}了属性名称为${formData.attrName}的这条数据`, {
+              type: "success"
+            });
+            done(); // 关闭弹框
+            onSearch(); // 刷新表格数据
+          }
+          FormRef.validate(valid => {
+            if (!valid) {
+              return;
+            }
+
+            // 清理数据，只保留后端需要的字段
+            const submitData: any = {
+              relatedId: formData.productId || formData.relatedId, // 使用 productId 作为 relatedId
+              attrType: 0, // 固定为商品属性
+              attrRequired: formData.attrRequired ?? 0, // 必选属性，默认为0（可选）
+              attrName: formData.attrName,
+              attrValue: formData.attrValue,
+              attrDesc: formData.attrDesc || null
+            };
+
+            // 如果是编辑，需要添加id字段
+            if (title === "编辑" && formData.id) {
+              submitData.id = formData.id;
+            }
+
+            // 表单规则校验通过
+            if (title === "新增") {
+              addAttr(submitData).then(res => {
+                if (res.code === 200) {
+                  chores();
+                }
+              });
+            } else {
+              updateAttr(submitData).then(res => {
+                if (res.code === 200) {
+                  chores();
+                }
+              });
+            }
           });
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
         }
-        FormRef.validate(valid => {
-          if (!valid) {
-            return;
-          }
-
-          // 清理数据，只保留后端需要的字段
-          const submitData: any = {
-            relatedId: formData.relatedId,
-            attrName: formData.attrName,
-            attrValue: formData.attrValue,
-            attrDesc: formData.attrDesc || null
-          };
-
-          // 如果是编辑，需要添加id字段
-          if (title === "编辑" && formData.id) {
-            submitData.id = formData.id;
-          }
-
-          // 表单规则校验通过
-          if (title === "新增") {
-            addAttr(submitData).then(res => {
-              if (res.code === 200) {
-                chores();
-              }
-            });
-          } else {
-            updateAttr(submitData).then(res => {
-              if (res.code === 200) {
-                chores();
-              }
-            });
-          }
-        });
-      }
+      });
     });
   }
 
@@ -241,6 +303,7 @@ export function useColumns() {
 
   onMounted(() => {
     onSearch();
+    loadProductList();
   });
 
   return {

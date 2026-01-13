@@ -47,9 +47,16 @@ const newFormInline = ref(props.formInline as ExtendedFormItemProps);
 // 商品选项
 const productOptions = ref([]);
 
-// SKU属性列表
+// SKU属性列表（包含商品属性和SKU属性）
 const skuAttrs = ref<
-  Array<{ id?: number; attrName: string; attrValue: string; attrDesc?: string }>
+  Array<{
+    id?: number;
+    attrName: string;
+    attrValue: string;
+    attrDesc?: string;
+    attrType?: number; // 0: 商品属性（只读），1: SKU属性（可删除）
+    isProductAttr?: boolean; // 是否为商品属性
+  }>
 >([]);
 
 // 新增属性表单
@@ -86,36 +93,90 @@ watch(
     if (extendedVal.id && extendedVal.id > 0) {
       // 延迟加载，确保组件已渲染
       setTimeout(() => {
-        loadSkuAttrs(extendedVal.id);
+        // 如果已选择商品，先加载商品属性
+        if (extendedVal.productId) {
+          loadProductAttrs(extendedVal.productId).then(() => {
+            // 商品属性加载完成后再加载SKU属性
+            loadSkuAttrs(extendedVal.id);
+          });
+        } else {
+          // 如果没有商品ID，只加载SKU属性
+          loadSkuAttrs(extendedVal.id);
+        }
       }, 100);
     } else {
       skuAttrs.value = [];
+      // 如果是新增模式且已选择商品，加载商品属性
+      if (extendedVal.productId) {
+        setTimeout(() => {
+          loadProductAttrs(extendedVal.productId);
+        }, 100);
+      }
     }
   },
   { deep: true, immediate: true }
 );
 
-// 监听商品ID变化，加载预设属性
+// 监听商品ID变化，加载商品属性和预设属性
 watch(
   () => newFormInline.value.productId,
   productId => {
     if (productId) {
+      loadProductAttrs(productId);
       loadPresetAttrs(productId);
     } else {
       presetAttrs.value = [];
+      // 清空商品属性，只保留SKU属性
+      skuAttrs.value = skuAttrs.value.filter(attr => attr.attrType === 1);
     }
   }
 );
+
+// 加载商品属性（attrType=0）
+function loadProductAttrs(productId: number): Promise<void> {
+  return getAttrPage({
+    size: 1000,
+    current: 1,
+    filter: { relatedId: productId, attrType: 0 }
+  }).then(res => {
+    if (res.code === 200) {
+      const productAttrs = (res.data.items || []).map((attr: any) => ({
+        id: attr.id,
+        attrName: attr.attrName,
+        attrValue: attr.attrValue,
+        attrDesc: attr.attrDesc,
+        attrType: 0,
+        isProductAttr: true
+      }));
+
+      // 移除之前的商品属性，添加新的商品属性
+      skuAttrs.value = skuAttrs.value.filter(attr => attr.attrType === 1);
+      skuAttrs.value = [...productAttrs, ...skuAttrs.value];
+    }
+  });
+}
 
 function getRef() {
   return ruleFormRef.value;
 }
 
-// 加载SKU的属性列表
+// 加载SKU的属性列表（只加载SKU属性，商品属性需要从商品ID加载）
 function loadSkuAttrs(skuId: number) {
   getAttrListByRelatedId(skuId).then(res => {
     if (res.code === 200) {
-      skuAttrs.value = res.data || [];
+      const allAttrs = res.data || [];
+      // 只保留SKU属性（attrType=1），商品属性从商品ID加载
+      const skuOnlyAttrs = allAttrs
+        .filter((attr: any) => attr.attrType === 1)
+        .map((attr: any) => ({
+          ...attr,
+          isProductAttr: false
+        }));
+      // 保留现有的商品属性，只更新SKU属性
+      const existingProductAttrs = skuAttrs.value.filter(
+        attr => attr.isProductAttr || attr.attrType === 0
+      );
+      skuAttrs.value = [...existingProductAttrs, ...skuOnlyAttrs];
     }
   });
 }
@@ -144,11 +205,13 @@ function handleAddAttr() {
 
   // 如果是新增SKU，先添加到临时列表，等SKU保存后再提交
   if (!newFormInline.value.id || newFormInline.value.id === 0) {
-    // 添加到临时列表
+    // 添加到临时列表（SKU属性）
     skuAttrs.value.push({
       attrName: newAttrForm.value.attrName,
       attrValue: newAttrForm.value.attrValue,
-      attrDesc: newAttrForm.value.attrDesc
+      attrDesc: newAttrForm.value.attrDesc,
+      attrType: 1,
+      isProductAttr: false
     });
     // 重置表单
     newAttrForm.value = {
@@ -160,68 +223,56 @@ function handleAddAttr() {
     return;
   }
 
-  const attrData = {
-    relatedId: newFormInline.value.id,
+  // 编辑模式下，也先添加到临时列表，等保存SKU时一起提交
+  // 这样可以避免在编辑过程中频繁请求接口
+  skuAttrs.value.push({
     attrName: newAttrForm.value.attrName,
     attrValue: newAttrForm.value.attrValue,
-    attrDesc: newAttrForm.value.attrDesc || null
-  };
-
-  addAttr(attrData).then(res => {
-    if (res.code === 200) {
-      message("属性添加成功", { type: "success" });
-      // 重置表单
-      newAttrForm.value = {
-        attrName: "",
-        attrValue: "",
-        attrDesc: ""
-      };
-      // 重新加载属性列表
-      loadSkuAttrs(newFormInline.value.id);
-    }
+    attrDesc: newAttrForm.value.attrDesc,
+    attrType: 1,
+    isProductAttr: false
   });
+  // 重置表单
+  newAttrForm.value = {
+    attrName: "",
+    attrValue: "",
+    attrDesc: ""
+  };
+  message("属性已添加到列表，保存SKU后将自动提交", { type: "success" });
 }
 
 // 从预设属性中选择并添加
 function handleSelectPresetAttr(attr: any) {
-  // 如果是新增SKU，先添加到临时列表
-  if (!newFormInline.value.id || newFormInline.value.id === 0) {
-    // 检查是否已存在相同属性
-    const exists = skuAttrs.value.some(
-      a => a.attrName === attr.attrName && a.attrValue === attr.attrValue
-    );
-    if (exists) {
-      message("该属性已存在", { type: "warning" });
-      return;
-    }
-    skuAttrs.value.push({
-      attrName: attr.attrName,
-      attrValue: attr.attrValue,
-      attrDesc: attr.attrDesc
-    });
-    message("属性已添加到列表，保存SKU后将自动提交", { type: "success" });
-    showPresetDialog.value = false;
+  // 检查是否已存在相同属性（包括商品属性和SKU属性）
+  const exists = skuAttrs.value.some(
+    a => a.attrName === attr.attrName && a.attrValue === attr.attrValue
+  );
+  if (exists) {
+    message("该属性已存在", { type: "warning" });
     return;
   }
 
-  const attrData = {
-    relatedId: newFormInline.value.id,
+  // 统一添加到临时列表，等保存SKU时一起提交
+  skuAttrs.value.push({
     attrName: attr.attrName,
     attrValue: attr.attrValue,
-    attrDesc: attr.attrDesc || null
-  };
-
-  addAttr(attrData).then(res => {
-    if (res.code === 200) {
-      message("属性添加成功", { type: "success" });
-      loadSkuAttrs(newFormInline.value.id);
-      showPresetDialog.value = false;
-    }
+    attrDesc: attr.attrDesc,
+    attrType: 1,
+    isProductAttr: false
   });
+  message("属性已添加到列表，保存SKU后将自动提交", { type: "success" });
+  showPresetDialog.value = false;
 }
 
 // 删除属性
 function handleDeleteAttr(attrId: number, index: number) {
+  const attr = skuAttrs.value[index];
+  // 商品属性不允许删除
+  if (attr.isProductAttr || attr.attrType === 0) {
+    message("商品属性不允许删除", { type: "warning" });
+    return;
+  }
+
   if (!attrId) {
     // 如果是未保存的属性，直接从列表中删除
     skuAttrs.value.splice(index, 1);
@@ -270,15 +321,18 @@ async function saveAttrs(skuId: number) {
     return;
   }
 
-  const promises = tempAttrs.map(attr => {
-    const attrData = {
-      relatedId: skuId,
-      attrName: attr.attrName,
-      attrValue: attr.attrValue,
-      attrDesc: attr.attrDesc || null
-    };
-    return addAttr(attrData);
-  });
+  const promises = tempAttrs
+    .filter(attr => !attr.isProductAttr && attr.attrType !== 0) // 只保存SKU属性
+    .map(attr => {
+      const attrData = {
+        relatedId: skuId,
+        attrType: 1, // SKU属性
+        attrName: attr.attrName,
+        attrValue: attr.attrValue,
+        attrDesc: attr.attrDesc || null
+      };
+      return addAttr(attrData);
+    });
 
   try {
     await Promise.all(promises);
@@ -414,13 +468,27 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
                     border-radius: 4px;
                   "
                 >
-                  <el-tag style="margin-right: 10px" type="primary">
+                  <el-tag
+                    style="margin-right: 10px"
+                    :type="
+                      attr.isProductAttr || attr.attrType === 0
+                        ? 'success'
+                        : 'primary'
+                    "
+                  >
                     {{ attr.attrName }}
+                    <span
+                      v-if="attr.isProductAttr || attr.attrType === 0"
+                      style="margin-left: 5px; font-size: 10px"
+                    >
+                      (商品)
+                    </span>
                   </el-tag>
                   <span style="flex: 1; margin-right: 10px">{{
                     attr.attrValue
                   }}</span>
                   <el-button
+                    v-if="!(attr.isProductAttr || attr.attrType === 0)"
                     type="danger"
                     size="small"
                     :icon="useRenderIcon('ep:delete')"
@@ -428,6 +496,12 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
                   >
                     删除
                   </el-button>
+                  <span
+                    v-else
+                    style=" padding: 0 8px; font-size: 12px;color: #909399"
+                  >
+                    商品属性（不可删除）
+                  </span>
                 </div>
               </div>
 
