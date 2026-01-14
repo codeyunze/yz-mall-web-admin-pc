@@ -136,7 +136,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View)"
-              @click="openDialog('入库', row)"
+              @click="openDialog('详情', row)"
             >
               详情
             </el-button>

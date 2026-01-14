@@ -147,9 +147,14 @@ export function useColumns() {
       props: {
         formInline: {
           productName: row.productName,
-          productId: row.skuId,
-          quantity: 0,
-          remark: row.remark
+          productId: row.productId,
+          skuId: row.skuId,
+          skuName: row.skuName,
+          quantity: row.quantity || 0,
+          remark: row.remark || "",
+          createTime: row.createTime || "",
+          operatorName: row.operatorName || "",
+          readOnly: title === "详情"
         }
       },
       width: "46%",
@@ -160,6 +165,7 @@ export function useColumns() {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
+      hideFooter: title === "详情",
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();

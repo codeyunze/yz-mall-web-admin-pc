@@ -5,6 +5,9 @@ interface FormItemProps {
   skuName?: string;
   quantity: number;
   remark: string;
+  createTime?: string;
+  operatorName?: string;
+  readOnly?: boolean;
 }
 interface FormProps {
   formInline: FormItemProps;

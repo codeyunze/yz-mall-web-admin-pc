@@ -29,14 +29,10 @@ export function useColumns() {
       width: 90
     },
     {
-      label: "SKU ID",
-      prop: "id",
-      width: 120
-    },
-    {
-      label: "商品ID",
-      prop: "productId",
-      width: 120
+      label: "商品名称",
+      prop: "productName",
+      align: "left",
+      minWidth: 150
     },
     {
       label: "SKU编码",

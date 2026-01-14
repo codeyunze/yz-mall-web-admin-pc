@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<FormProps>(), {
       id: 0,
       relatedId: null,
       attrType: 0,
-      attrRequired: 0,
+      attrRequired: 1,
       productId: null,
       attrName: "",
       attrValue: "",
@@ -128,22 +128,6 @@ defineExpose({ getRef, getFormData });
               clearable
               placeholder="请输入属性值"
             />
-          </el-form-item>
-        </re-col>
-
-        <re-col :value="12" :xs="24" :sm="24">
-          <el-form-item label="必选属性" prop="attrRequired">
-            <el-select
-              v-model="newFormInline.attrRequired"
-              placeholder="请选择"
-              style="width: 100%"
-            >
-              <el-option label="可选" :value="0" />
-              <el-option label="必选" :value="1" />
-            </el-select>
-            <div style="margin-top: 5px; font-size: 12px; color: #909399">
-              必选属性表示SKU必须包含此属性
-            </div>
           </el-form-item>
         </re-col>
 

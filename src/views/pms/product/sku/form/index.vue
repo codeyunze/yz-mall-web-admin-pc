@@ -498,7 +498,7 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
                   </el-button>
                   <span
                     v-else
-                    style=" padding: 0 8px; font-size: 12px;color: #909399"
+                    style="padding: 0 8px; font-size: 12px; color: #909399"
                   >
                     商品属性（不可删除）
                   </span>

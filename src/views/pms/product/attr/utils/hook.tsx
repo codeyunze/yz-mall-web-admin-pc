@@ -232,7 +232,7 @@ export function useColumns() {
             const submitData: any = {
               relatedId: formData.productId || formData.relatedId, // 使用 productId 作为 relatedId
               attrType: 0, // 固定为商品属性
-              attrRequired: formData.attrRequired ?? 0, // 必选属性，默认为0（可选）
+              attrRequired: formData.attrRequired ?? 1, // 必选属性，默认为1（必选）
               attrName: formData.attrName,
               attrValue: formData.attrValue,
               attrDesc: formData.attrDesc || null
