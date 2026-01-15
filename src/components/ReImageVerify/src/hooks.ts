@@ -1,21 +1,62 @@
 import { ref, onMounted } from "vue";
+import { getCaptcha } from "@/api/user";
 
 /**
- * 绘制图形验证码
- * @param width - 图形宽度
- * @param height - 图形高度
+ * 从后端获取图形验证码
  */
-export const useImageVerify = (width = 120, height = 40) => {
-  const domRef = ref<HTMLCanvasElement>();
+export const useImageVerify = () => {
+  const imgRef = ref<HTMLImageElement>();
   const imgCode = ref("");
+  const captchaId = ref("");
+  const imageSrc = ref("");
 
   function setImgCode(code: string) {
     imgCode.value = code;
   }
 
-  function getImgCode() {
-    if (!domRef.value) return;
-    imgCode.value = draw(domRef.value, width, height);
+  async function getImgCode() {
+    try {
+      imageSrc.value = ""; // 清空图片，显示加载状态
+      const res = await getCaptcha();
+      console.log("验证码接口响应:", res);
+
+      // 检查响应格式
+      if (!res) {
+        console.error("验证码接口返回为空");
+        return;
+      }
+
+      // 检查响应码和数据
+      if (res.code === 200 && res.data) {
+        if (res.data.captchaId && res.data.image) {
+          captchaId.value = res.data.captchaId;
+          imageSrc.value = res.data.image;
+          imgCode.value = ""; // 清空验证码，等待用户输入
+          console.log(
+            "验证码加载成功, captchaId:",
+            captchaId.value,
+            "imageSrc前50字符:",
+            imageSrc.value?.substring(0, 50)
+          );
+        } else {
+          console.error("验证码数据不完整:", res.data);
+        }
+      } else {
+        console.error(
+          "验证码接口返回错误, code:",
+          res.code,
+          "msg:",
+          res.msg,
+          "data:",
+          res.data
+        );
+      }
+    } catch (error: any) {
+      console.error("获取验证码失败:", error);
+      if (error?.response) {
+        console.error("响应错误:", error.response.data);
+      }
+    }
   }
 
   onMounted(() => {
@@ -23,63 +64,11 @@ export const useImageVerify = (width = 120, height = 40) => {
   });
 
   return {
-    domRef,
+    imgRef,
     imgCode,
+    captchaId,
+    imageSrc,
     setImgCode,
     getImgCode
   };
 };
-
-function randomNum(min: number, max: number) {
-  const num = Math.floor(Math.random() * (max - min) + min);
-  return num;
-}
-
-function randomColor(min: number, max: number) {
-  const r = randomNum(min, max);
-  const g = randomNum(min, max);
-  const b = randomNum(min, max);
-  return `rgb(${r},${g},${b})`;
-}
-
-function draw(dom: HTMLCanvasElement, width: number, height: number) {
-  let imgCode = "";
-
-  const NUMBER_STRING = "0123456789";
-
-  const ctx = dom.getContext("2d");
-  if (!ctx) return imgCode;
-
-  ctx.fillStyle = randomColor(180, 230);
-  ctx.fillRect(0, 0, width, height);
-  for (let i = 0; i < 4; i += 1) {
-    const text = NUMBER_STRING[randomNum(0, NUMBER_STRING.length)];
-    imgCode += text;
-    const fontSize = randomNum(18, 41);
-    const deg = randomNum(-30, 30);
-    ctx.font = `${fontSize}px Simhei`;
-    ctx.textBaseline = "top";
-    ctx.fillStyle = randomColor(80, 150);
-    ctx.save();
-    ctx.translate(30 * i + 15, 15);
-    ctx.rotate((deg * Math.PI) / 180);
-    ctx.fillText(text, -15 + 5, -15);
-    ctx.restore();
-  }
-  for (let i = 0; i < 5; i += 1) {
-    ctx.beginPath();
-    ctx.moveTo(randomNum(0, width), randomNum(0, height));
-    ctx.lineTo(randomNum(0, width), randomNum(0, height));
-    ctx.strokeStyle = randomColor(180, 230);
-    ctx.closePath();
-    ctx.stroke();
-  }
-  for (let i = 0; i < 41; i += 1) {
-    ctx.beginPath();
-    ctx.arc(randomNum(0, width), randomNum(0, height), 1, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.fillStyle = randomColor(150, 200);
-    ctx.fill();
-  }
-  return imgCode;
-}

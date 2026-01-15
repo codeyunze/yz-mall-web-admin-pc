@@ -38,6 +38,7 @@ defineOptions({
 });
 
 const imgCode = ref("");
+const captchaId = ref("");
 const loginDay = ref(7);
 const router = useRouter();
 const loading = ref(false);
@@ -79,9 +80,16 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   disabled.value = true;
 
   try {
+    console.log("登录参数:", {
+      account: ruleForm.account,
+      captcha: ruleForm.verifyCode,
+      captchaId: captchaId.value
+    });
     const loginPromise = useUserStoreHook().loginByUsername({
       account: ruleForm.account,
-      password: ruleForm.password
+      password: ruleForm.password,
+      captcha: ruleForm.verifyCode,
+      captchaId: captchaId.value
     });
 
     // 增加登录超时保护，防止 Promise 一直不结束导致按钮一直 loading
@@ -252,7 +260,10 @@ watch(loginDay, value => {
                   :prefix-icon="useRenderIcon('ri:shield-keyhole-line')"
                 >
                   <template v-slot:append>
-                    <ReImageVerify v-model:code="imgCode" />
+                    <ReImageVerify
+                      v-model:code="imgCode"
+                      v-model:captchaId="captchaId"
+                    />
                   </template>
                 </el-input>
               </el-form-item>

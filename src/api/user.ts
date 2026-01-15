@@ -60,6 +60,18 @@ export type UserInfoResult = {
   data: UserInfo;
 };
 
+/** 获取验证码 */
+export const getCaptcha = () => {
+  return http.request<{
+    code: number;
+    msg: string;
+    data: {
+      captchaId: string;
+      image: string;
+    };
+  }>("get", baseUrlApi("/authentication/captcha"));
+};
+
 /** 登录 */
 export const getLogin = (data?: object) => {
   return http.request<UserResult>("post", baseUrlApi("/authentication/login"), {
