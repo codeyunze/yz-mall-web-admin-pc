@@ -68,6 +68,6 @@ defineExpose({ getImgCode, captchaId });
       @click="getImgCode"
       @error="handleImageError"
     />
-    <span v-else style=" font-size: 12px;color: #999">加载中...</span>
+    <span v-else style="font-size: 12px; color: #999">加载中...</span>
   </div>
 </template>
