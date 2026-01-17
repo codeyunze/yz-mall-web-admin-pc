@@ -28,27 +28,45 @@ const INITIAL_DATA = {
 
 const pagination = ref({ current: 1, pageSize: 20, total: 0 });
 
-const productList = ref([]);
+interface ProductItem {
+  id: string;
+  productName: string;
+  productPrice: number;
+  titles: string;
+  remark: string;
+  productImages: string[];
+  isSetup: boolean;
+  type?: number;
+  description?: string;
+  albumPics?: string;
+  quantity?: number;
+  [key: string]: any;
+}
+
+const productList = ref<ProductItem[]>([]);
 const dataLoading = ref(true);
 const lastProductId = ref(0);
+const searchValue = ref("");
 
 const getCardListData = async () => {
   try {
     const queryFilter = reactive({
-      queryInfo: searchValue,
-      lastProductId: lastProductId
+      queryInfo: searchValue.value,
+      lastProductId: lastProductId.value
     });
     const { data } = await pmsProductInfo(queryFilter);
-    lastProductId.value = data[data.length - 1].id;
-    if (productList.value.length > 0) {
-      productList.value.push(...data);
-    } else {
-      productList.value = data;
-    }
+    if (data && data.length > 0) {
+      lastProductId.value = data[data.length - 1].id;
+      if (productList.value.length > 0) {
+        productList.value.push(...data);
+      } else {
+        productList.value = data;
+      }
 
-    pagination.value.current = 1;
-    pagination.value.pageSize = productList.value.length;
-    pagination.value.total = productList.value.length;
+      pagination.value.current = 1;
+      pagination.value.pageSize = productList.value.length;
+      pagination.value.total = productList.value.length;
+    }
   } catch (e) {
     console.log(e);
   } finally {
@@ -66,12 +84,18 @@ onMounted(() => {
 
 // const formDialogVisible = ref(false);
 const formData = ref({ ...INITIAL_DATA });
-const searchValue = ref("");
 
-const handleManageProduct = product => {
+const handleManageProduct = (product: ProductItem) => {
   // formDialogVisible.value = true;
   nextTick(() => {
-    formData.value = { ...product, status: product?.isSetup ? "1" : "0" };
+    formData.value = {
+      ...INITIAL_DATA,
+      ...product,
+      status: product?.isSetup ? "1" : "0",
+      description: product.remark || "",
+      type: product.type?.toString() || "",
+      mark: product.titles || ""
+    };
   });
 };
 const load = () => {
@@ -118,8 +142,8 @@ const load = () => {
         :description="`${searchValue} 产品不存在`"
       />
       <template v-if="pagination.total > 0">
-        <el-row v-infinite-scroll="load" :gutter="16">
-          <el-col
+        <div v-infinite-scroll="load" class="product-grid">
+          <div
             v-for="(product, index) in productList
               .slice(
                 pagination.pageSize * (pagination.current - 1),
@@ -129,19 +153,35 @@ const load = () => {
                 v.productName.toLowerCase().includes(searchValue.toLowerCase())
               )"
             :key="index"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-            :xl="4"
+            class="card-col"
           >
             <ListCard
-              :product="product"
+              :product="{
+                ...product,
+                type: product.type ?? 0,
+                description: product.remark || '',
+                albumPics: product.albumPics || '',
+                quantity: product.quantity ?? 0
+              }"
               @manage-product="handleManageProduct"
             />
-          </el-col>
-        </el-row>
+          </div>
+        </div>
       </template>
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 16px; // 固定间距，水平和垂直都是16px
+  margin-bottom: 24px;
+}
+
+.card-col {
+  width: 100%;
+  min-width: 330px;
+}
+</style>

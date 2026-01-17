@@ -79,44 +79,38 @@ function addOrder(product?: CardProductType) {
 <template>
   <div :class="cardClass">
     <div class="list-card-item_detail bg-bg_color">
-      <el-row justify="space-between">
-        <div :class="cardLogoClass">
-          <el-image
-            :src="
-              product &&
-              product.productImages &&
-              product.productImages.length > 0
-                ? product.productImages[0]
-                : ''
-            "
-            alt="商品图片"
-          >
-            <template #error>
-              <div class="image-slot">
-                <el-icon><icon-picture /></el-icon>
-              </div>
-            </template>
-          </el-image>
-        </div>
-        <div class="list-card-item_detail--operation">
-          价格：
-          <!--<span style="margin: 0 5px; text-decoration: line-through"
-            >{{ product.productPrice }}$</span
-          >-->
-          <span style="margin: 0 5px">{{ product.productPrice }}$</span>
-          <!--:color="product.isSetup ? '#00a870' : '#eee'"-->
-          <el-tag
-            :color="'#00a870'"
-            effect="dark"
-            class="mx-1 list-card-item_detail--operation--tag"
-          >
-            已启用
-          </el-tag>
-        </div>
-      </el-row>
+      <div :class="cardLogoClass" class="list-card-item_detail--header">
+        <el-image
+          :src="
+            product && product.productImages && product.productImages.length > 0
+              ? product.productImages[0]
+              : ''
+          "
+          alt="商品图片"
+        >
+          <template #error>
+            <div class="image-slot">
+              <el-icon><icon-picture /></el-icon>
+            </div>
+          </template>
+        </el-image>
+      </div>
       <p class="list-card-item_detail--name text-text_color_primary">
         {{ product.productName }}
       </p>
+      <div class="list-card-item_detail--price">
+        <span class="list-card-item_detail--price--label">价格：</span>
+        <span class="list-card-item_detail--price--value"
+          >{{ product.productPrice }}$</span
+        >
+        <el-tag
+          :color="'#00a870'"
+          effect="dark"
+          class="list-card-item_detail--price--tag"
+        >
+          已启用
+        </el-tag>
+      </div>
       <p class="list-card-item_detail--tag text-text_color_regular">
         <el-tag
           v-for="(title, index) in product.titles.split(' ')"
@@ -130,8 +124,8 @@ function addOrder(product?: CardProductType) {
       <p class="list-card-item_detail--desc text-text_color_regular">
         {{ product.remark }}
       </p>
-      <div>
-        <el-button-group class="ml-4">
+      <div class="list-card-item_detail--actions">
+        <el-button-group class="list-card-item_detail--actions--group">
           <el-button :icon="Star" plain />
           <el-button :icon="Share" plain />
           <el-button
@@ -143,7 +137,7 @@ function addOrder(product?: CardProductType) {
         <el-button
           type="primary"
           plain
-          style="float: right"
+          class="list-card-item_detail--actions--buy"
           @click="addOrder(product)"
           >立即购买</el-button
         >
@@ -156,15 +150,29 @@ function addOrder(product?: CardProductType) {
 .list-card-item {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
+  width: 100%;
+  min-width: 330px;
+  height: 100%;
   overflow: hidden;
   cursor: pointer;
   border-radius: 8px;
 
   &_detail {
+    display: flex;
     flex: 1;
-    min-height: 140px;
+    flex-direction: column;
+    width: 100%;
     padding: 24px 32px;
+
+    &--header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 16px;
+      overflow: visible;
+    }
 
     &--logo {
       display: flex;
@@ -182,25 +190,47 @@ function addOrder(product?: CardProductType) {
       }
     }
 
-    &--operation {
+    &--name {
+      position: relative;
+      z-index: 1;
+      display: -webkit-box;
+      padding: 12px 0;
+      margin: 0;
+      overflow: hidden;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    &--price {
       display: flex;
-      height: 100%;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+
+      &--label {
+        color: var(--el-text-color-regular);
+      }
+
+      &--value {
+        font-weight: 500;
+        color: var(--el-text-color-primary);
+      }
 
       &--tag {
         border: 0;
       }
     }
 
-    &--name {
-      margin: 10px 0 8px;
-      font-size: 16px;
-      font-weight: 400;
-    }
-
     &--tag {
       display: -webkit-box;
-      height: 25px;
-      margin-bottom: 5px;
+      min-height: 25px;
+      margin-bottom: 12px;
       overflow: hidden;
       font-size: 12px;
       line-height: 20px;
@@ -211,7 +241,8 @@ function addOrder(product?: CardProductType) {
 
     &--desc {
       display: -webkit-box;
-      height: 40px;
+      flex: 1;
+      min-height: 40px;
       margin-bottom: 24px;
       overflow: hidden;
       font-size: 14px;
@@ -219,6 +250,39 @@ function addOrder(product?: CardProductType) {
       text-overflow: ellipsis;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
+    }
+
+    &--actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+
+      @media (width <= 480px) {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &--group {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+
+        &--buy {
+          width: 100%;
+        }
+      }
+
+      &--group {
+        flex-shrink: 0;
+      }
+
+      &--buy {
+        flex-shrink: 0;
+      }
     }
   }
 
@@ -228,20 +292,27 @@ function addOrder(product?: CardProductType) {
       color: var(--el-text-color-disabled);
     }
 
-    .list-card-item_detail--operation--tag {
+    .list-card-item_detail--price--tag {
       color: #bababa;
     }
   }
 }
 
 .block {
+  position: relative;
   box-sizing: border-box;
-  display: inline-block;
-  width: 278px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 252px;
+  min-width: 252px;
+  height: 252px;
+  min-height: 252px;
   padding: 0;
-  text-align: center;
-  vertical-align: top;
-  border: 1px solid var(--el-text-color-disabled);
+  margin: 0 auto;
+  overflow: hidden;
+  border: none;
   border-radius: 10px;
 }
 
@@ -252,11 +323,20 @@ function addOrder(product?: CardProductType) {
 }
 
 .block .el-image {
-  width: 100%;
-  max-width: 300px;
-  height: 222px;
-  max-height: 278px;
-  padding: 5px 5px 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 252px;
+  height: 252px;
+
+  :deep(.el-image__inner) {
+    display: block;
+    width: 252px;
+    height: 252px;
+    object-fit: contain;
+  }
 }
 
 .block .image-slot {
