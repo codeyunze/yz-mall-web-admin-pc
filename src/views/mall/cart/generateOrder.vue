@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, h } from "vue";
 import { Order } from "./utils/types";
 import type { CascaderProps } from "element-plus";
 import { getRegionByParent, pageReceiptInfo } from "@/api/system";
+import {
+  addDialog,
+  closeDialog,
+  type DialogOptions
+} from "@/components/ReDialog/index";
+import AddressSelector from "./components/AddressSelector.vue";
+import { message } from "@/utils/message";
 
 // 声明 props 类型
 export interface FormProps {
@@ -69,6 +76,62 @@ const handleAddressChange = (values: any) => {
 const newFormInline = ref(props.formInline);
 const totalPrice = ref(0.0);
 
+// 更新地址信息
+const updateAddress = (item: any) => {
+  newFormInline.value.receiverName = item.receiverName || "";
+  newFormInline.value.receiverPhone = item.receiverPhone || "";
+  newFormInline.value.receiverProvince = item.receiverProvince || "";
+  newFormInline.value.receiverCity = item.receiverCity || "";
+  newFormInline.value.receiverDistrict = item.receiverDistrict || "";
+  newFormInline.value.receiverProvinceName = item.receiverProvinceName || "";
+  newFormInline.value.receiverCityName = item.receiverCityName || "";
+  newFormInline.value.receiverDistrictName = item.receiverDistrictName || "";
+  newFormInline.value.receiverAddress = item.receiverAddress || "";
+  newFormInline.value.email = item.receiverEmail || item.email || "";
+
+  selectAddress.value[0] = newFormInline.value.receiverProvince;
+  selectAddress.value[1] = newFormInline.value.receiverCity;
+  selectAddress.value[2] = newFormInline.value.receiverDistrict;
+};
+
+// 选择其他地址
+const handleSelectOtherAddress = () => {
+  let dialogIndex = 0;
+  const dialogOptions: DialogOptions = {
+    title: "选择收货地址",
+    width: "50%",
+    props: {
+      currentAddress: {
+        receiverName: newFormInline.value.receiverName,
+        receiverPhone: newFormInline.value.receiverPhone,
+        receiverProvince: newFormInline.value.receiverProvince,
+        receiverCity: newFormInline.value.receiverCity,
+        receiverDistrict: newFormInline.value.receiverDistrict,
+        receiverProvinceName: newFormInline.value.receiverProvinceName,
+        receiverCityName: newFormInline.value.receiverCityName,
+        receiverDistrictName: newFormInline.value.receiverDistrictName,
+        receiverAddress: newFormInline.value.receiverAddress,
+        email: newFormInline.value.email
+      }
+    },
+    contentRenderer: ({ options, index }) => {
+      dialogIndex = index;
+      return h(AddressSelector, {
+        currentAddress: options.props.currentAddress,
+        onSelect: (address: any) => {
+          updateAddress(address);
+          message("地址已更新", { type: "success" });
+          // 关闭对话框
+          closeDialog(dialogOptions, dialogIndex);
+        }
+      });
+    },
+    footerRenderer: () => null,
+    closeOnClickModal: true
+  };
+  addDialog(dialogOptions);
+};
+
 onMounted(() => {
   const params = { filter: {} };
   pageReceiptInfo(params).then(res => {
@@ -77,20 +140,7 @@ onMounted(() => {
       return;
     }
     const item = res.data.items[0];
-    newFormInline.value.receiverName = item.receiverName;
-    newFormInline.value.receiverPhone = item.receiverPhone;
-    newFormInline.value.receiverProvince = item.receiverProvince;
-    newFormInline.value.receiverCity = item.receiverCity;
-    newFormInline.value.receiverDistrict = item.receiverDistrict;
-    newFormInline.value.receiverProvinceName = item.receiverProvinceName;
-    newFormInline.value.receiverCityName = item.receiverCityName;
-    newFormInline.value.receiverDistrictName = item.receiverDistrictName;
-    newFormInline.value.receiverAddress = item.receiverAddress;
-    newFormInline.value.email = item.email;
-
-    selectAddress.value[0] = newFormInline.value.receiverProvince;
-    selectAddress.value[1] = newFormInline.value.receiverCity;
-    selectAddress.value[2] = newFormInline.value.receiverDistrict;
+    updateAddress(item);
 
     newFormInline.value.products.forEach(product => {
       totalPrice.value = totalPrice.value + product.price * product.quantity;
@@ -130,7 +180,11 @@ onMounted(() => {
           </el-col>
         </el-row>
         <div style="text-align: center">
-          <el-text type="primary"><a>其它地址 >></a></el-text>
+          <el-text type="primary">
+            <a style="cursor: pointer" @click="handleSelectOtherAddress"
+              >其它地址 >></a
+            >
+          </el-text>
         </div>
       </el-card>
     </div>
