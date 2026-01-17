@@ -22,17 +22,12 @@ const {
   form,
   dataList,
   pagination,
-  selectedNum,
-  adaptiveConfig,
-  buttonClass,
+  categoryOptions,
   onSearch,
-  resetForm,
-  onCurrentChange,
   openDialog,
-  handleSelectionChange,
   handleSizeChange,
   handleCurrentChange
-} = useColumns(tableRef);
+} = useColumns();
 
 const state = ref({
   status: "0",
@@ -45,8 +40,14 @@ const filterColumns: PlusColumn[] = [
     prop: "productName"
   },
   {
-    label: "商品标签",
-    prop: "titles"
+    label: "SKU名称",
+    prop: "skuName"
+  },
+  {
+    label: "商品分类",
+    prop: "categoryId",
+    valueType: "select",
+    options: categoryOptions.value
   },
   {
     label: "创建时间",
@@ -66,6 +67,8 @@ const handleChange = (values: any) => {
 const handleSearch = (values: any) => {
   form.productName = values.productName;
   form.productId = values.productId;
+  form.skuName = values.skuName;
+  form.categoryId = values.categoryId;
   if (values.createTime) {
     form.startTimeFilter = dayjs(values.createTime[0]).format(
       "YYYY-MM-DD HH:mm:ss"
@@ -79,6 +82,8 @@ const handleSearch = (values: any) => {
 const handleRest = () => {
   form.productName = null;
   form.productId = 0;
+  form.skuName = null;
+  form.categoryId = null;
   form.startTimeFilter = null;
   form.endTimeFilter = null;
   onSearch();
@@ -111,7 +116,6 @@ const handleRest = () => {
           ref="tableRef"
           row-key="id"
           adaptive
-          :adaptiveConfig="{ offsetBottom: 108 }"
           align-whole="center"
           table-layout="auto"
           :loading="loading"
@@ -123,7 +127,6 @@ const handleRest = () => {
             background: 'var(--el-fill-color-light)',
             color: 'var(--el-text-color-primary)'
           }"
-          @selection-change="handleSelectionChange"
           @page-size-change="handleSizeChange"
           @page-current-change="handleCurrentChange"
         >
@@ -134,7 +137,7 @@ const handleRest = () => {
               type="primary"
               :size="size"
               :icon="useRenderIcon(View)"
-              @click="openDialog('入库', row)"
+              @click="openDialog('详情', row)"
             >
               详情
             </el-button>

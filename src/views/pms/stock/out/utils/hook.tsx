@@ -1,23 +1,41 @@
-import type {
-  LoadingConfig,
-  AdaptiveConfig,
-  PaginationProps
-} from "@pureadmin/table";
+import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
-import { delay, deviceDetection } from "@pureadmin/utils";
+import { ref, onMounted, reactive, h } from "vue";
+
+// 将树形数据转换为扁平列表
+function flattenCategoryTree(
+  tree: any[],
+  prefix = ""
+): Array<{ label: string; value: number }> {
+  const result: Array<{ label: string; value: number }> = [];
+  tree.forEach(item => {
+    const label = prefix
+      ? `${prefix} / ${item.categoryName}`
+      : item.categoryName;
+    result.push({
+      label,
+      value: item.id
+    });
+    if (item.children && item.children.length > 0) {
+      result.push(...flattenCategoryTree(item.children, label));
+    }
+  });
+  return result;
+}
+import { deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/stock/info/form/index.vue";
 import { message } from "@/utils/message";
 import {
   pmsStockOutPage,
   pmsProductStockIn,
-  pmsProductStockOut
+  pmsProductStockOut,
+  getCategoryTree
 } from "@/api/pms";
-import type { FormItemProps } from "@/views/pms/stock/info/utils/types";
+import type { FormItemProps } from "@/views/pms/stock/info/utils/viewTypes";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
@@ -36,9 +54,18 @@ export function useColumns(tableRef: Ref) {
       align: "left"
     },
     {
-      label: "标签",
-      prop: "titles",
-      minWidth: 200
+      label: "SKU名称",
+      prop: "skuName",
+      align: "left"
+    },
+    {
+      label: "商品分类",
+      prop: "categoryName",
+      align: "left"
+    },
+    {
+      label: "关联订单",
+      prop: "orderId"
     },
     {
       label: "出库数量",
@@ -47,10 +74,6 @@ export function useColumns(tableRef: Ref) {
     {
       label: "出库时间",
       prop: "createTime"
-    },
-    {
-      label: "关联订单",
-      prop: "orderId"
     },
     {
       label: "操作",
@@ -65,17 +88,10 @@ export function useColumns(tableRef: Ref) {
     productName: "",
     productId: 0,
     quantity: 0,
+    skuName: null,
+    categoryId: null,
     startTimeFilter: null,
     endTimeFilter: null
-  });
-  const buttonClass = computed(() => {
-    return [
-      "!h-[20px]",
-      "reset-margin",
-      "!text-gray-500",
-      "dark:!text-white",
-      "dark:hover:!text-primary"
-    ];
   });
   const dataList = ref([]);
   /** 分页配置 */
@@ -106,26 +122,6 @@ export function useColumns(tableRef: Ref) {
     // background: rgba()
   });
 
-  /** 撑满内容区自适应高度相关配置 */
-  const adaptiveConfig: AdaptiveConfig = {
-    /** 表格距离页面底部的偏移量，默认值为 `96` */
-    offsetBottom: 110,
-    /** 是否固定表头，默认值为 `true`（如果不想固定表头，fixHeader设置为false并且表格要设置table-layout="auto"） */
-    // fixHeader: true
-    /** 页面 `resize` 时的防抖时间，默认值为 `60` ms */
-    timeout: 200
-    /** 表头的 `z-index`，默认值为 `100` */
-    // zIndex: 100
-  };
-
-  function onCurrentChange(val) {
-    loadingConfig.text = `正在加载第${val}页...`;
-    loading.value = true;
-    delay(600).then(() => {
-      loading.value = false;
-    });
-  }
-
   function onSearch() {
     loading.value = true;
     const queryFilter = {
@@ -143,20 +139,20 @@ export function useColumns(tableRef: Ref) {
     }, 500);
   }
 
-  const resetForm = formEl => {
-    if (!formEl) return;
-    formEl.resetFields();
-    onSearch();
-  };
-
-  function openDialog(title = "入库", row?: FormItemProps) {
+  function openDialog(title = "出库", row?: FormItemProps) {
     addDialog({
       title: `${row.productName} 商品${title}`,
       props: {
         formInline: {
           productName: row.productName,
-          productId: row.skuId,
-          quantity: 0
+          productId: row.productId,
+          skuId: row.skuId,
+          skuName: row.skuName,
+          quantity: row.quantity || 0,
+          remark: row.remark || "",
+          createTime: row.createTime || "",
+          createName: row.createName || "",
+          readOnly: title === "详情"
         }
       },
       width: "46%",
@@ -167,6 +163,7 @@ export function useColumns(tableRef: Ref) {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
+      hideFooter: title === "详情",
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
@@ -203,13 +200,6 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
-  /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
-    selectedNum.value = val.length;
-    // 重置表格高度
-    tableRef.value.setAdaptive();
-  }
-
   /**
    * 设置一页数据量
    * @param val 一页展示的数据量
@@ -229,7 +219,20 @@ export function useColumns(tableRef: Ref) {
     onSearch();
   }
 
+  // 分类选项（扁平列表）
+  const categoryOptions = ref<Array<{ label: string; value: number }>>([]);
+
+  // 加载分类树
+  function loadCategoryTree() {
+    getCategoryTree().then(data => {
+      if (data.code === 200) {
+        categoryOptions.value = flattenCategoryTree(data.data || []);
+      }
+    });
+  }
+
   onMounted(() => {
+    loadCategoryTree();
     onSearch();
   });
 
@@ -241,13 +244,9 @@ export function useColumns(tableRef: Ref) {
     pagination,
     selectedNum,
     loadingConfig,
-    adaptiveConfig,
-    buttonClass,
+    categoryOptions,
     onSearch,
-    resetForm,
-    onCurrentChange,
     openDialog,
-    handleSelectionChange,
     handleSizeChange,
     handleCurrentChange
   };
