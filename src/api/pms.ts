@@ -89,6 +89,11 @@ export const pmsProductInfo = (data?: object) => {
   });
 };
 
+/** 产品管理-商品详情查询 */
+export const getProductDetail = (id?: string | number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/product/get/${id}`));
+};
+
 /** 商品添加购物车 */
 export const addCart = (data?: object) => {
   return http.request<Result>("post", baseUrlApi("/pms/cart/add"), {
@@ -225,6 +230,6 @@ export const getSkuDetail = (id?: number) => {
 };
 
 /** 商品SKU-根据商品ID查询SKU列表 */
-export const getSkuListByProductId = (productId?: number) => {
+export const getSkuListByProductId = (productId?: string | number) => {
   return http.request<Result>("get", baseUrlApi(`/pms/sku/list/${productId}`));
 };

@@ -79,7 +79,12 @@ function addOrder(product?: CardProductType) {
 <template>
   <div :class="cardClass">
     <div class="list-card-item_detail bg-bg_color">
-      <div :class="cardLogoClass" class="list-card-item_detail--header">
+      <div
+        :class="cardLogoClass"
+        class="list-card-item_detail--header"
+        style="cursor: pointer"
+        @click="$router.push(`/mall/product/${product.id}`)"
+      >
         <el-image
           :src="
             product && product.productImages && product.productImages.length > 0
@@ -95,7 +100,11 @@ function addOrder(product?: CardProductType) {
           </template>
         </el-image>
       </div>
-      <p class="list-card-item_detail--name text-text_color_primary">
+      <p
+        class="list-card-item_detail--name text-text_color_primary"
+        style="cursor: pointer"
+        @click="$router.push(`/mall/product/${product.id}`)"
+      >
         {{ product.productName }}
       </p>
       <div class="list-card-item_detail--price">

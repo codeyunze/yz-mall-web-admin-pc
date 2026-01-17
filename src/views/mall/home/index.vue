@@ -29,7 +29,7 @@ const INITIAL_DATA = {
 const pagination = ref({ current: 1, pageSize: 20, total: 0 });
 
 interface ProductItem {
-  id: string;
+  id: number | string; // 商品ID，从 /pms/product/info 接口返回的 id 字段
   productName: string;
   productPrice: number;
   titles: string;
@@ -56,7 +56,14 @@ const getCardListData = async () => {
     });
     const { data } = await pmsProductInfo(queryFilter);
     if (data && data.length > 0) {
-      lastProductId.value = data[data.length - 1].id;
+      // 使用 /pms/product/info 接口返回的 id 字段
+      // 注意：id可能是大整数，需要保持为字符串或使用BigInt，避免精度丢失
+      const lastItem = data[data.length - 1];
+      // 如果id是字符串，尝试转换为数字；如果是数字，直接使用
+      // 但要注意JavaScript数字精度限制，大整数会丢失精度
+      const idValue =
+        typeof lastItem.id === "string" ? Number(lastItem.id) : lastItem.id;
+      lastProductId.value = idValue || 0;
       if (productList.value.length > 0) {
         productList.value.push(...data);
       } else {
@@ -158,6 +165,7 @@ const load = () => {
             <ListCard
               :product="{
                 ...product,
+                id: String(product.id), // 确保使用 /pms/product/info 返回的 id 字段，并转换为字符串
                 type: product.type ?? 0,
                 description: product.remark || '',
                 albumPics: product.albumPics || '',
