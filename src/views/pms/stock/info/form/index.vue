@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<FormProps>(), {
     quantity: 0,
     remark: "",
     createTime: "",
-    operatorName: "",
+    createName: "",
     readOnly: false
   })
 });
@@ -198,7 +198,7 @@ defineExpose({ getRef, getFormData });
         <re-col :value="12" :xs="24" :sm="24">
           <el-form-item label="操作人">
             <el-input
-              v-model="newFormInline.operatorName"
+              v-model="newFormInline.createName"
               placeholder="操作人名称"
               readonly
             />

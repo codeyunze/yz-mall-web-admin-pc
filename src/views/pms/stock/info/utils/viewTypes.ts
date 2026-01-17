@@ -6,7 +6,7 @@ interface FormItemProps {
   quantity: number;
   remark: string;
   createTime?: string;
-  operatorName?: string;
+  createName?: string;
   readOnly?: boolean;
 }
 interface FormProps {

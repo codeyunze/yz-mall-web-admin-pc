@@ -153,7 +153,7 @@ export function useColumns() {
           quantity: row.quantity || 0,
           remark: row.remark || "",
           createTime: row.createTime || "",
-          operatorName: row.operatorName || "",
+          createName: row.createName || "",
           readOnly: title === "详情"
         }
       },
