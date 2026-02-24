@@ -7,14 +7,14 @@ import { FormProps } from "@/views/pms/product/attr/utils/types";
 interface ExtendedFormItemProps {
   id?: number;
   title: string;
-  relatedId?: number;
+  relatedId?: number | string;
   attrType?: number;
   attrRequired?: number;
-  productId?: number;
+  productId?: number | string;
   attrName: string;
   attrValue: string;
   attrDesc?: string;
-  productOptions?: Array<{ label: string; value: number }>;
+  productOptions?: Array<{ label: string; value: string }>;
 }
 
 const props = withDefaults(defineProps<FormProps>(), {
@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<FormProps>(), {
 
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline as ExtendedFormItemProps);
-const productOptions = ref<Array<{ label: string; value: number }>>([]);
+const productOptions = ref<Array<{ label: string; value: string }>>([]);
 
 // 监听formInline变化
 watch(
@@ -51,9 +51,10 @@ watch(
     if (
       extendedVal.title === "编辑" &&
       extendedVal.attrType === 0 &&
-      extendedVal.relatedId
+      extendedVal.relatedId != null
     ) {
-      newFormInline.value.productId = extendedVal.relatedId;
+      // 与下拉选项保持同一类型（字符串）
+      newFormInline.value.productId = String(extendedVal.relatedId);
     }
   },
   { deep: true, immediate: true }

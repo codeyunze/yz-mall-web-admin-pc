@@ -28,33 +28,39 @@ export function useColumns() {
       width: 90
     },
     {
-      label: "属性类型",
-      prop: "attrType",
-      width: 120,
-      cellRenderer: ({ row }) => (
-        <el-tag
-          size="small"
-          type={row.attrType === 0 ? "success" : "info"}
-          effect="plain"
-        >
-          {row.attrType === 0 ? "商品" : "SKU"}
-        </el-tag>
-      )
+      label: "商品名称",
+      prop: "productName",
+      align: "left",
+      minWidth: 180
     },
-    {
-      label: "必选属性",
-      prop: "attrRequired",
-      width: 120,
-      cellRenderer: ({ row }) => (
-        <el-tag
-          size="small"
-          type={row.attrRequired === 1 ? "danger" : "info"}
-          effect="plain"
-        >
-          {row.attrRequired === 1 ? "必选" : "可选"}
-        </el-tag>
-      )
-    },
+    // {
+    //   label: "属性类型",
+    //   prop: "attrType",
+    //   width: 120,
+    //   cellRenderer: ({ row }) => (
+    //     <el-tag
+    //       size="small"
+    //       type={row.attrType === 0 ? "success" : "info"}
+    //       effect="plain"
+    //     >
+    //       {row.attrType === 0 ? "商品" : "SKU"}
+    //     </el-tag>
+    //   )
+    // },
+    // {
+    //   label: "必选属性",
+    //   prop: "attrRequired",
+    //   width: 120,
+    //   cellRenderer: ({ row }) => (
+    //     <el-tag
+    //       size="small"
+    //       type={row.attrRequired === 1 ? "danger" : "info"}
+    //       effect="plain"
+    //     >
+    //       {row.attrRequired === 1 ? "必选" : "可选"}
+    //     </el-tag>
+    //   )
+    // },
     {
       label: "属性名称",
       prop: "attrName",
@@ -87,6 +93,11 @@ export function useColumns() {
 
   const formRef = ref();
   const form = reactive({
+    // 默认只查询「商品」类型的属性（attrType = 0）
+    attrType: 0,
+    // 过滤条件中的商品名称
+    productName: null,
+    // 其他过滤条件
     relatedId: null,
     attrName: null,
     attrValue: null
@@ -134,7 +145,7 @@ export function useColumns() {
   };
 
   // 商品列表（用于选择商品）
-  const productOptions = ref<Array<{ label: string; value: number }>>([]);
+  const productOptions = ref<Array<{ label: string; value: string }>>([]);
 
   // 加载商品列表
   function loadProductList(): Promise<void> {
@@ -146,7 +157,8 @@ export function useColumns() {
       if (data.code === 200) {
         productOptions.value = (data.data.items || []).map(item => ({
           label: item.productName,
-          value: item.id
+          // 统一转成字符串，避免与表单中的 productId 类型不一致
+          value: String(item.id)
         }));
       }
     });
@@ -195,7 +207,11 @@ export function useColumns() {
             relatedId: row?.relatedId ?? null,
             attrType: 0, // 固定为商品属性
             attrRequired: row?.attrRequired ?? 0,
-            productId: row?.attrType === 0 ? (row?.relatedId ?? null) : null,
+            // 这里也统一用字符串，方便与下拉选项匹配
+            productId:
+              row?.attrType === 0 && row?.relatedId != null
+                ? String(row.relatedId)
+                : null,
             attrName: row?.attrName ?? "",
             attrValue: row?.attrValue ?? "",
             attrDesc: row?.attrDesc ?? "",
@@ -211,7 +227,11 @@ export function useColumns() {
         fullscreenIcon: true,
         closeOnClickModal: false,
         hideFooter: title !== "编辑" && title !== "新增",
-        contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+        contentRenderer: ({ options }) =>
+          h(editForm, {
+            ref: formRef,
+            formInline: options?.props?.formInline ?? null
+          }),
         beforeSure: done => {
           const FormRef = formRef.value.getRef();
           // 从表单组件中获取实际的数据，而不是使用初始的 props
@@ -230,7 +250,13 @@ export function useColumns() {
 
             // 清理数据，只保留后端需要的字段
             const submitData: any = {
-              relatedId: formData.productId || formData.relatedId, // 使用 productId 作为 relatedId
+              // 下拉内部用字符串，这里提交前统一转成 number
+              relatedId:
+                formData.productId != null
+                  ? Number(formData.productId)
+                  : formData.relatedId != null
+                    ? Number(formData.relatedId)
+                    : null,
               attrType: 0, // 固定为商品属性
               attrRequired: formData.attrRequired ?? 1, // 必选属性，默认为1（必选）
               attrName: formData.attrName,
@@ -315,6 +341,7 @@ export function useColumns() {
     loadingConfig,
     adaptiveConfig,
     buttonClass,
+    productOptions,
     onSearch,
     resetForm,
     onCurrentChange,

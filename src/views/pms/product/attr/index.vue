@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useColumns } from "@/views/pms/product/attr/utils/hook";
+import { pmsProductInfo } from "@/api/pms";
 
 import "plus-pro-components/es/components/search/style/css";
 
@@ -25,6 +26,7 @@ const {
   pagination,
   adaptiveConfig,
   buttonClass,
+  productOptions,
   onSearch,
   resetForm,
   openDialog,
@@ -35,15 +37,15 @@ const {
 } = useColumns();
 
 const state = ref({
-  relatedId: null,
+  productName: "",
   attrName: "",
   attrValue: ""
 });
 
 const filterColumns: PlusColumn[] = [
   {
-    label: "关联ID",
-    prop: "relatedId"
+    label: "商品名称",
+    prop: "productName"
   },
   {
     label: "属性名称",
@@ -59,10 +61,30 @@ const handleChange = (values: any) => {
   console.log(values, "change");
 };
 
-const handleSearch = (values: any) => {
-  form.relatedId = values.relatedId;
+const handleSearch = async (values: any) => {
+  // 先根据商品名称到后端做一次模糊匹配，拿到商品列表
+  if (values.productName) {
+    const res: any = await pmsProductInfo({
+      queryInfo: values.productName
+    });
+    const list = res?.data || [];
+    if (list.length === 1) {
+      // 只有一个匹配结果，直接用这条商品的 ID 作为过滤条件
+      form.relatedId = list[0].id;
+    } else if (list.length > 1) {
+      // 多条结果时，暂时不带 product 过滤，让用户缩小搜索范围
+      form.relatedId = null;
+    } else {
+      // 未匹配到任何商品
+      form.relatedId = null;
+    }
+  } else {
+    form.relatedId = null;
+  }
   form.attrName = values.attrName;
   form.attrValue = values.attrValue;
+  // 保持默认过滤条件：只查询商品类型属性
+  form.attrType = 0;
   onSearch();
 };
 
@@ -70,6 +92,8 @@ const handleRest = () => {
   form.relatedId = null;
   form.attrName = null;
   form.attrValue = null;
+  // 重置时同样只查商品类型属性
+  form.attrType = 0;
   onSearch();
 };
 </script>
