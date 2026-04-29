@@ -170,8 +170,8 @@ export function useColumns() {
   }
 
   // 加载商品列表
-  function loadProductList() {
-    getProductPage({
+  function loadProductList(): Promise<void> {
+    return getProductPage({
       size: 1000,
       current: 1,
       filter: {}
@@ -192,98 +192,105 @@ export function useColumns() {
   };
 
   function openDialog(title = "新增", row?: FormItemProps) {
-    // 加载商品列表用于选择商品
-    loadProductList();
+    // 加载商品列表用于选择商品，加载完成后再打开弹窗，避免组件初始渲染数据不完整
+    loadProductList().then(() => {
+      addDialog({
+        title: `${title}商品SKU`,
+        props: {
+          formInline: {
+            title,
+            id: row?.id ?? 0,
+            productId: row?.productId ?? null,
+            skuCode: row?.skuCode ?? "",
+            skuName: row?.skuName ?? "",
+            priceFee: row?.priceFee ?? 0,
+            marketPriceFee: row?.marketPriceFee ?? 0,
+            status: row?.status ?? 1,
+            albumPics: row?.albumPics ?? "",
+            productOptions: productOptions.value
+          }
+        },
+        width: "60%",
+        style: {
+          "border-radius": "12px"
+        },
+        draggable: false,
+        fullscreen: false,
+        fullscreenIcon: true,
+        closeOnClickModal: false,
+        hideFooter: title !== "编辑" && title !== "新增",
+        // 正确传入 formInline，避免 contentRenderer 返回 null 导致组件更新报错
+        contentRenderer: ({ options }) =>
+          h(editForm, {
+            ref: formRef,
+            formInline: options?.props?.formInline ?? null
+          }),
+        beforeSure: done => {
+          const FormRef = formRef.value.getRef();
+          // 从表单组件中获取实际的数据，而不是使用初始的 props
+          const formData = formRef.value.getFormData();
 
-    addDialog({
-      title: `${title}商品SKU`,
-      props: {
-        formInline: {
-          title,
-          id: row?.id ?? 0,
-          productId: row?.productId ?? null,
-          skuCode: row?.skuCode ?? "",
-          skuName: row?.skuName ?? "",
-          priceFee: row?.priceFee ?? 0,
-          marketPriceFee: row?.marketPriceFee ?? 0,
-          status: row?.status ?? 1,
-          albumPics: row?.albumPics ?? "",
-          productOptions: productOptions.value
-        }
-      },
-      width: "60%",
-      style: {
-        "border-radius": "12px"
-      },
-      draggable: false,
-      fullscreen: false,
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      hideFooter: title !== "编辑" && title !== "新增",
-      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
-      beforeSure: done => {
-        const FormRef = formRef.value.getRef();
-        // 从表单组件中获取实际的数据，而不是使用初始的 props
-        const formData = formRef.value.getFormData();
-        function chores() {
-          message(`您${title}了SKU编码为${formData.skuCode}的这条数据`, {
-            type: "success"
+          function chores() {
+            message(`您${title}了SKU编码为${formData.skuCode}的这条数据`, {
+              type: "success"
+            });
+            done(); // 关闭弹框
+            onSearch(); // 刷新表格数据
+          }
+
+          FormRef.validate(valid => {
+            if (!valid) {
+              return;
+            }
+
+            // 清理数据，只保留后端需要的字段
+            const submitData: any = {
+              productId: formData.productId,
+              skuCode: formData.skuCode,
+              skuName: formData.skuName,
+              priceFee: formData.priceFee,
+              marketPriceFee: formData.marketPriceFee,
+              status: formData.status ?? 1,
+              albumPics: formData.albumPics || ""
+            };
+
+            // 如果是编辑，需要添加id字段
+            if (title === "编辑" && formData.id) {
+              submitData.id = formData.id;
+            }
+
+            // 表单规则校验通过
+            if (title === "新增") {
+              addSku(submitData).then(res => {
+                if (res.code === 200) {
+                  const skuId = res.data;
+                  // 如果有待添加的属性，保存SKU后添加属性
+                  if (formRef.value.saveAttrs) {
+                    formRef.value.saveAttrs(skuId).then(() => {
+                      chores();
+                    });
+                  } else {
+                    chores();
+                  }
+                }
+              });
+            } else {
+              updateSku(submitData).then(res => {
+                if (res.code === 200) {
+                  // 编辑模式下，如果有待添加的属性，也需要保存
+                  if (formRef.value.saveAttrs && formData.id) {
+                    formRef.value.saveAttrs(formData.id).then(() => {
+                      chores();
+                    });
+                  } else {
+                    chores();
+                  }
+                }
+              });
+            }
           });
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
         }
-        FormRef.validate(valid => {
-          if (!valid) {
-            return;
-          }
-
-          // 清理数据，只保留后端需要的字段
-          const submitData: any = {
-            productId: formData.productId,
-            skuCode: formData.skuCode,
-            skuName: formData.skuName,
-            priceFee: formData.priceFee,
-            marketPriceFee: formData.marketPriceFee,
-            status: formData.status ?? 1,
-            albumPics: formData.albumPics || ""
-          };
-
-          // 如果是编辑，需要添加id字段
-          if (title === "编辑" && formData.id) {
-            submitData.id = formData.id;
-          }
-
-          // 表单规则校验通过
-          if (title === "新增") {
-            addSku(submitData).then(res => {
-              if (res.code === 200) {
-                const skuId = res.data;
-                // 如果有待添加的属性，保存SKU后添加属性
-                if (formRef.value.saveAttrs) {
-                  formRef.value.saveAttrs(skuId).then(() => {
-                    chores();
-                  });
-                } else {
-                  chores();
-                }
-              }
-            });
-          } else {
-            updateSku(submitData).then(res => {
-              if (res.code === 200) {
-                // 编辑模式下，如果有待添加的属性，也需要保存
-                if (formRef.value.saveAttrs && formData.id) {
-                  formRef.value.saveAttrs(formData.id).then(() => {
-                    chores();
-                  });
-                } else {
-                  chores();
-                }
-              }
-            });
-          }
-        });
-      }
+      });
     });
   }
 

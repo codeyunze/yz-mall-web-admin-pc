@@ -11,6 +11,10 @@ import {
   getAttrListByRelatedId,
   getAttrPage
 } from "@/api/pms";
+import { Plus } from "@element-plus/icons-vue";
+import type { UploadProps, UploadUserFile, ImageInstance } from "element-plus";
+import { formatToken, getToken } from "@/utils/auth";
+import { filePreviewUrl, fileUploadUrl, deleteFileById } from "@/api/system";
 
 interface ExtendedFormItemProps {
   id?: number;
@@ -44,6 +48,9 @@ const props = withDefaults(defineProps<FormProps>(), {
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline as ExtendedFormItemProps);
 
+// 图片预览组件引用
+const imageRef = ref<ImageInstance>();
+
 // 商品选项
 const productOptions = ref([]);
 
@@ -72,6 +79,15 @@ const presetAttrs = ref<
 >([]);
 const showPresetDialog = ref(false);
 const presetAttrLoading = ref(false);
+
+// 预览图片列表
+const previewFilesUrl = ref<string[]>([]);
+// 选中预览图片地址
+const previewSelectedFileUrl = ref("");
+// 选中预览图片在图片列表里的索引下标
+const previewSelectedFileIndex = ref(0);
+// 照片墙展示图片（使用 any 简化类型约束）
+const photoWallUrl = ref<any[]>([]);
 
 // 监听formInline变化
 watch(
@@ -113,6 +129,8 @@ watch(
         }, 100);
       }
     }
+    // 根据当前 albumPics 初始化图片列表
+    photoWallUrl.value = getFileList();
   },
   { deep: true, immediate: true }
 );
@@ -309,6 +327,139 @@ function getFormData() {
   return data;
 }
 
+/**
+ * 组装文件预览地址
+ * @param fileId 文件唯一Id
+ */
+function assembleFileUrl(fileId: string) {
+  return getRequestAddress() + filePreviewUrl(fileId, getToken().accessToken);
+}
+
+function getRequestAddress() {
+  return window.location.href.substring(0, window.location.href.indexOf("/#"));
+}
+
+function getFileList() {
+  previewFilesUrl.value = [];
+  if (!newFormInline.value.albumPics) {
+    return [];
+  }
+
+  // 单张图片
+  if (newFormInline.value.albumPics.indexOf(",") === -1) {
+    const url = assembleFileUrl(newFormInline.value.albumPics);
+    previewSelectedFileUrl.value = url;
+    previewFilesUrl.value.push(url);
+    return [{ url }];
+  }
+
+  // 多张图片
+  const split = newFormInline.value.albumPics.split(",");
+  const files: UploadUserFile[] = [];
+  split.forEach(item => {
+    const url = assembleFileUrl(item);
+    const file = { url } as UploadUserFile;
+    previewFilesUrl.value.push(url);
+    files.push(file);
+  });
+  previewSelectedFileUrl.value = files.length > 0 ? files[0].url! : "";
+  return files;
+}
+
+/**
+ * 解析图片预览Url获取图片Id
+ * @param fileUrl 图片预览Url 样例：http://127.0.0.1:8899/api/sys/file/preview/1896206422350864384?token=xxxx
+ * @return 图片Id 样例：1896206422350864384
+ */
+function parseFileId(fileUrl: string) {
+  const pattern = /\/preview\/([^/?]+)/;
+  const match = fileUrl.match(pattern);
+  return match ? match[1] : "";
+}
+
+/**
+ * 删除图片
+ */
+const handleRemove: UploadProps["onRemove"] = uploadFile => {
+  let fileId = uploadFile.url ? parseFileId(uploadFile.url) : "";
+  if (!fileId && uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    fileId = file.data;
+  }
+  if (!fileId) return;
+
+  deleteFileById(fileId);
+
+  // 删除 albumPics 里的图片 id
+  const fileIds = (newFormInline.value.albumPics || "")
+    .split(",")
+    .filter(Boolean);
+  const remaining = fileIds.filter(id => id !== fileId);
+  newFormInline.value.albumPics = remaining.join(",");
+
+  // 清理 filesUrl 里的 url
+  for (let i = previewFilesUrl.value.length - 1; i >= 0; i--) {
+    if (parseFileId(previewFilesUrl.value[i]) === fileId) {
+      previewFilesUrl.value.splice(i, 1);
+      break;
+    }
+  }
+
+  // 清理 photoWallUrl
+  for (let i = photoWallUrl.value.length - 1; i >= 0; i--) {
+    if (
+      photoWallUrl.value[i].url &&
+      parseFileId(photoWallUrl.value[i].url!) === fileId
+    ) {
+      photoWallUrl.value.splice(i, 1);
+      break;
+    }
+  }
+};
+
+const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
+  if (!uploadFile.url && !uploadFile.response) return;
+  if (uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    previewSelectedFileUrl.value = assembleFileUrl(file.data);
+  } else if (uploadFile.url) {
+    previewSelectedFileUrl.value = uploadFile.url;
+  }
+  previewSelectedFileIndex.value = previewFilesUrl.value.indexOf(
+    previewSelectedFileUrl.value
+  );
+  imageRef.value?.showPreview();
+};
+
+/**
+ * 图片上传成功执行方法
+ * @param uploadFile 响应信息
+ */
+const handleUploadSuccess: UploadProps["onSuccess"] = uploadFile => {
+  if (200 !== uploadFile.code) {
+    return;
+  }
+  if (!newFormInline.value.albumPics) {
+    newFormInline.value.albumPics = uploadFile.data;
+  } else {
+    newFormInline.value.albumPics += "," + uploadFile.data;
+  }
+  previewFilesUrl.value.push(assembleFileUrl(uploadFile.data));
+};
+
+const handleUploadExceed: UploadProps["onExceed"] = () => {
+  message("图片数量超过限制（最多 5 张）", {
+    type: "warning"
+  });
+};
+
+/**
+ * 图片上传过程中执行方法
+ */
+const handleUploadProgress: UploadProps["onProgress"] = uploadFile => {
+  console.log(uploadFile);
+};
+
 // 获取属性列表（用于父组件在保存SKU后调用）
 function getAttrs() {
   return skuAttrs.value;
@@ -452,6 +603,34 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
         </re-col>
 
         <re-col :value="24" :xs="24" :sm="24">
+          <el-form-item label="图片上传" prop="albumPics">
+            <el-upload
+              v-model:file-list="photoWallUrl"
+              :action="
+                getRequestAddress() +
+                fileUploadUrl +
+                '?fileStorageMode=cos&publicAccess=1&fileStorageStation=mall'
+              "
+              list-type="picture-card"
+              accept="image/jpeg,image/png,image/jpg"
+              method="POST"
+              name="uploadfile"
+              :limit="5"
+              :headers="{ Authorization: formatToken(getToken().accessToken) }"
+              :on-preview="handlePictureCardPreview"
+              :on-remove="handleRemove"
+              :on-success="handleUploadSuccess"
+              :on-exceed="handleUploadExceed"
+              :on-progress="handleUploadProgress"
+            >
+              <el-icon>
+                <Plus />
+              </el-icon>
+            </el-upload>
+          </el-form-item>
+        </re-col>
+
+        <re-col :value="24" :xs="24" :sm="24">
           <el-form-item label="SKU属性">
             <div style="width: 100%">
               <!-- 已添加的属性列表 -->
@@ -567,6 +746,21 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
         </re-col>
       </el-row>
     </el-form>
+
+    <el-image
+      v-if="previewFilesUrl.length > 0"
+      ref="imageRef"
+      style="width: 0; height: 0"
+      :src="previewSelectedFileUrl"
+      :zoom-rate="1.2"
+      :max-scale="7"
+      :min-scale="0.2"
+      :preview-src-list="previewFilesUrl"
+      show-progress
+      :initial-index="previewSelectedFileIndex"
+      :infinite="false"
+      fit="cover"
+    />
 
     <!-- 预设属性选择对话框 -->
     <el-dialog v-model="showPresetDialog" title="选择预设属性" width="60%">
