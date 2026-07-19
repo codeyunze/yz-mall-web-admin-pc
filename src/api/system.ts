@@ -356,3 +356,86 @@ export const kickoutOnlineUser = (userId: string | number) => {
     baseUrlApi(`/sys/onlineUser/kickoutByUserId/${userId}`)
   );
 };
+
+/** 租户管理-分页查询 */
+export const getTenantPage = (data?: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/sys/tenant/page"), {
+    data
+  });
+};
+
+/** 租户管理-新增 */
+export const addTenant = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/tenant/add"), {
+    data
+  });
+};
+
+/** 租户管理-修改 */
+export const updateTenant = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/tenant/update"), {
+    data
+  });
+};
+
+/** 租户管理-详情 */
+export const getTenantById = (
+  id: string | number,
+  serviceCode?: string | null
+) => {
+  const serviceQuery =
+    serviceCode && serviceCode.trim().length > 0
+      ? `?serviceCode=${encodeURIComponent(serviceCode)}`
+      : "";
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/tenant/get/${id}${serviceQuery}`)
+  );
+};
+
+/** 租户管理-查询租户下数据源 */
+export const getTenantDatasourceList = (tenantId: string | number) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/tenant/datasource/list/${tenantId}`)
+  );
+};
+
+/** 租户管理-保存/更新数据源 */
+export const saveOrUpdateTenantDatasource = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/sys/tenant/datasource/saveOrUpdate"),
+    {
+      data
+    }
+  );
+};
+
+/** 租户管理-删除数据源 */
+export const deleteTenantDatasource = (id: string | number) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/tenant/datasource/delete/${id}`)
+  );
+};
+
+/** 租户管理-删除 */
+export const deleteTenant = (id: string | number) => {
+  return http.request<Result>("delete", baseUrlApi(`/sys/tenant/delete/${id}`));
+};
+
+/** 租户管理-建库并初始化 */
+export const initTenantDb = (
+  id: string | number,
+  serviceCode?: string | null
+) => {
+  const serviceQuery =
+    serviceCode && serviceCode.trim().length > 0
+      ? `?serviceCode=${encodeURIComponent(serviceCode)}`
+      : "";
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/sys/tenant/initDb/${id}${serviceQuery}`)
+  );
+};
