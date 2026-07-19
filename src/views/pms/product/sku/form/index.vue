@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import ReCol from "@/components/ReCol";
 import { formRules } from "@/views/pms/product/sku/utils/rule";
 import { FormProps } from "@/views/pms/product/sku/utils/types";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { message } from "@/utils/message";
+import { Plus } from "@element-plus/icons-vue";
+import type { UploadProps, UploadUserFile, ImageInstance } from "element-plus";
+import { formatToken, getToken } from "@/utils/auth";
+import { filePreviewUrl, fileUploadUrl, deleteFileById } from "@/api/system";
 import {
   addAttr,
   deleteAttr,
@@ -43,6 +47,13 @@ const props = withDefaults(defineProps<FormProps>(), {
 
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline as ExtendedFormItemProps);
+const imageRef = ref<ImageInstance>();
+
+/** 查看模式不可编辑上传 */
+const isViewMode = computed(() => {
+  const title = newFormInline.value.title;
+  return title !== "新增" && title !== "编辑";
+});
 
 // 商品选项
 const productOptions = ref([]);
@@ -73,6 +84,142 @@ const presetAttrs = ref<
 const showPresetDialog = ref(false);
 const presetAttrLoading = ref(false);
 
+/** 预览图片列表 */
+const previewFilesUrl = ref<string[]>([]);
+/** 选中预览图片地址 */
+const previewSelectedFileUrl = ref("");
+/** 选中预览图片在图片列表里的索引下标 */
+const previewSelectedFileIndex = ref(0);
+/** 照片墙展示图片 */
+const photoWallUrl = ref<UploadUserFile[]>([]);
+const dialogVisible = ref(false);
+
+function getRequestAddress() {
+  return window.location.href.substring(0, window.location.href.indexOf("/#"));
+}
+
+/**
+ * 组装文件预览地址
+ * @param fileId 文件唯一Id
+ */
+function assembleFileUrl(fileId: string) {
+  return getRequestAddress() + filePreviewUrl(fileId, getToken().accessToken);
+}
+
+/**
+ * 解析图片预览Url获取图片Id
+ */
+function parseFileId(fileUrl) {
+  const pattern = /\/preview\/([^/?]+)/;
+  const match = fileUrl?.match?.(pattern);
+  return match ? match[1] : "";
+}
+
+/** 根据 albumPics 组装照片墙 file-list */
+const getFileList = () => {
+  previewFilesUrl.value = [];
+  if (!newFormInline.value.albumPics) {
+    previewSelectedFileUrl.value = "";
+    return [];
+  }
+
+  if (newFormInline.value.albumPics.indexOf(",") === -1) {
+    const url = assembleFileUrl(newFormInline.value.albumPics);
+    previewSelectedFileUrl.value = url;
+    previewFilesUrl.value.push(url);
+    return [{ url }];
+  }
+
+  const split = newFormInline.value.albumPics.split(",");
+  const files = [];
+  split.forEach(item => {
+    if (!item) {
+      return;
+    }
+    const url = assembleFileUrl(item);
+    previewFilesUrl.value.push(url);
+    files.push({ url });
+  });
+  previewSelectedFileUrl.value = files.length > 0 ? files[0].url : "";
+  return files;
+};
+
+/** 刷新照片墙（编辑回显） */
+function refreshPhotoWall() {
+  photoWallUrl.value = getFileList();
+}
+
+/**
+ * 删除图片
+ */
+const handleRemove: UploadProps["onRemove"] = uploadFile => {
+  let fileId = parseFileId(uploadFile.url);
+  if (!fileId && uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    fileId = file.data;
+  }
+  if (fileId) {
+    deleteFileById(fileId);
+  }
+  const fileIds = (newFormInline.value.albumPics || "").split(",");
+  let albumPics = "";
+  for (let i = fileIds.length - 1; i >= 0; i--) {
+    if (fileId !== fileIds[i]) {
+      albumPics += "," + fileIds[i];
+    }
+  }
+  newFormInline.value.albumPics = albumPics.substring(1);
+  for (let i = previewFilesUrl.value.length - 1; i >= 0; i--) {
+    if (parseFileId(previewFilesUrl.value[i]) === fileId) {
+      previewFilesUrl.value.splice(i, 1);
+      break;
+    }
+  }
+  for (let i = photoWallUrl.value.length - 1; i >= 0; i--) {
+    if (parseFileId(photoWallUrl.value[i].url) === fileId) {
+      photoWallUrl.value.splice(i, 1);
+      break;
+    }
+  }
+};
+
+const handlePictureCardPreview: UploadProps["onPreview"] = uploadFile => {
+  dialogVisible.value = true;
+  if (uploadFile.response) {
+    const file = JSON.parse(JSON.stringify(uploadFile.response));
+    previewSelectedFileUrl.value = assembleFileUrl(file.data);
+  } else {
+    previewSelectedFileUrl.value = uploadFile.url;
+  }
+  previewSelectedFileIndex.value = previewFilesUrl.value.indexOf(
+    previewSelectedFileUrl.value
+  );
+  imageRef.value!.showPreview();
+};
+
+/**
+ * 图片上传成功
+ */
+const handleUploadSuccess: UploadProps["onSuccess"] = uploadFile => {
+  if (200 !== uploadFile.code) {
+    return;
+  }
+  if (!newFormInline.value.albumPics) {
+    newFormInline.value.albumPics = uploadFile.data;
+  } else {
+    newFormInline.value.albumPics += "," + uploadFile.data;
+  }
+  previewFilesUrl.value.push(assembleFileUrl(uploadFile.data));
+};
+
+const handleUploadExceed: UploadProps["onExceed"] = () => {
+  message("图片数量超过限制（最多5张）", {
+    type: "warning"
+  });
+};
+
+const handleUploadProgress: UploadProps["onProgress"] = () => {};
+
 // 监听formInline变化
 watch(
   () => props.formInline,
@@ -89,6 +236,7 @@ watch(
     if (extendedVal.productOptions) {
       productOptions.value = extendedVal.productOptions;
     }
+    refreshPhotoWall();
     // 如果是编辑模式，加载该SKU的属性
     if (extendedVal.id && extendedVal.id > 0) {
       // 延迟加载，确保组件已渲染
@@ -345,6 +493,10 @@ async function saveAttrs(skuId: number) {
 }
 
 defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
+
+onMounted(() => {
+  refreshPhotoWall();
+});
 </script>
 
 <template>
@@ -416,9 +568,6 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
               placeholder="请输入市场价"
               style="width: 100%"
             />
-            <div style="margin-top: 5px; font-size: 12px; color: #909399">
-              实际存储单位为分
-            </div>
           </el-form-item>
         </re-col>
 
@@ -431,22 +580,42 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
               placeholder="请输入售价"
               style="width: 100%"
             />
-            <div style="margin-top: 5px; font-size: 12px; color: #909399">
-              实际存储单位为分
-            </div>
           </el-form-item>
         </re-col>
 
         <re-col :value="24" :xs="24" :sm="24">
-          <el-form-item label="商品图片" prop="albumPics">
-            <el-input
-              v-model="newFormInline.albumPics"
-              placeholder="商品图片ID，限制为5张，以逗号分割"
-              type="textarea"
-              :rows="2"
-            />
-            <div style="margin-top: 5px; font-size: 12px; color: #909399">
-              多张图片ID以逗号分割，例如：1,2,3
+          <el-form-item label="SKU图片" prop="albumPics">
+            <div class="sku-album-upload">
+              <el-upload
+                v-model:file-list="photoWallUrl"
+                :action="
+                  getRequestAddress() +
+                  fileUploadUrl +
+                  '?fileStorageMode=cos&publicAccess=1&fileStorageStation=mall'
+                "
+                list-type="picture-card"
+                accept="image/jpeg,image/png,image/jpg"
+                method="POST"
+                name="uploadfile"
+                :disabled="isViewMode"
+                :limit="5"
+                :headers="{
+                  Authorization: formatToken(getToken().accessToken)
+                }"
+                :on-preview="handlePictureCardPreview"
+                :on-remove="handleRemove"
+                :on-success="handleUploadSuccess"
+                :on-exceed="handleUploadExceed"
+                :on-progress="handleUploadProgress"
+                :class="{ 'view-mode-upload': isViewMode }"
+              >
+                <el-icon v-if="!isViewMode">
+                  <Plus />
+                </el-icon>
+              </el-upload>
+              <div class="sku-album-upload__tip">
+                最多上传5张，支持 jpg / png
+              </div>
             </div>
           </el-form-item>
         </re-col>
@@ -627,5 +796,39 @@ defineExpose({ getRef, getFormData, getAttrs, saveAttrs, loadSkuAttrs });
         <el-button @click="showPresetDialog = false">关闭</el-button>
       </template>
     </el-dialog>
+
+    <el-image
+      v-show="dialogVisible"
+      ref="imageRef"
+      style="width: 0; height: 0"
+      :src="previewSelectedFileUrl"
+      :zoom-rate="1.2"
+      :max-scale="7"
+      :min-scale="0.2"
+      :preview-src-list="previewFilesUrl"
+      show-progress
+      :initial-index="previewSelectedFileIndex"
+      :infinite="false"
+      fit="cover"
+    />
   </div>
 </template>
+
+<style scoped lang="scss">
+.sku-album-upload {
+  width: 100%;
+
+  &__tip {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #909399;
+  }
+}
+
+.view-mode-upload {
+  :deep(.el-upload-list--picture-card .el-upload--picture-card) {
+    display: none !important;
+  }
+}
+</style>

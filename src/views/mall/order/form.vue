@@ -1,8 +1,16 @@
 <script setup lang="ts">
+/**
+ * 订单详情抽屉内容：展示订单主信息（el-descriptions）、订单行商品卡片及金额合计；
+ * 由 getOmsInfo 拉取数据后经 addDrawer 以 formInline 传入。
+ */
 import { onMounted, ref } from "vue";
 import { OmsOrderDetail } from "@/api/oms";
 
-// 声明 props 类型
+defineOptions({
+  name: "OmsOrderDetailForm"
+});
+
+/** 抽屉内订单详情 props */
 export interface FormProps {
   formInline: OmsOrderDetail;
 }
@@ -20,7 +28,7 @@ const props = withDefaults(defineProps<FormProps>(), {
      */
     orderCode: 0,
     /**
-     * 订单状态：0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消/已取消；6无效订单
+     * 订单状态：0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单；7退款中；8已退款
      */
     orderStatus: 0,
     /**
@@ -120,7 +128,7 @@ const props = withDefaults(defineProps<FormProps>(), {
 // 但该写法仅适用于 props.formInline 是一个对象类型的情况，原始类型需抛出事件
 // 推荐阅读：https://cn.vuejs.org/guide/components/props.html#one-way-data-flow
 const newFormInline = ref(props.formInline);
-// 合计
+/** 订单行原价×数量之和（页面底部展示） */
 const totalPrice = ref(0.0);
 
 onMounted(() => {
@@ -180,6 +188,15 @@ onMounted(() => {
         </el-tag>
         <el-tag v-if="newFormInline.orderStatus === 6" size="small" type="info"
           >无效订单
+        </el-tag>
+        <el-tag
+          v-if="newFormInline.orderStatus === 7"
+          size="small"
+          type="warning"
+          >退款中
+        </el-tag>
+        <el-tag v-if="newFormInline.orderStatus === 8" size="small" type="info"
+          >已退款
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="支付方式:" :width="150">

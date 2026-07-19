@@ -76,6 +76,12 @@ const handleAddressChange = (values: any) => {
 const newFormInline = ref(props.formInline);
 const totalPrice = ref(0.0);
 
+/** 金额展示，空值按 0.00 */
+const formatAmount = (value: unknown) => {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount.toFixed(2) : "0.00";
+};
+
 // 更新地址信息
 const updateAddress = (item: any) => {
   newFormInline.value.receiverName = item.receiverName || "";
@@ -142,8 +148,11 @@ onMounted(() => {
     const item = res.data.items[0];
     updateAddress(item);
 
-    newFormInline.value.products.forEach(product => {
-      totalPrice.value = totalPrice.value + product.price * product.quantity;
+    totalPrice.value = 0;
+    (newFormInline.value.products || []).forEach(product => {
+      const price = Number(product.price || 0);
+      const quantity = Number(product.quantity || 0);
+      totalPrice.value += price * quantity;
     });
   });
 });
@@ -192,7 +201,7 @@ onMounted(() => {
     <div class="flex flex-wrap gap-4" style="margin-top: 20px">
       <el-card
         v-for="product in newFormInline.products"
-        :key="product.id"
+        :key="`${product.productId || product.id}-${product.skuId || ''}`"
         style="width: 100%"
         shadow="hover"
       >
@@ -210,20 +219,38 @@ onMounted(() => {
               >
               <el-col :span="8" class="colProduct"
                 >原价:
-                <span style="color: red">￥ {{ product.price }}</span></el-col
+                <span style="color: red"
+                  >￥ {{ formatAmount(product.price) }}</span
+                ></el-col
               >
-              <el-col :span="16" class="colProduct">SKU: XXX</el-col>
+              <el-col :span="16" class="colProduct"
+                >SKU:
+                {{ product.skuName || product.skuId || "默认规格" }}</el-col
+              >
               <el-col :span="8" class="colProduct"
-                >到手价: ￥ {{ product.realAmount }}</el-col
+                >到手价: ￥
+                {{
+                  formatAmount(
+                    product.realAmount ??
+                      Number(product.price || 0) -
+                        Number(product.discountAmount || 0)
+                  )
+                }}</el-col
               >
               <el-col :span="8" class="colProduct"
                 >数量：{{ product.quantity }}</el-col
               >
               <el-col :span="8" class="colProduct"
-                >共减: ￥ {{ product.discountAmount }}</el-col
+                >共减: ￥
+                {{ formatAmount(product.discountAmount || 0) }}</el-col
               >
               <el-col :span="8" class="colProduct"
-                >合计: ￥ {{ product.price * product.quantity }}</el-col
+                >合计: ￥
+                {{
+                  formatAmount(
+                    Number(product.price || 0) * Number(product.quantity || 0)
+                  )
+                }}</el-col
               >
             </el-row>
             <!--<el-descriptions>

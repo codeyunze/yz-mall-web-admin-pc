@@ -1,14 +1,21 @@
+/**
+ * 订单管理（后台）页组合式逻辑：管理员分页列表（omsOrderMgrPage）、详情抽屉、待付款取消等。
+ */
 import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
 import { ref, onMounted, reactive, type Ref } from "vue";
 import { delay } from "@pureadmin/utils";
-import { getOmsInfo, omsOrderCancel, omsOrderMgrPage } from "@/api/oms";
+import { getOmsInfo, omsOrderMgrCancel, omsOrderMgrPage } from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
 import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
 import forms from "../../form.vue";
 import { message } from "@/utils/message";
 export { default as dayjs } from "dayjs";
 
+/**
+ * 订单管理表格与抽屉相关状态与方法。
+ * @param tableRef 表格实例，用于勾选后重置自适应高度
+ */
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
   const { tagStyle } = usePublicHooks();
@@ -50,7 +57,11 @@ export function useColumns(tableRef: Ref) {
                     ? "已完成"
                     : row.orderStatus === 5
                       ? "已取消"
-                      : "无效订单"}
+                      : row.orderStatus === 7
+                        ? "退款中"
+                        : row.orderStatus === 8
+                          ? "已退款"
+                          : "无效订单"}
         </el-tag>
       )
     },
@@ -125,6 +136,7 @@ export function useColumns(tableRef: Ref) {
     // background: rgba()
   });
 
+  /** 分页或每页条数变化时更新加载文案 */
   function onCurrentChange(val) {
     loadingConfig.text = `正在加载第${val}页...`;
     loading.value = true;
@@ -133,6 +145,7 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
+  /** 按当前 form 与 pagination 请求管理端订单分页数据 */
   function onSearch() {
     loading.value = true;
     const queryFilter = {
@@ -157,16 +170,21 @@ export function useColumns(tableRef: Ref) {
   };
 
   /**
-   * 展开操作按钮
+   * 与「我的订单」侧一致：用于待付款订单在操作后控制底部按钮显示（如支付流程扩展）。
    */
   const showOperationButtons = ref(true);
 
+  /**
+   * 打开订单详情抽屉；管理端待付款时展示取消等操作。
+   * @param title 抽屉标题
+   * @param orderCode 订单编号
+   */
   function openDialog(title = "订单详情", orderCode?: string) {
     const queryFilter = {
       orderCode
     };
     getOmsInfo(queryFilter).then(data => {
-      if (data.code !== 0) {
+      if (data.code !== 200) {
         return;
       }
       console.log("订单详情数据", data.data);
@@ -175,7 +193,7 @@ export function useColumns(tableRef: Ref) {
         title: title,
         contentRenderer: () => forms,
         props: {
-          // 赋默认值
+          // 订单详情表单初值（接口返回）
           formInline: data.data
         },
         footerRenderer: ({ options, index }) => {
@@ -211,10 +229,14 @@ export function useColumns(tableRef: Ref) {
    * 取消订单
    */
   function orderCancelHandle(options, index) {
-    omsOrderCancel(options.props.formInline.id).then(result => {
-      message(result.msg, { type: "success" });
-      onSearch();
-      closeDrawer(options, index);
+    omsOrderMgrCancel(options.props.formInline.id).then(result => {
+      if (result.code === 200) {
+        message("订单已取消", { type: "success" });
+        onSearch();
+        closeDrawer(options, index);
+      } else {
+        message(result.msg || "取消订单失败", { type: "error" });
+      }
     });
   }
 

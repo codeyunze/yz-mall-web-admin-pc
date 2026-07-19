@@ -8,9 +8,11 @@ import { ref, onMounted, reactive, h, computed, type Ref } from "vue";
 import { delay, deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog/index";
 import editForm from "@/views/pms/stock/info/form/index.vue";
+import skuStockDialog from "@/views/pms/stock/info/skuStockDialog.vue";
 import { message } from "@/utils/message";
 import {
   deleteProduct,
+  getSkuStockByProductId,
   getStockPage,
   pmsProductStockIn,
   pmsProductStockOut
@@ -45,7 +47,12 @@ export function useColumns(tableRef: Ref) {
     {
       label: "库存数量",
       prop: "quantity",
-      width: 200
+      width: 200,
+      cellRenderer: ({ row }) => (
+        <el-button link type="primary" onClick={() => openSkuStockDialog(row)}>
+          {row.quantity ?? 0}
+        </el-button>
+      )
     },
     {
       label: "操作",
@@ -143,6 +150,34 @@ export function useColumns(tableRef: Ref) {
     formEl.resetFields();
     onSearch();
   };
+
+  /**
+   * 点击汇总库存：弹窗展示该商品各 SKU 库存
+   */
+  function openSkuStockDialog(row) {
+    if (!row?.productId) {
+      message("商品信息不完整，无法查询SKU库存", { type: "warning" });
+      return;
+    }
+    getSkuStockByProductId(row.productId).then(res => {
+      if (res.code !== 200) {
+        message(res.msg || "查询SKU库存失败", { type: "error" });
+        return;
+      }
+      const list = Array.isArray(res.data) ? res.data : [];
+      addDialog({
+        title: `${row.productName || "商品"} - SKU库存明细`,
+        width: "640px",
+        style: {
+          "border-radius": "12px"
+        },
+        draggable: true,
+        hideFooter: true,
+        closeOnClickModal: true,
+        contentRenderer: () => h(skuStockDialog, { list })
+      });
+    });
+  }
 
   function openDialog(title = "入库", row?: FormItemProps) {
     addDialog({

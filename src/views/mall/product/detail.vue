@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getProductDetail, getSkuListByProductId, addCart } from "@/api/pms";
+import { filePreviewUrl } from "@/api/system";
+import { getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { ShoppingCart, Plus, Minus, Picture } from "@element-plus/icons-vue";
 import {
@@ -31,6 +33,25 @@ const mainImageIndex = ref(0);
 // 收货地址
 const selectedAddress = ref<any>(null);
 
+function getRequestAddress() {
+  return window.location.href.substring(0, window.location.href.indexOf("/#"));
+}
+
+/**
+ * 将 albumPics（逗号分隔文件ID）转为可预览地址
+ */
+function parseAlbumPicsToUrls(albumPics?: string): string[] {
+  if (!albumPics) {
+    return [];
+  }
+  const token = getToken()?.accessToken;
+  return albumPics
+    .split(",")
+    .map(id => id?.trim())
+    .filter(Boolean)
+    .map(fileId => getRequestAddress() + filePreviewUrl(fileId, token));
+}
+
 // 加载商品详情
 const loadProductDetail = async () => {
   const productId = route.params.id as string;
@@ -54,6 +75,7 @@ const loadProductDetail = async () => {
         // 默认选择第一个SKU
         if (skuList.value.length > 0) {
           selectedSku.value = skuList.value[0];
+          mainImageIndex.value = 0;
         }
       }
     } else {
@@ -69,18 +91,36 @@ const loadProductDetail = async () => {
   }
 };
 
-// 当前价格
+// 当前价格：优先 SKU 售价（分转元）
 const currentPrice = computed(() => {
-  if (selectedSku.value && selectedSku.value.price) {
+  if (selectedSku.value?.priceFee != null) {
+    return (Number(selectedSku.value.priceFee) / 100).toFixed(2);
+  }
+  if (selectedSku.value?.price != null) {
     return selectedSku.value.price;
   }
   return product.value?.productPrice || 0;
+});
+
+/**
+ * 展示图：优先当前 SKU 图片，否则回退商品图片
+ */
+const displayImages = computed(() => {
+  const skuImages = parseAlbumPicsToUrls(selectedSku.value?.albumPics);
+  if (skuImages.length > 0) {
+    return skuImages;
+  }
+  if (product.value?.productImages?.length > 0) {
+    return product.value.productImages;
+  }
+  return parseAlbumPicsToUrls(product.value?.albumPics);
 });
 
 // 选择SKU
 const handleSelectSku = (sku: any) => {
   selectedSku.value = sku;
   quantity.value = 1; // 切换SKU时重置数量
+  mainImageIndex.value = 0;
 };
 
 // 数量增减
@@ -151,9 +191,15 @@ const handleAddToCart = async () => {
     return;
   }
 
+  const productId = product.value?.id || (route.params.id as string);
+  if (!productId) {
+    message("商品ID缺失，请刷新页面后重试", { type: "warning" });
+    return;
+  }
+
   try {
     const params = {
-      productId: product.value.id,
+      productId,
       skuId: selectedSku.value.id,
       quantity: quantity.value
     };
@@ -174,17 +220,23 @@ const handleBuyNow = () => {
     return;
   }
 
+  const productId = product.value?.id || (route.params.id as string);
+  if (!productId) {
+    message("商品ID缺失，请刷新页面后重试", { type: "warning" });
+    return;
+  }
+
   const tableRef = vueRef();
   const { openDialog } = carUseColumns(tableRef, false);
 
   const param = {
-    productId: product.value.id,
+    productId,
     productName: product.value.productName,
     skuId: selectedSku.value.id,
     skuName: selectedSku.value.skuName || selectedSku.value.skuCode,
     quantity: quantity.value,
     price: currentPrice.value,
-    previewAddress: product.value.productImages?.[0] || ""
+    previewAddress: displayImages.value?.[0] || ""
   };
 
   openDialog(param);
@@ -203,12 +255,12 @@ onMounted(() => {
 <template>
   <div v-loading="loading" class="product-detail">
     <div v-if="product" class="detail-container">
-      <!-- 商品图片区域 -->
+      <!-- 商品图片区域：优先展示当前 SKU 图片 -->
       <div class="product-images">
         <div class="main-image">
           <el-image
-            v-if="product.productImages && product.productImages.length > 0"
-            :src="product.productImages[mainImageIndex]"
+            v-if="displayImages.length > 0"
+            :src="displayImages[mainImageIndex]"
             fit="contain"
             class="main-img"
           >
@@ -218,13 +270,13 @@ onMounted(() => {
               </div>
             </template>
           </el-image>
+          <div v-else class="image-slot">
+            <el-icon><Picture /></el-icon>
+          </div>
         </div>
-        <div
-          v-if="product.productImages && product.productImages.length > 1"
-          class="thumbnail-list"
-        >
+        <div v-if="displayImages.length > 1" class="thumbnail-list">
           <div
-            v-for="(img, index) in product.productImages"
+            v-for="(img, index) in displayImages"
             :key="index"
             :class="['thumbnail-item', { active: mainImageIndex === index }]"
             @click="handleImageClick(index)"
@@ -260,9 +312,6 @@ onMounted(() => {
               @click="handleSelectSku(sku)"
             >
               <span class="sku-name">{{ sku.skuName || sku.skuCode }}</span>
-              <span v-if="sku.priceFee" class="sku-price"
-                >￥{{ (sku.priceFee / 100).toFixed(2) }}</span
-              >
             </div>
           </div>
         </div>

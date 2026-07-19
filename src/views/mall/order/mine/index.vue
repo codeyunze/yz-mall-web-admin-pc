@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 我的订单列表页：按订单编号、状态、类型、收货/支付信息筛选，分页表格展示，
+ * 详情通过抽屉打开共用组件 form.vue（见 mine/utils/hook 中 openDialog）。
+ */
 import { ref } from "vue";
 import { useColumns } from "@/views/mall/order/mine/utils/hook";
 
@@ -29,11 +33,13 @@ const {
   handleCurrentChange
 } = useColumns(tableRef);
 
+/** PlusSearch 本地状态（与筛选项展示相关） */
 const state = ref({
   status: "0",
   time: new Date().toString()
 });
 
+/** 顶部筛选表单列配置，字段需与 hook 内 form 及接口 filter 一致 */
 const filterColumns: PlusColumn[] = [
   {
     label: "订单编号",
@@ -72,6 +78,14 @@ const filterColumns: PlusColumn[] = [
       {
         label: "无效订单",
         value: "6"
+      },
+      {
+        label: "退款中",
+        value: "7"
+      },
+      {
+        label: "已退款",
+        value: "8"
       }
     ]
   },
@@ -135,6 +149,7 @@ const filterColumns: PlusColumn[] = [
 const handleChange = (values: any) => {
   console.log(values, "change");
 };
+/** 将筛选结果同步到查询 form 并触发列表请求 */
 const handleSearch = (values: any) => {
   form.orderCode = values.orderCode;
   form.orderStatus = values.orderStatus;
@@ -144,6 +159,7 @@ const handleSearch = (values: any) => {
   form.receiverPhone = values.receiverPhone;
   onSearch();
 };
+/** 重置筛选条件并重新查询 */
 const handleRest = () => {
   form.orderCode = null;
   form.orderStatus = null;

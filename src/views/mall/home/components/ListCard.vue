@@ -9,7 +9,6 @@ import {
 import { addCart } from "@/api/pms";
 import { message } from "@/utils/message";
 import { carUseColumns } from "@/views/mall/cart/utils/hook";
-import type { ProductInfo } from "@/views/mall/cart/utils/orderInfo";
 
 defineOptions({
   name: "MallProductCard"
@@ -48,11 +47,18 @@ const cardClass = computed(() => [
 
 const cardLogoClass = computed(() => ["list-card-item", "block"]);
 
+/** 库存为 0 视为已售罄 */
+const isSoldOut = computed(() => (props.product?.quantity ?? 0) <= 0);
+
 /**
  * 商品加入购物车
  * @param productId 商品Id
  */
 function addToCart(productId) {
+  if (isSoldOut.value) {
+    message("商品已售罄", { type: "warning" });
+    return;
+  }
   const cart = reactive({
     productId: productId
   });
@@ -64,6 +70,10 @@ function addToCart(productId) {
 }
 
 function addOrder(product?: CardProductType) {
+  if (isSoldOut.value) {
+    message("商品已售罄", { type: "warning" });
+    return;
+  }
   const param = {
     productId: product.id,
     productName: product.productName,
@@ -71,7 +81,6 @@ function addOrder(product?: CardProductType) {
     price: product.productPrice,
     previewAddress: product.productImages[0]
   };
-  console.log(param);
   openDialog(param);
 }
 </script>
@@ -85,6 +94,15 @@ function addOrder(product?: CardProductType) {
         style="cursor: pointer"
         @click="$router.push(`/mall/product/${product.id}`)"
       >
+        <el-tag
+          v-if="isSoldOut"
+          class="list-card-item_detail--soldout"
+          type="info"
+          effect="dark"
+          size="small"
+        >
+          已售罄
+        </el-tag>
         <el-image
           :src="
             product && product.productImages && product.productImages.length > 0
@@ -113,11 +131,12 @@ function addOrder(product?: CardProductType) {
           >{{ product.productPrice }}$</span
         >
         <el-tag
-          :color="'#00a870'"
-          effect="dark"
+          v-if="isSoldOut"
+          type="info"
+          size="small"
           class="list-card-item_detail--price--tag"
         >
-          已启用
+          已售罄
         </el-tag>
       </div>
       <p class="list-card-item_detail--tag text-text_color_regular">
@@ -140,6 +159,7 @@ function addOrder(product?: CardProductType) {
           <el-button
             :icon="ShoppingCart"
             plain
+            :disabled="isSoldOut"
             @click="addToCart(product.id)"
           />
         </el-button-group>
@@ -147,6 +167,7 @@ function addOrder(product?: CardProductType) {
           type="primary"
           plain
           class="list-card-item_detail--actions--buy"
+          :disabled="isSoldOut"
           @click="addOrder(product)"
           >立即购买</el-button
         >
@@ -181,6 +202,13 @@ function addOrder(product?: CardProductType) {
       width: 100%;
       margin-bottom: 16px;
       overflow: visible;
+    }
+
+    &--soldout {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
     }
 
     &--logo {

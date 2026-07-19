@@ -1,21 +1,34 @@
+/**
+ * 我的订单页组合式逻辑：分页列表（omsOrderMinePage）、详情抽屉（getOmsInfo + form.vue）、
+ * 待付款状态下取消/假支付等操作。
+ */
 import type { LoadingConfig, PaginationProps } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, type Ref } from "vue";
+import { ref, onMounted, reactive, watch, type Ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { delay } from "@pureadmin/utils";
 import {
   getOmsInfo,
   omsOrderCancel,
   omsOrderMinePage,
-  omsPay
+  omsPay,
+  omsRefundApply
 } from "@/api/oms";
 import { usePublicHooks } from "@/views/system/hooks";
-import { addDrawer, closeDrawer } from "@/components/ReDrawer/index";
+import { addDrawer, closeDrawer } from "@/components/ReDrawer";
 import forms from "../../form.vue";
 import { message } from "@/utils/message";
+import { ElMessageBox } from "element-plus";
 export { default as dayjs } from "dayjs";
 
+/**
+ * 我的订单表格与抽屉相关状态与方法。
+ * @param tableRef 表格实例，用于勾选后重置自适应高度
+ */
 export function useColumns(tableRef: Ref) {
   const loading = ref(true);
+  const route = useRoute();
+  const router = useRouter();
   const { tagStyle } = usePublicHooks();
   const selectedNum = ref(0);
   const columns: TableColumnList = [
@@ -39,7 +52,7 @@ export function useColumns(tableRef: Ref) {
       label: "订单状态",
       prop: "orderStatus",
       cellRenderer: ({ row }) => {
-        // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单
+        // 0待付款；1待发货；2已发货；3待收货；4已完成；5已关闭/已取消；6无效订单；7退款中；8已退款
         if (row.orderStatus === 0) {
           return "待付款";
         } else if (row.orderStatus === 1) {
@@ -54,6 +67,10 @@ export function useColumns(tableRef: Ref) {
           return "已取消";
         } else if (row.orderStatus === 6) {
           return "无效订单";
+        } else if (row.orderStatus === 7) {
+          return "退款中";
+        } else if (row.orderStatus === 8) {
+          return "已退款";
         }
       }
     },
@@ -128,6 +145,7 @@ export function useColumns(tableRef: Ref) {
     // background: rgba()
   });
 
+  /** 分页或每页条数变化时更新加载文案（与 delay 配合的占位动画） */
   function onCurrentChange(val) {
     loadingConfig.text = `正在加载第${val}页...`;
     loading.value = true;
@@ -136,6 +154,7 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
+  /** 按当前 form 与 pagination 请求我的订单分页数据 */
   function onSearch() {
     loading.value = true;
     const queryFilter = {
@@ -160,16 +179,26 @@ export function useColumns(tableRef: Ref) {
   };
 
   /**
-   * 展开操作按钮
+   * 待付款订单在支付成功后置为 false，用于隐藏「取消 / 修改 / 去支付」按钮，避免重复操作。
    */
   const showOperationButtons = ref(true);
 
+  /**
+   * 打开订单详情抽屉；待付款时展示取消、修改、去支付等底部操作。
+   * @param title 抽屉标题
+   * @param orderCode 订单编号，用于拉取详情
+   */
   function openDialog(title = "订单详情", orderCode?: string) {
+    if (!orderCode) {
+      return;
+    }
+    showOperationButtons.value = true;
     const queryFilter = {
       orderCode
     };
     getOmsInfo(queryFilter).then(data => {
-      if (data.code !== 0) {
+      if (data.code !== 200) {
+        message(data.msg || "获取订单详情失败", { type: "error" });
         return;
       }
       console.log("订单详情数据", data.data);
@@ -178,7 +207,7 @@ export function useColumns(tableRef: Ref) {
         title: title,
         contentRenderer: () => forms,
         props: {
-          // 赋默认值
+          // 订单详情表单初值（接口返回）
           formInline: data.data
         },
         footerRenderer: ({ options, index }) => {
@@ -201,10 +230,16 @@ export function useColumns(tableRef: Ref) {
                   </el-button>
                 </div>
               )}
-              {(orderStatus === 1 ||
-                orderStatus === 2 ||
-                orderStatus === 3 ||
-                !showOperationButtons.value) && <el-button>申请退款</el-button>}
+              {orderStatus === 1 && (
+                <el-button
+                  type="warning"
+                  onClick={() => orderRefundApplyHandle(options, index)}
+                >
+                  申请退款
+                </el-button>
+              )}
+              {orderStatus === 7 && <el-button disabled>退款审核中</el-button>}
+              {orderStatus === 8 && <el-button disabled>已退款</el-button>}
               {orderStatus === 4 && <el-button>退款/售后</el-button>}
               {(orderStatus === 4 || orderStatus === 5) && (
                 <el-button type="warning">再次购买</el-button>
@@ -219,41 +254,114 @@ export function useColumns(tableRef: Ref) {
     });
   }
 
+  watch(
+    () => route?.query?.orderCode,
+    orderCode => {
+      if (orderCode && route?.path?.startsWith("/mall/order/mine")) {
+        openDialog("订单详情", String(orderCode));
+      }
+    }
+  );
+
   /**
-   * 取消订单
+   * 取消待付款订单：确认后调用接口，成功则关闭抽屉并刷新列表。
    */
   function orderCancelHandle(options, index) {
-    omsOrderCancel(options.props.formInline.id).then(result => {
-      message(result.msg, { type: "success" });
-      onSearch();
-      closeDrawer(options, index);
-    });
+    const order = options.props.formInline;
+    ElMessageBox.confirm(
+      `确认取消订单 ${order.orderCode}？取消后将释放已占用的库存。`,
+      "取消订单",
+      {
+        confirmButtonText: "确认取消",
+        cancelButtonText: "再想想",
+        type: "warning"
+      }
+    )
+      .then(() => omsOrderCancel(order.id))
+      .then(result => {
+        if (result.code === 200) {
+          message("订单已取消", { type: "success" });
+          onSearch();
+          closeDrawer(options, index);
+        } else {
+          message(result.msg || "取消订单失败", { type: "error" });
+        }
+      })
+      .catch(() => {});
   }
 
   /**
-   * 处理订单修改操作
-   * @param options
-   * @param index
+   * 修改订单（占位，具体跳转或表单待产品对接）
+   * @param options 抽屉 options
+   * @param index 抽屉索引
    */
   function handleOrderUpdate(options, index) {
     console.log(options, index);
   }
 
   /**
-   * 订单支付
+   * 待发货订单申请退款：填写原因后提交，成功则刷新并重新打开详情。
+   */
+  function orderRefundApplyHandle(options, index) {
+    const order = options.props.formInline;
+    ElMessageBox.prompt("请填写退款原因", "申请退款", {
+      confirmButtonText: "提交",
+      cancelButtonText: "取消",
+      inputType: "textarea",
+      inputPlaceholder: "请说明退款原因",
+      inputValidator: value => {
+        if (!value || !String(value).trim()) {
+          return "退款原因不能为空";
+        }
+        if (String(value).trim().length > 500) {
+          return "退款原因不能超过500字";
+        }
+        return true;
+      }
+    })
+      .then(({ value }) => {
+        return omsRefundApply({
+          orderId: order.id,
+          reason: String(value).trim()
+        }).then(res => {
+          if (res.code === 200) {
+            message("退款申请已提交", { type: "success" });
+            closeDrawer(options, index);
+            onSearch();
+            openDialog("订单详情", order.orderCode);
+          } else {
+            message(res.msg || "申请退款失败", { type: "error" });
+          }
+        });
+      })
+      .catch(() => {});
+  }
+
+  /**
+   * 假支付：成功后提示、关闭当前抽屉，并跳转我的订单打开对应详情。
    */
   function orderPayHandle(options, index) {
-    console.log(options.props.formInline.id, index);
+    const order = options.props.formInline;
     const pay = {
-      businessId: options.props.formInline.id,
+      businessId: order.id,
       payType: 1
     };
     omsPay(pay).then(res => {
-      if (0 === res.code) {
-        message(res.msg, { type: "success" });
+      if (res.code === 200) {
+        message("支付成功", { type: "success" });
+        closeDrawer(options, index);
         onSearch();
-        showOperationButtons.value = false;
-        console.log("按钮状态：", showOperationButtons);
+        const orderCode = order.orderCode;
+        if (route?.path?.startsWith("/mall/order/mine")) {
+          openDialog("订单详情", orderCode);
+        } else {
+          router.push({
+            path: "/mall/order/mine",
+            query: { orderCode }
+          });
+        }
+      } else {
+        message(res.msg || "支付失败", { type: "error" });
       }
     });
   }
@@ -288,6 +396,10 @@ export function useColumns(tableRef: Ref) {
 
   onMounted(() => {
     onSearch();
+    const orderCode = route.query.orderCode;
+    if (orderCode) {
+      openDialog("订单详情", String(orderCode));
+    }
   });
 
   return {

@@ -51,6 +51,10 @@ export type OmsOrderProduct = {
    */
   productId: string;
   /**
+   * SKU Id（有则传，库存按 SKU 扣减）
+   */
+  skuId?: string;
+  /**
    * 商品数量
    */
   productQuantity: number;
@@ -283,11 +287,19 @@ export const omsOrderMgrPage = (data?: object) => {
   });
 };
 
-/** 取消订单 */
-export const omsOrderCancel = (data?: object) => {
-  return http.request<ResultTable>(
+/** 取消订单（我的订单-待付款） */
+export const omsOrderCancel = (id: string | number) => {
+  return http.request<Result>(
     "post",
-    baseUrlApi(`/oms/order/cancel/${data}`)
+    baseUrlApi(`/oms/order/mine/cancel/${id}`)
+  );
+};
+
+/** 取消订单（管理端） */
+export const omsOrderMgrCancel = (id: string | number) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/oms/order/mgr/cancel/${id}`)
   );
 };
 
@@ -295,7 +307,7 @@ export const omsOrderCancel = (data?: object) => {
 export const omsOrderGeneral = (data?: OmsOrder) => {
   return http.request<GenerateOrderResult>(
     "post",
-    baseUrlApi("/oms/order/generate"),
+    baseUrlApi("/oms/order/mine/generate"),
     {
       data
     }
@@ -314,4 +326,58 @@ export const omsPay = (data?: OmsOrderPay) => {
   return http.request<Result>("post", baseUrlApi("/oms/pay"), {
     data
   });
+};
+
+/** 申请退款 */
+export type OmsRefundApply = {
+  orderId: string | number;
+  reasonType?: number;
+  reason: string;
+};
+
+/** 退款审核 */
+export type OmsRefundAudit = {
+  refundId: string | number;
+  pass: boolean;
+  auditRemark?: string;
+};
+
+/** 用户申请退款 */
+export const omsRefundApply = (data: OmsRefundApply) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/oms/order/mine/refund/apply"),
+    {
+      data
+    }
+  );
+};
+
+/** 我的退款单分页 */
+export const omsRefundMinePage = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/oms/order/mine/refund/page"),
+    { data }
+  );
+};
+
+/** 管理端退款审核分页 */
+export const omsRefundMgrPage = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/oms/order/mgr/refund/page"),
+    { data }
+  );
+};
+
+/** 管理端审核退款 */
+export const omsRefundAudit = (data: OmsRefundAudit) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/oms/order/mgr/refund/audit"),
+    {
+      data
+    }
+  );
 };

@@ -2,6 +2,8 @@ interface OrderProduct {
   id: string;
   orderId: string;
   productId: string;
+  skuId?: string;
+  skuName?: string;
   productQuantity: number;
   quantity: number;
   discountAmount: number;

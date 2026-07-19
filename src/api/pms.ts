@@ -54,6 +54,11 @@ export const getStockPage = (data?: object) => {
   });
 };
 
+/** 产品管理-库存-按商品查询各 SKU 库存 */
+export const getSkuStockByProductId = (productId?: string | number) => {
+  return http.request<Result>("get", baseUrlApi(`/pms/stock/sku/${productId}`));
+};
+
 /** 产品管理-库存管理-入库明细-入库 */
 export const pmsProductStockIn = (data?: object) => {
   return http.request<Result>("post", baseUrlApi("/pms/stock/add"), {

@@ -5,10 +5,10 @@ import type {
 } from "@pureadmin/table";
 
 import { onMounted, reactive, ref, type Ref } from "vue";
+import { useRouter } from "vue-router";
 import { delay, getKeyList } from "@pureadmin/utils";
 import { message } from "@/utils/message";
 import { deleteCart, getCartPage } from "@/api/pms";
-import { useColumns } from "@/views/mall/order/mine/utils/hook";
 import {
   addDrawer,
   closeDrawer,
@@ -17,14 +17,13 @@ import {
 import forms from "../generateOrder.vue";
 import type { OrderBaseInfo, ProductInfo } from "./orderInfo";
 import { type OmsOrder, omsOrderGeneral } from "@/api/oms";
-const tableRef = ref();
-const { openDialog } = useColumns(tableRef);
 // 按钮加载状态
 const btnLoading = ref(false);
 
 export { default as dayjs } from "dayjs";
 
 export function carUseColumns(tableRef: Ref, initLoading: boolean) {
+  const router = useRouter();
   const loading = ref(true);
   const selectedNum = ref(0);
   const selectProductTotalPrice = ref(0);
@@ -187,24 +186,47 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
 
   function openDialogGenerateOrder(row?: ProductInfo) {
     const curSelected =
-      tableRef.value && tableRef.value.getTableRef().getSelectionRows();
-    const cartItem: OrderBaseInfo = {
-      products: row ? [row] : []
-    };
-
-    if (curSelected) {
+      tableRef.value && tableRef.value.getTableRef?.()?.getSelectionRows?.();
+    const selectedRows: any[] = row ? [row] : [];
+    if (curSelected?.length) {
       curSelected.forEach(item => {
         if (!row || item.productId != row.productId) {
-          cartItem.products.push(item);
+          selectedRows.push(item);
         }
       });
     }
 
-    // 检查商品是否为空
-    if (cartItem.products.length === 0) {
-      message("请选择要结算的商品", { type: "warning" });
+    const products = selectedRows
+      .map(item => {
+        const price = Number(item.price ?? item.productPrice ?? 0);
+        const discountAmount = Number(item.discountAmount ?? 0);
+        const realAmount = Number(
+          item.realAmount ?? Math.max(price - discountAmount, 0)
+        );
+        return {
+          productId: item.productId,
+          skuId: item.skuId,
+          skuName: item.skuName || item.skuId || "默认规格",
+          productName: item.productName,
+          quantity: item.quantity ?? 1,
+          price,
+          discountAmount,
+          realAmount,
+          previewAddress: item.previewAddress
+        };
+      })
+      .filter(item => item.productId != null && item.productId !== "");
+
+    if (products.length === 0) {
+      message("请选择要结算的商品（商品ID缺失，请刷新后重试）", {
+        type: "warning"
+      });
       return;
     }
+
+    const cartItem: OrderBaseInfo = {
+      products
+    };
 
     addDrawer({
       size: "60%",
@@ -252,12 +274,26 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
   }
 
   function handleConfirmOrder(options: DrawerOptions, index: number) {
-    btnLoading.value = true;
-    delay(30000).then(() => {
-      btnLoading.value = false;
-    });
-
     const row = options.props.formInline;
+    const products =
+      row.products
+        ?.map(product => ({
+          productId: product.productId,
+          skuId: product.skuId,
+          productQuantity: product.quantity ?? product.productQuantity ?? 1
+        }))
+        .filter(item => item.productId != null && item.productId !== "") ?? [];
+
+    if (products.length === 0) {
+      message("商品信息无效，请重新选择商品后再下单", { type: "warning" });
+      return;
+    }
+    if (!row.receiverName || !row.receiverPhone || !row.receiverAddress) {
+      message("请先选择收货地址", { type: "warning" });
+      return;
+    }
+
+    btnLoading.value = true;
     const params: OmsOrder = {
       orderType: 0,
       receiverName: row.receiverName ?? "",
@@ -266,24 +302,26 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
       receiverCity: row.receiverCity ?? "",
       receiverDistrict: row.receiverDistrict ?? "",
       receiverAddress: row.receiverAddress ?? "",
-      email: row.receiverEmail ?? "", // 将 receiverEmail 映射到 email
-      note: "", // 如果没有备注信息，默认为空字符串或根据需求设置其他默认值
-      products:
-        row.products?.map(product => ({
-          productId: product.productId,
-          productQuantity: product.quantity
-        })) ?? []
+      email: row.receiverEmail ?? row.email ?? "",
+      note: row.note ?? "",
+      products
     };
 
-    // 提交订单信息
-    omsOrderGeneral(params).then(res => {
-      if (res.data) {
-        onSearch();
-        closeDrawer(options, index);
-        openDialog("订单详情", res.data.orderCode);
+    omsOrderGeneral(params)
+      .then(res => {
+        if (res.data) {
+          onSearch();
+          closeDrawer(options, index);
+          // 跳转我的订单并打开详情，避免在模块顶层误调 mine 的 useColumns
+          router.push({
+            path: "/mall/order/mine",
+            query: { orderCode: res.data.orderCode }
+          });
+        }
+      })
+      .finally(() => {
         btnLoading.value = false;
-      }
-    });
+      });
   }
 
   /** 取消选择 */

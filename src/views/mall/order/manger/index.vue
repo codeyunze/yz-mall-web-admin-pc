@@ -1,4 +1,7 @@
 <script setup lang="ts">
+/**
+ * 订单管理（后台）列表页：筛选维度与「我的订单」一致，数据接口为管理端分页（见 manger/utils/hook）。
+ */
 import { ref } from "vue";
 import { useColumns } from "@/views/mall/order/manger/utils/hook";
 
@@ -29,11 +32,13 @@ const {
   handleCurrentChange
 } = useColumns(tableRef);
 
+/** PlusSearch 本地状态 */
 const state = ref({
   status: "0",
   time: new Date().toString()
 });
 
+/** 顶部筛选列，与 hook 内 form 字段一致 */
 const filterColumns: PlusColumn[] = [
   {
     label: "订单编号",
@@ -72,6 +77,14 @@ const filterColumns: PlusColumn[] = [
       {
         label: "无效订单",
         value: "6"
+      },
+      {
+        label: "退款中",
+        value: "7"
+      },
+      {
+        label: "已退款",
+        value: "8"
       }
     ]
   },
@@ -135,6 +148,7 @@ const filterColumns: PlusColumn[] = [
 const handleChange = (values: any) => {
   console.log(values, "change");
 };
+/** 筛选提交：同步 form 并查询 */
 const handleSearch = (values: any) => {
   form.orderCode = values.orderCode;
   form.orderStatus = values.orderStatus;
