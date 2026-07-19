@@ -17,7 +17,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     receiverProvince: "",
     receiverCity: "",
     receiverDistrict: "",
-    receiverAddress: ""
+    receiverAddress: "",
+    isDefault: 0
   })
 });
 
@@ -114,6 +115,17 @@ onMounted(() => {
             v-model="newFormInline.receiverAddress"
             placeholder="请输入详细信息"
             type="textarea"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col :value="12" :xs="24" :sm="24">
+        <el-form-item label="默认地址" prop="isDefault">
+          <el-switch
+            v-model="newFormInline.isDefault"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="是"
+            inactive-text="否"
           />
         </el-form-item>
       </re-col>

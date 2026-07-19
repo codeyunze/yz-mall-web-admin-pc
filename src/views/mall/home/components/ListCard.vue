@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed, PropType, reactive, ref } from "vue";
+import { computed, PropType, ref } from "vue";
 import {
   Star,
   Share,
   ShoppingCart,
   Picture as IconPicture
 } from "@element-plus/icons-vue";
-import { addCart } from "@/api/pms";
+import { addCart, getSkuListByProductId } from "@/api/pms";
 import { message } from "@/utils/message";
 import { carUseColumns } from "@/views/mall/cart/utils/hook";
+import { useRouter } from "vue-router";
 
 defineOptions({
   name: "MallProductCard"
@@ -29,6 +30,7 @@ interface CardProductType {
 }
 
 const tableRef = ref();
+const router = useRouter();
 const { openDialog } = carUseColumns(tableRef, false);
 
 const props = defineProps({
@@ -51,22 +53,40 @@ const cardLogoClass = computed(() => ["list-card-item", "block"]);
 const isSoldOut = computed(() => (props.product?.quantity ?? 0) <= 0);
 
 /**
- * 商品加入购物车
- * @param productId 商品Id
+ * 商品加入购物车：需关联 SKU；多规格时跳转详情选择
  */
-function addToCart(productId) {
+async function addToCart(productId) {
   if (isSoldOut.value) {
     message("商品已售罄", { type: "warning" });
     return;
   }
-  const cart = reactive({
-    productId: productId
-  });
-  addCart(cart).then(res => {
+  try {
+    const skuRes = await getSkuListByProductId(productId);
+    if (skuRes.code !== 200) {
+      message(skuRes.msg || "获取商品规格失败", { type: "error" });
+      return;
+    }
+    const skus = Array.isArray(skuRes.data) ? skuRes.data : [];
+    if (skus.length === 0) {
+      message("商品未配置规格，无法加入购物车", { type: "warning" });
+      return;
+    }
+    if (skus.length > 1) {
+      message("请选择商品规格", { type: "info" });
+      router.push(`/mall/product/${productId}`);
+      return;
+    }
+    const res = await addCart({
+      productId,
+      skuId: skus[0].id,
+      quantity: 1
+    });
     if (res.code === 200) {
       message("商品加入购物车成功", { type: "success" });
     }
-  });
+  } catch (e) {
+    message("加入购物车失败", { type: "error" });
+  }
 }
 
 function addOrder(product?: CardProductType) {

@@ -33,7 +33,17 @@ export function useColumns() {
       label: "收货人",
       prop: "receiverName",
       minWidth: 180,
-      fixed: "left"
+      fixed: "left",
+      cellRenderer: ({ row }) => (
+        <div class="flex items-center gap-2">
+          <span>{row.receiverName}</span>
+          {row.isDefault === 1 ? (
+            <el-tag size="small" type="danger" effect="plain">
+              默认
+            </el-tag>
+          ) : null}
+        </div>
+      )
     },
     {
       label: "收货手机号",
@@ -75,7 +85,8 @@ export function useColumns() {
     receiverAddress: null,
     receiverName: null,
     receiverPhone: null,
-    receiverEmail: null
+    receiverEmail: null,
+    isDefault: null
   });
   const formRef = ref();
   const buttonClass = computed(() => {
@@ -177,7 +188,8 @@ export function useColumns() {
           receiverProvince: row?.receiverProvince ?? "",
           receiverCity: row?.receiverCity ?? "",
           receiverDistrict: row?.receiverDistrict ?? "",
-          receiverAddress: row?.receiverAddress ?? ""
+          receiverAddress: row?.receiverAddress ?? "",
+          isDefault: row?.isDefault ?? 0
         }
       },
       width: "46%",

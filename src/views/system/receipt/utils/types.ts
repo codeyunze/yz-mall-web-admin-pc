@@ -10,6 +10,8 @@ interface FormItemProps {
   receiverCity: string;
   receiverDistrict: string;
   receiverAddress: string;
+  /** 是否默认地址：0否；1是 */
+  isDefault: number;
 }
 interface FormProps {
   formInline: FormItemProps;

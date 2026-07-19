@@ -38,6 +38,8 @@ interface Order {
   receiverCityName: string;
   receiverDistrictName: string;
   email: string;
+  /** 当前展示地址是否为默认地址：0否；1是（仅前端展示） */
+  isDefault?: number;
   products?: OrderProduct[];
 }
 

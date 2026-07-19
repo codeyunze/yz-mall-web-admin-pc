@@ -17,6 +17,8 @@ interface ReceiptAddress {
   receiverDistrictName?: string;
   receiverAddress?: string;
   receiverEmail?: string;
+  /** 是否默认地址：0否；1是 */
+  isDefault?: number;
 }
 
 interface Props {
@@ -55,7 +57,7 @@ const loadAddressList = async () => {
     const res = await pageReceiptInfo(params);
     if (res.code === 200 && res.data) {
       addressList.value = res.data.items || [];
-      // 如果有当前地址，尝试匹配并选中
+      // 如果有当前地址，尝试匹配并选中；否则预选默认地址
       if (props.currentAddress) {
         const matched = addressList.value.find(
           item =>
@@ -65,6 +67,13 @@ const loadAddressList = async () => {
         );
         if (matched) {
           selectedAddressId.value = matched.id;
+        }
+      } else {
+        const defaultAddr = addressList.value.find(
+          item => item.isDefault === 1
+        );
+        if (defaultAddr?.id) {
+          selectedAddressId.value = defaultAddr.id;
         }
       }
     }
@@ -108,6 +117,14 @@ onMounted(() => {
       >
         <div class="address-header">
           <span class="receiver-name">{{ address.receiverName }}</span>
+          <el-tag
+            v-if="address.isDefault === 1"
+            size="small"
+            type="danger"
+            effect="plain"
+          >
+            默认
+          </el-tag>
           <span class="receiver-phone">{{ address.receiverPhone }}</span>
         </div>
         <div class="address-content">

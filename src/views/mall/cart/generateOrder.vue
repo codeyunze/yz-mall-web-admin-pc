@@ -41,7 +41,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     receiverCityName: "",
     receiverDistrictName: "",
     receiverAddress: "",
-    email: ""
+    email: "",
+    isDefault: 0
   })
 });
 
@@ -94,11 +95,22 @@ const updateAddress = (item: any) => {
   newFormInline.value.receiverDistrictName = item.receiverDistrictName || "";
   newFormInline.value.receiverAddress = item.receiverAddress || "";
   newFormInline.value.email = item.receiverEmail || item.email || "";
+  newFormInline.value.isDefault = item.isDefault ?? 0;
 
   selectAddress.value[0] = newFormInline.value.receiverProvince;
   selectAddress.value[1] = newFormInline.value.receiverCity;
   selectAddress.value[2] = newFormInline.value.receiverDistrict;
 };
+
+/**
+ * 优先取默认地址，否则取列表第一条
+ */
+function pickDefaultAddress(items: any[] = []) {
+  if (!items.length) {
+    return null;
+  }
+  return items.find(item => item.isDefault === 1) || items[0];
+}
 
 // 选择其他地址
 const handleSelectOtherAddress = () => {
@@ -139,21 +151,30 @@ const handleSelectOtherAddress = () => {
 };
 
 onMounted(() => {
+  totalPrice.value = 0;
+  (newFormInline.value.products || []).forEach(product => {
+    const price = Number(product.price || 0);
+    const quantity = Number(product.quantity || 0);
+    totalPrice.value += price * quantity;
+  });
+
+  // 详情页已传入地址时不再覆盖；否则加载默认地址
+  if (newFormInline.value.receiverName && newFormInline.value.receiverAddress) {
+    selectAddress.value[0] = newFormInline.value.receiverProvince;
+    selectAddress.value[1] = newFormInline.value.receiverCity;
+    selectAddress.value[2] = newFormInline.value.receiverDistrict;
+    return;
+  }
+
   const params = { filter: {} };
   pageReceiptInfo(params).then(res => {
-    console.log(res);
     if (res.data.total === 0) {
       return;
     }
-    const item = res.data.items[0];
-    updateAddress(item);
-
-    totalPrice.value = 0;
-    (newFormInline.value.products || []).forEach(product => {
-      const price = Number(product.price || 0);
-      const quantity = Number(product.quantity || 0);
-      totalPrice.value += price * quantity;
-    });
+    const item = pickDefaultAddress(res.data.items);
+    if (item) {
+      updateAddress(item);
+    }
   });
 });
 </script>
@@ -179,8 +200,17 @@ onMounted(() => {
                   }}</span></strong
                 >
               </el-descriptions-item>
-              <el-descriptions-item label="收货人: "
-                >{{ newFormInline.receiverName }}
+              <el-descriptions-item label="收货人: ">
+                {{ newFormInline.receiverName }}
+                <el-tag
+                  v-if="newFormInline.isDefault === 1"
+                  size="small"
+                  type="danger"
+                  effect="plain"
+                  class="ml-1"
+                >
+                  默认
+                </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="收货人手机号: "
                 >{{ newFormInline.receiverPhone }}

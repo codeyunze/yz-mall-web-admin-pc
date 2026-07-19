@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getProductDetail, getSkuListByProductId, addCart } from "@/api/pms";
-import { filePreviewUrl } from "@/api/system";
+import { filePreviewUrl, pageReceiptInfo } from "@/api/system";
 import { getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { ShoppingCart, Plus, Minus, Picture } from "@element-plus/icons-vue";
@@ -32,6 +32,30 @@ const mainImageIndex = ref(0);
 
 // 收货地址
 const selectedAddress = ref<any>(null);
+
+/**
+ * 优先取默认地址，否则取列表第一条
+ */
+function pickDefaultAddress(items: any[] = []) {
+  if (!items.length) {
+    return null;
+  }
+  return items.find(item => item.isDefault === 1) || items[0];
+}
+
+/**
+ * 加载默认收货地址（未手动选择时展示）
+ */
+async function loadDefaultAddress() {
+  try {
+    const res = await pageReceiptInfo({ filter: {} });
+    if (res.code === 200 && res.data?.items?.length) {
+      selectedAddress.value = pickDefaultAddress(res.data.items);
+    }
+  } catch (error) {
+    console.error("加载默认收货地址失败:", error);
+  }
+}
 
 function getRequestAddress() {
   return window.location.href.substring(0, window.location.href.indexOf("/#"));
@@ -239,7 +263,7 @@ const handleBuyNow = () => {
     previewAddress: displayImages.value?.[0] || ""
   };
 
-  openDialog(param);
+  openDialog(param, selectedAddress.value);
 };
 
 // 切换主图
@@ -249,6 +273,7 @@ const handleImageClick = (index: number) => {
 
 onMounted(() => {
   loadProductDetail();
+  loadDefaultAddress();
 });
 </script>
 
@@ -349,10 +374,19 @@ onMounted(() => {
           <div class="section-title">收货地址：</div>
           <div v-if="selectedAddress" class="selected-address">
             <div class="address-info">
-              <span class="receiver"
-                >{{ selectedAddress.receiverName }}
-                {{ selectedAddress.receiverPhone }}</span
-              >
+              <span class="receiver">
+                {{ selectedAddress.receiverName }}
+                <el-tag
+                  v-if="selectedAddress.isDefault === 1"
+                  size="small"
+                  type="danger"
+                  effect="plain"
+                  class="ml-1"
+                >
+                  默认
+                </el-tag>
+                {{ selectedAddress.receiverPhone }}
+              </span>
               <span class="address-text">
                 {{ selectedAddress.receiverProvinceName
                 }}{{ selectedAddress.receiverCityName

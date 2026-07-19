@@ -15,7 +15,7 @@ import {
   type DrawerOptions
 } from "@/components/ReDrawer/index";
 import forms from "../generateOrder.vue";
-import type { OrderBaseInfo, ProductInfo } from "./orderInfo";
+import type { OrderBaseInfo, ProductInfo, ReceiptInfo } from "./orderInfo";
 import { type OmsOrder, omsOrderGeneral } from "@/api/oms";
 // 按钮加载状态
 const btnLoading = ref(false);
@@ -68,9 +68,15 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
         )
     },
     {
-      label: "价格",
+      label: "价格（元）",
       prop: "price",
       width: 150
+    },
+    {
+      label: "规格",
+      prop: "skuName",
+      minWidth: 120,
+      cellRenderer: ({ row }) => row.skuName || row.skuId || "默认规格"
     },
     {
       label: "数量",
@@ -184,7 +190,7 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
     onSearch();
   };
 
-  function openDialogGenerateOrder(row?: ProductInfo) {
+  function openDialogGenerateOrder(row?: ProductInfo, address?: ReceiptInfo) {
     const curSelected =
       tableRef.value && tableRef.value.getTableRef?.()?.getSelectionRows?.();
     const selectedRows: any[] = row ? [row] : [];
@@ -225,7 +231,22 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
     }
 
     const cartItem: OrderBaseInfo = {
-      products
+      products,
+      ...(address
+        ? {
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            receiverProvince: address.receiverProvince,
+            receiverCity: address.receiverCity,
+            receiverDistrict: address.receiverDistrict,
+            receiverAddress: address.receiverAddress,
+            email: address.receiverEmail,
+            receiverProvinceName: address.receiverProvinceName,
+            receiverCityName: address.receiverCityName,
+            receiverDistrictName: address.receiverDistrictName,
+            isDefault: address.isDefault
+          }
+        : {})
     };
 
     addDrawer({

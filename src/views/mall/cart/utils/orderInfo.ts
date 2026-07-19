@@ -27,6 +27,16 @@ export type ReceiptInfo = {
    * 收货人邮件
    */
   receiverEmail?: string;
+  /**
+   * 是否默认地址：0否；1是
+   */
+  isDefault?: number;
+  /**
+   * 省/市/区名称（展示用）
+   */
+  receiverProvinceName?: string;
+  receiverCityName?: string;
+  receiverDistrictName?: string;
 };
 
 export type ProductInfo = {
@@ -56,4 +66,6 @@ export type ProductInfo = {
 
 export type OrderBaseInfo = ReceiptInfo & {
   products?: ProductInfo[];
+  /** 下单表单中的邮件字段（与 receiverEmail 同源） */
+  email?: string;
 };

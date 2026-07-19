@@ -1,5 +1,8 @@
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { getCaptcha } from "@/api/user";
+
+/** 图形验证码自动刷新间隔（毫秒） */
+const CAPTCHA_REFRESH_INTERVAL_MS = 60_000;
 
 /**
  * 从后端获取图形验证码
@@ -9,6 +12,7 @@ export const useImageVerify = () => {
   const imgCode = ref("");
   const captchaId = ref("");
   const imageSrc = ref("");
+  let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   function setImgCode(code: string) {
     imgCode.value = code;
@@ -18,7 +22,6 @@ export const useImageVerify = () => {
     try {
       imageSrc.value = ""; // 清空图片，显示加载状态
       const res = await getCaptcha();
-      console.log("验证码接口响应:", res);
 
       // 检查响应格式
       if (!res) {
@@ -32,12 +35,6 @@ export const useImageVerify = () => {
           captchaId.value = res.data.captchaId;
           imageSrc.value = res.data.image;
           imgCode.value = ""; // 清空验证码，等待用户输入
-          console.log(
-            "验证码加载成功, captchaId:",
-            captchaId.value,
-            "imageSrc前50字符:",
-            imageSrc.value?.substring(0, 50)
-          );
         } else {
           console.error("验证码数据不完整:", res.data);
         }
@@ -59,8 +56,27 @@ export const useImageVerify = () => {
     }
   }
 
+  function startAutoRefresh() {
+    stopAutoRefresh();
+    refreshTimer = setInterval(() => {
+      getImgCode();
+    }, CAPTCHA_REFRESH_INTERVAL_MS);
+  }
+
+  function stopAutoRefresh() {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+  }
+
   onMounted(() => {
     getImgCode();
+    startAutoRefresh();
+  });
+
+  onUnmounted(() => {
+    stopAutoRefresh();
   });
 
   return {

@@ -39,6 +39,7 @@ defineOptions({
 
 const imgCode = ref("");
 const captchaId = ref("");
+const imageVerifyRef = ref<{ getImgCode?: () => void } | null>(null);
 const loginDay = ref(7);
 const router = useRouter();
 const loading = ref(false);
@@ -68,6 +69,12 @@ const ruleForm = reactive({
   password: "a1234567",
   verifyCode: ""
 });
+
+/** 登录失败后刷新验证码并清空输入 */
+function refreshCaptcha() {
+  ruleForm.verifyCode = "";
+  imageVerifyRef.value?.getImgCode?.();
+}
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -110,15 +117,15 @@ const onLogin = async (formEl: FormInstance | undefined) => {
       await router.push(getTopMenu(true).path);
       message("登录成功", { type: "success" });
     } else {
-      message(res.msg, { type: "error" });
+      // 业务错误提示已由 http 拦截器统一弹出，此处避免重复 message
+      refreshCaptcha();
     }
   } catch (error: any) {
-    // 请求异常（包含超时）时提示
+    // 请求异常（包含超时）时提示；网络错误拦截器可能已提示，超时需单独提示
     if (error?.message === "LOGIN_TIMEOUT") {
       message("登录超时，请检查网络后重试", { type: "error" });
-    } else {
-      message("登录失败，请稍后重试", { type: "error" });
     }
+    refreshCaptcha();
   } finally {
     // 无论成功、失败还是异常，都允许用户重新点击登录
     loading.value = false;
@@ -143,6 +150,10 @@ useEventListener(document, "keypress", ({ code }) => {
 
 watch(imgCode, value => {
   useUserStoreHook().SET_VERIFYCODE(value);
+});
+/** 验证码刷新（点击/定时）后清空已输入内容 */
+watch(captchaId, () => {
+  ruleForm.verifyCode = "";
 });
 watch(checked, bool => {
   useUserStoreHook().SET_ISREMEMBERED(bool);
@@ -261,6 +272,7 @@ watch(loginDay, value => {
                 >
                   <template v-slot:append>
                     <ReImageVerify
+                      ref="imageVerifyRef"
                       v-model:code="imgCode"
                       v-model:captchaId="captchaId"
                     />
