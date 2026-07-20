@@ -7,6 +7,8 @@ import {
   Picture as IconPicture
 } from "@element-plus/icons-vue";
 import { addCart, getSkuListByProductId } from "@/api/pms";
+import { toAccessibleFileUrl, firstAlbumPicPreviewUrl } from "@/api/utils";
+import { getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { carUseColumns } from "@/views/mall/cart/utils/hook";
 import { useRouter } from "vue-router";
@@ -99,7 +101,12 @@ function addOrder(product?: CardProductType) {
     productName: product.productName,
     quantity: 1,
     price: product.productPrice,
-    previewAddress: product.productImages[0]
+    albumPics: product.albumPics,
+    previewAddress:
+      toAccessibleFileUrl(
+        product.productImages?.[0],
+        getToken()?.accessToken
+      ) || firstAlbumPicPreviewUrl(product.albumPics, getToken()?.accessToken)
   };
   openDialog(param);
 }
@@ -126,7 +133,7 @@ function addOrder(product?: CardProductType) {
         <el-image
           :src="
             product && product.productImages && product.productImages.length > 0
-              ? product.productImages[0]
+              ? toAccessibleFileUrl(product.productImages[0])
               : ''
           "
           alt="商品图片"

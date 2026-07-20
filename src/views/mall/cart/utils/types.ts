@@ -13,6 +13,8 @@ interface OrderProduct {
   price: number;
   remark: string;
   previewAddress: string;
+  /** SKU/商品图文件ID（逗号分隔） */
+  albumPics?: string;
 }
 
 interface Order {

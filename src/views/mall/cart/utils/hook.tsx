@@ -17,6 +17,8 @@ import {
 import forms from "../generateOrder.vue";
 import type { OrderBaseInfo, ProductInfo, ReceiptInfo } from "./orderInfo";
 import { type OmsOrder, omsOrderGeneral } from "@/api/oms";
+import { toAccessibleFileUrl, firstAlbumPicPreviewUrl } from "@/api/utils";
+import { getToken } from "@/utils/auth";
 // 按钮加载状态
 const btnLoading = ref(false);
 
@@ -209,6 +211,10 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
         const realAmount = Number(
           item.realAmount ?? Math.max(price - discountAmount, 0)
         );
+        const token = getToken()?.accessToken;
+        const previewAddress =
+          toAccessibleFileUrl(item.previewAddress, token) ||
+          firstAlbumPicPreviewUrl(item.albumPics, token);
         return {
           productId: item.productId,
           skuId: item.skuId,
@@ -218,7 +224,8 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
           price,
           discountAmount,
           realAmount,
-          previewAddress: item.previewAddress
+          albumPics: item.albumPics,
+          previewAddress
         };
       })
       .filter(item => item.productId != null && item.productId !== "");
@@ -252,6 +259,8 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
     addDrawer({
       size: "60%",
       title: "生成订单",
+      destroyOnClose: true,
+      // ReDrawer 用 <component :is="contentRenderer()" v-bind="props" />，须返回组件而非 VNode
       contentRenderer: () => forms,
       footerRenderer: ({ options, index }) => {
         return (

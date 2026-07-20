@@ -29,7 +29,7 @@ const {
   openDialog,
   handleSizeChange,
   handleCurrentChange
-} = useColumns(tableRef);
+} = useColumns();
 
 const state = ref({
   taskStatus: "0",

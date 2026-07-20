@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getProductDetail, getSkuListByProductId, addCart } from "@/api/pms";
 import { filePreviewUrl, pageReceiptInfo } from "@/api/system";
+import { toAccessibleFileUrl } from "@/api/utils";
 import { getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { ShoppingCart, Plus, Minus, Picture } from "@element-plus/icons-vue";
@@ -260,7 +261,11 @@ const handleBuyNow = () => {
     skuName: selectedSku.value.skuName || selectedSku.value.skuCode,
     quantity: quantity.value,
     price: currentPrice.value,
-    previewAddress: displayImages.value?.[0] || ""
+    previewAddress: toAccessibleFileUrl(
+      displayImages.value?.[0] || "",
+      getToken()?.accessToken
+    ),
+    albumPics: selectedSku.value.albumPics || product.value.albumPics || ""
   };
 
   openDialog(param, selectedAddress.value);

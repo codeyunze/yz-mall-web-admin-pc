@@ -9,6 +9,8 @@ import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Delete from "@iconify-icons/ep/delete";
 import { PureTableBar } from "@/components/RePureTableBar";
+import { toAccessibleFileUrl } from "@/api/utils";
+import { getToken } from "@/utils/auth";
 // import { tableDataImage } from "@/views/table/base/data";
 
 defineOptions({
@@ -184,7 +186,9 @@ const handleRest = () => {
             <el-image
               preview-teleported
               loading="lazy"
-              :src="row.previewAddress"
+              :src="
+                toAccessibleFileUrl(row.previewAddress, getToken()?.accessToken)
+              "
               :initial-index="index"
               fit="cover"
               class="w-[100px] h-[100px]"

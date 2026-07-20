@@ -6,6 +6,8 @@ interface FormItemProps {
   taskCode: string;
   taskStatus: number;
   taskNode: string;
+  /** 关联业务主键 */
+  businessId?: string;
 }
 interface FormProps {
   formInline: FormItemProps;

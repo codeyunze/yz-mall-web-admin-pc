@@ -4,15 +4,17 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { ref, onMounted, reactive, computed, type Ref } from "vue";
+import { ref, onMounted, reactive, computed } from "vue";
 import { delay } from "@pureadmin/utils";
 import { endTask, getUserTaskList } from "@/api/system";
 import { usePublicHooks } from "@/views/system/hooks";
 import type { FormItemProps } from "./types";
 import { message } from "@/utils/message";
+import { useRouter } from "vue-router";
 export { default as dayjs } from "dayjs";
 
-export function useColumns(tableRef: Ref) {
+export function useColumns() {
+  const router = useRouter();
   const loading = ref(true);
   const selectedNum = ref(0);
   const { tagStyle } = usePublicHooks();
@@ -154,13 +156,25 @@ export function useColumns(tableRef: Ref) {
   };
 
   function openDialog(row?: FormItemProps) {
-    console.log(row);
-    console.log(tableRef);
+    if (!row) {
+      return;
+    }
     if ("PMS:PRODUCT:PUBLISH" === row.taskCode) {
       endTask({ id: row.id }).then(data => {
         if (data.data) {
           message("操作成功", { type: "success" });
           onSearch();
+        }
+      });
+      return;
+    }
+    // 退款审核：跳转退款审核页，由审核接口结束待办
+    if ("OMS:ORDER:REFUND" === row.taskCode) {
+      router.push({
+        path: "/mall/order/refund",
+        query: {
+          refundId: row.businessId,
+          taskId: row.id
         }
       });
     }

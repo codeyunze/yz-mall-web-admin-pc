@@ -60,6 +60,8 @@ export type ProductInfo = {
   discountAmount?: number;
   /** 商品预览图 */
   previewAddress?: string;
+  /** SKU/商品图文件ID（逗号分隔），预览地址缺失时前端可回退拼接 */
+  albumPics?: string;
   /** 订单详情场景下的购买数量字段 */
   productQuantity?: number;
 };

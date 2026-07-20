@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, h } from "vue";
+import { onMounted, ref, h, watch } from "vue";
 import { Order } from "./utils/types";
 import type { CascaderProps } from "element-plus";
 import { getRegionByParent, pageReceiptInfo } from "@/api/system";
@@ -10,6 +10,9 @@ import {
 } from "@/components/ReDialog/index";
 import AddressSelector from "./components/AddressSelector.vue";
 import { message } from "@/utils/message";
+import { toAccessibleFileUrl, firstAlbumPicPreviewUrl } from "@/api/utils";
+import { getToken } from "@/utils/auth";
+import { Picture } from "@element-plus/icons-vue";
 
 // 声明 props 类型
 export interface FormProps {
@@ -76,6 +79,33 @@ const handleAddressChange = (values: any) => {
 // 推荐阅读：https://cn.vuejs.org/guide/components/props.html#one-way-data-flow
 const newFormInline = ref(props.formInline);
 const totalPrice = ref(0.0);
+
+/**
+ * 原地补齐商品预览图（保持与 props.formInline 同一引用，便于确认订单读取地址改动）
+ */
+function normalizeProductImages(val: Order) {
+  const token = getToken()?.accessToken;
+  if (!val?.products?.length) {
+    return val;
+  }
+  val.products.forEach(product => {
+    product.previewAddress =
+      toAccessibleFileUrl(product?.previewAddress, token) ||
+      firstAlbumPicPreviewUrl(product?.albumPics, token) ||
+      "";
+  });
+  return val;
+}
+
+watch(
+  () => props.formInline,
+  val => {
+    if (val) {
+      newFormInline.value = normalizeProductImages(val);
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 /** 金额展示，空值按 0.00 */
 const formatAmount = (value: unknown) => {
@@ -238,9 +268,26 @@ onMounted(() => {
         <el-row>
           <el-col :span="4">
             <el-image
+              v-if="product.previewAddress"
+              :key="product.previewAddress"
               style="width: 100px; height: 100px"
+              fit="cover"
               :src="product.previewAddress"
-            />
+            >
+              <template #error>
+                <div
+                  class="flex items-center justify-center w-full h-full bg-[var(--el-fill-color-light)]"
+                >
+                  <el-icon :size="28"><Picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
+            <div
+              v-else
+              class="flex items-center justify-center w-[100px] h-[100px] bg-[var(--el-fill-color-light)]"
+            >
+              <el-icon :size="28"><Picture /></el-icon>
+            </div>
           </el-col>
           <el-col :span="20">
             <el-row>

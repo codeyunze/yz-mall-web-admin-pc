@@ -8,12 +8,14 @@ import { delay } from "@pureadmin/utils";
 import { omsRefundAudit, omsRefundMgrPage } from "@/api/oms";
 import { message } from "@/utils/message";
 import { ElMessageBox } from "element-plus";
+import { useRoute } from "vue-router";
 
 /**
  * 退款审核表格状态与方法
  * @param tableRef 表格实例
  */
 export function useColumns(tableRef: Ref) {
+  const route = useRoute();
   const loading = ref(true);
   const selectedNum = ref(0);
   const columns: TableColumnList = [
@@ -83,6 +85,7 @@ export function useColumns(tableRef: Ref) {
   ];
 
   const form = reactive({
+    id: null as string | number | null,
     refundNo: "",
     orderCode: "",
     refundStatus: null as number | null
@@ -142,6 +145,7 @@ export function useColumns(tableRef: Ref) {
     form.refundNo = "";
     form.orderCode = "";
     form.refundStatus = null;
+    form.id = null;
     onSearch();
   };
 
@@ -222,6 +226,11 @@ export function useColumns(tableRef: Ref) {
   }
 
   onMounted(() => {
+    const refundId = route.query.refundId;
+    if (refundId != null && refundId !== "") {
+      form.id = String(refundId);
+      form.refundStatus = 0;
+    }
     onSearch();
   });
 
