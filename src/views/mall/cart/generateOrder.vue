@@ -12,6 +12,7 @@ import AddressSelector from "./components/AddressSelector.vue";
 import { message } from "@/utils/message";
 import { toAccessibleFileUrl, firstAlbumPicPreviewUrl } from "@/api/utils";
 import { getToken } from "@/utils/auth";
+import { fenToYuan } from "@/utils/money";
 import { Picture } from "@element-plus/icons-vue";
 
 // 声明 props 类型
@@ -107,11 +108,8 @@ watch(
   { immediate: true, deep: true }
 );
 
-/** 金额展示，空值按 0.00 */
-const formatAmount = (value: unknown) => {
-  const amount = Number(value);
-  return Number.isFinite(amount) ? amount.toFixed(2) : "0.00";
-};
+/** 金额展示：接口为分，页面展示元 */
+const formatAmount = (value: unknown) => fenToYuan(value as number);
 
 // 更新地址信息
 const updateAddress = (item: any) => {
@@ -366,9 +364,9 @@ onMounted(() => {
 
     <div style="float: right; margin-top: 20px">
       合计
-      <el-text type="danger" size="large" style="font-size: 24px"
-        >￥{{ totalPrice }}</el-text
-      >
+      <el-text type="danger" size="large" style="font-size: 24px">
+        ￥{{ fenToYuan(totalPrice) }}
+      </el-text>
     </div>
   </div>
 

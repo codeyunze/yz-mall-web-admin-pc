@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { getProductDetail, getSkuListByProductId, addCart } from "@/api/pms";
 import { filePreviewUrl, pageReceiptInfo } from "@/api/system";
 import { toAccessibleFileUrl } from "@/api/utils";
+import { fenToYuan } from "@/utils/money";
 import { getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { ShoppingCart, Plus, Minus, Picture } from "@element-plus/icons-vue";
@@ -119,12 +120,12 @@ const loadProductDetail = async () => {
 // 当前价格：优先 SKU 售价（分转元）
 const currentPrice = computed(() => {
   if (selectedSku.value?.priceFee != null) {
-    return (Number(selectedSku.value.priceFee) / 100).toFixed(2);
+    return fenToYuan(selectedSku.value.priceFee);
   }
   if (selectedSku.value?.price != null) {
-    return selectedSku.value.price;
+    return fenToYuan(selectedSku.value.price);
   }
-  return product.value?.productPrice || 0;
+  return fenToYuan(product.value?.productPrice);
 });
 
 /**
@@ -260,7 +261,11 @@ const handleBuyNow = () => {
     skuId: selectedSku.value.id,
     skuName: selectedSku.value.skuName || selectedSku.value.skuCode,
     quantity: quantity.value,
-    price: currentPrice.value,
+    price:
+      selectedSku.value?.priceFee ??
+      selectedSku.value?.price ??
+      product.value?.productPrice ??
+      0,
     previewAddress: toAccessibleFileUrl(
       displayImages.value?.[0] || "",
       getToken()?.accessToken

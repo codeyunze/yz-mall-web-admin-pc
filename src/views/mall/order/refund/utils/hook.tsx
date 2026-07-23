@@ -35,9 +35,12 @@ export function useColumns(tableRef: Ref) {
       minWidth: 140
     },
     {
-      label: "退款金额",
+      label: "退款金额（元）",
       prop: "refundAmount",
-      width: 110
+      width: 120,
+      cellRenderer: ({ row }) => (
+        <span>¥{((Number(row.refundAmount) || 0) / 100).toFixed(2)}</span>
+      )
     },
     {
       label: "退款原因",

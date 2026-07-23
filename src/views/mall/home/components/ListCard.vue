@@ -9,6 +9,7 @@ import {
 import { addCart, getSkuListByProductId } from "@/api/pms";
 import { toAccessibleFileUrl, firstAlbumPicPreviewUrl } from "@/api/utils";
 import { getToken } from "@/utils/auth";
+import { fenToYuan } from "@/utils/money";
 import { message } from "@/utils/message";
 import { carUseColumns } from "@/views/mall/cart/utils/hook";
 import { useRouter } from "vue-router";
@@ -155,7 +156,7 @@ function addOrder(product?: CardProductType) {
       <div class="list-card-item_detail--price">
         <span class="list-card-item_detail--price--label">价格：</span>
         <span class="list-card-item_detail--price--value"
-          >{{ product.productPrice }}$</span
+          >￥{{ fenToYuan(product.productPrice) }}</span
         >
         <el-tag
           v-if="isSoldOut"

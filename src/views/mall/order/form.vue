@@ -5,6 +5,7 @@
  */
 import { onMounted, ref } from "vue";
 import { OmsOrderDetail } from "@/api/oms";
+import { fenToYuan } from "@/utils/money";
 
 defineOptions({
   name: "OmsOrderDetailForm"
@@ -300,21 +301,34 @@ onMounted(() => {
                 >商品: {{ product.productName }}
               </el-col>
               <el-col :span="8" class="colProduct"
-                >原价: ￥ {{ product.productPrice }}
+                >原价: ￥ {{ fenToYuan(product.productPrice) }}
               </el-col>
-              <el-col :span="16" class="colProduct">SKU: XXX </el-col>
+              <el-col :span="16" class="colProduct"
+                >SKU:
+                {{
+                  product.skuName ||
+                  product.skuCode ||
+                  product.skuId ||
+                  "默认规格"
+                }}
+              </el-col>
               <el-col :span="8" class="colProduct"
-                >到手价: ￥ {{ product.realAmount }}
+                >到手价: ￥ {{ fenToYuan(product.realAmount) }}
               </el-col>
               <el-col :span="8" class="colProduct"
                 >数量: {{ product.productQuantity }}
               </el-col>
               <el-col :span="8" class="colProduct"
-                >共减: ￥ {{ product.discountAmount }}
+                >共减: ￥ {{ fenToYuan(product.discountAmount) }}
               </el-col>
               <el-col :span="8" class="colProduct"
                 >合计: ￥
-                {{ product.productPrice * product.productQuantity }}
+                {{
+                  fenToYuan(
+                    Number(product.productPrice || 0) *
+                      Number(product.productQuantity || 0)
+                  )
+                }}
               </el-col>
             </el-row>
           </el-col>
@@ -325,7 +339,7 @@ onMounted(() => {
     <div style="float: right; margin-top: 20px">
       合计
       <el-text type="danger" size="large" style="font-size: 24px"
-        >￥{{ totalPrice }}
+        >￥{{ fenToYuan(totalPrice) }}
       </el-text>
     </div>
   </div>

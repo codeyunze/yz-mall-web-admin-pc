@@ -263,12 +263,14 @@ onMounted(() => {
         </re-col>
 
         <re-col :value="12" :xs="24" :sm="24">
-          <el-form-item label="售价" prop="productPrice">
-            <el-input
+          <el-form-item label="售价（元）" prop="productPrice">
+            <el-input-number
               v-model="newFormInline.productPrice"
               :disabled="isViewMode"
-              clearable
+              :min="0"
+              :precision="2"
               placeholder="请输入商品售价"
+              style="width: 100%"
             />
           </el-form-item>
         </re-col>

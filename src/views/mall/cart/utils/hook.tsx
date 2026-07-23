@@ -72,7 +72,10 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
     {
       label: "价格（元）",
       prop: "price",
-      width: 150
+      width: 150,
+      cellRenderer: ({ row }) => (
+        <span>¥{((Number(row.price) || 0) / 100).toFixed(2)}</span>
+      )
     },
     {
       label: "规格",
@@ -318,6 +321,10 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
       message("商品信息无效，请重新选择商品后再下单", { type: "warning" });
       return;
     }
+    if (products.some(item => item.skuId == null || item.skuId === "")) {
+      message("请选择商品规格后再下单", { type: "warning" });
+      return;
+    }
     if (!row.receiverName || !row.receiverPhone || !row.receiverAddress) {
       message("请先选择收货地址", { type: "warning" });
       return;
@@ -368,8 +375,13 @@ export function carUseColumns(tableRef: Ref, initLoading: boolean) {
     selectProductTotalPrice.value = 0;
     if (selectedNum.value > 0) {
       val.forEach(item => {
-        selectProductTotalPrice.value += item.price * item.quantity;
+        selectProductTotalPrice.value +=
+          (Number(item.price) || 0) * (Number(item.quantity) || 0);
       });
+      // 合计存「分」，模板用 fenToYuan 展示
+      selectProductTotalPrice.value = Number(
+        (selectProductTotalPrice.value / 100).toFixed(2)
+      );
     }
     // 重置表格高度
     tableRef.value.setAdaptive();

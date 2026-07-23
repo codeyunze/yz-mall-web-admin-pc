@@ -51,9 +51,9 @@ export type OmsOrderProduct = {
    */
   productId: string;
   /**
-   * SKU Id（有则传，库存按 SKU 扣减）
+   * SKU Id（必填，交易按 SKU 计价与扣库存）
    */
-  skuId?: string;
+  skuId: string;
   /**
    * 商品数量
    */
@@ -204,9 +204,29 @@ export type OmsOrderProductDetail = {
   productId: number;
 
   /**
+   * 下单SKU Id
+   */
+  skuId?: number | string;
+
+  /**
+   * SKU编码快照
+   */
+  skuCode?: string;
+
+  /**
+   * SKU名称快照
+   */
+  skuName?: string;
+
+  /**
    * 购买商品数量
    */
   productQuantity: number;
+
+  /**
+   * 已退款数量
+   */
+  refundQuantity?: number;
 
   /**
    * 商品优惠金额
