@@ -439,3 +439,117 @@ export const initTenantDb = (
     baseUrlApi(`/sys/tenant/initDb/${id}${serviceQuery}`)
   );
 };
+
+/* ========================================
+ * 第三方访问授权管理 - 开放客户端
+ * ======================================== */
+
+/** 第三方客户端-分页查询 */
+export const getOpenClientPage = (data?: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/sys/open/client/page"),
+    {
+      data
+    }
+  );
+};
+
+/** 第三方客户端-详情 */
+export const getOpenClientById = (id: string | number) => {
+  return http.request<Result>("get", baseUrlApi(`/sys/open/client/get/${id}`));
+};
+
+/** 第三方客户端-新增 */
+export const addOpenClient = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/open/client/add"), {
+    data
+  });
+};
+
+/** 第三方客户端-编辑 */
+export const updateOpenClient = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/sys/open/client/update"), {
+    data
+  });
+};
+
+/** 第三方客户端-切换启停状态 */
+export const switchOpenClientStatus = (id: string | number) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi(`/sys/open/client/switch/${id}`)
+  );
+};
+
+/** 第三方客户端-删除 */
+export const deleteOpenClient = (id: string | number) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi(`/sys/open/client/delete/${id}`)
+  );
+};
+
+/** 第三方客户端-上传公钥 */
+export const uploadOpenClientKey = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/sys/open/client/key/upload"),
+    { data }
+  );
+};
+
+/** 第三方客户端-平台生成SM2密钥对（私钥仅此次返回） */
+export const generateOpenClientKey = (clientId: string) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/open/client/key/generate?clientId=${clientId}`)
+  );
+};
+
+/** 第三方客户端-查询当前生效公钥 */
+export const getCurrentOpenClientKey = (clientId: string) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/open/client/key/current/${clientId}`)
+  );
+};
+
+/** 第三方客户端-批量授予权限 */
+export const grantOpenClientAuth = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/sys/open/client/auth/grant"),
+    { data }
+  );
+};
+
+/** 第三方客户端-撤销权限 */
+export const revokeOpenClientAuth = (data?: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/sys/open/client/auth/revoke"),
+    { data }
+  );
+};
+
+/** 第三方客户端-查询有效授权列表 */
+export const listOpenClientAuth = (clientId: string) => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi(`/sys/open/client/auth/list/${clientId}`)
+  );
+};
+
+/** 下载平台服务端公钥 */
+export const getOpenServerPublicKey = () => {
+  return http.request<Result>("get", baseUrlApi("/sys/open/server-public-key"));
+};
+
+/** 可授权开放 API 权限码清单 */
+export const getOpenPermissionOptions = () => {
+  return http.request<Result>(
+    "get",
+    baseUrlApi("/sys/open/permission/options")
+  );
+};
