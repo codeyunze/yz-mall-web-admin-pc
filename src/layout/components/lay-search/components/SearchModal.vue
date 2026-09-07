@@ -44,7 +44,10 @@ const activePath = ref("");
 const historyPath = ref("");
 const resultOptions = shallowRef([]);
 const historyOptions = shallowRef([]);
-const handleSearch = useDebounceFn(search, 300);
+const handleSearch = useDebounceFn(
+  search,
+  getConfig()?.Debounce?.Search ?? 300
+);
 const historyNum = getConfig().MenuSearchHistory;
 const inputRef = ref<HTMLInputElement | null>(null);
 

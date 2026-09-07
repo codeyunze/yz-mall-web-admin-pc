@@ -19,6 +19,7 @@ import {
   deviceDetection,
   debounce
 } from "@pureadmin/utils";
+import { getConfig } from "@/config";
 
 export function useMenu() {
   const form = reactive({
@@ -171,7 +172,7 @@ export function useMenu() {
         }
       });
     },
-    3000,
+    getConfig()?.Debounce?.Add ?? 1500,
     true
   );
 
@@ -195,7 +196,7 @@ export function useMenu() {
         }
       });
     },
-    3000,
+    getConfig()?.Debounce?.Update ?? 3000,
     true
   );
 
@@ -247,11 +248,11 @@ export function useMenu() {
             menuParam.value = curData;
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
-              // 防抖(3秒内连续点击只会执行第一次点击事件)
+              // 防抖（连续点击只会执行第一次，时长见 platform-config.json Debounce.Add）
               debounceHandleAddMenu(title, curData.title, done);
             } else {
               // 实际开发先调用修改接口，再进行下面操作
-              // 防抖(3秒内连续点击只会执行第一次点击事件)
+              // 防抖（连续点击只会执行第一次，时长见 platform-config.json Debounce.Update）
               debounceHandleUpdateMenu(title, curData.title, done);
             }
           }

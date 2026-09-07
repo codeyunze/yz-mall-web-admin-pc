@@ -111,6 +111,17 @@ declare global {
     TooltipEffect?: Effect;
     ResponsiveStorageNameSpace?: string;
     MenuSearchHistory?: number;
+    /** 防抖时间配置（单位：毫秒） */
+    Debounce?: {
+      /** 新增操作防抖时间，默认 1500 */
+      Add?: number;
+      /** 修改操作防抖时间，默认 3000 */
+      Update?: number;
+      /** 登录防抖时间，默认 1000 */
+      Login?: number;
+      /** 搜索防抖时间，默认 300 */
+      Search?: number;
+    };
     MapConfigure?: {
       amapKey?: string;
       options: {

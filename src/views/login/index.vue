@@ -6,6 +6,7 @@ import { message } from "@/utils/message";
 import { loginRules } from "./utils/rule";
 import TypeIt from "@/components/ReTypeit";
 import { debounce } from "@pureadmin/utils";
+import { getConfig } from "@/config";
 import { useNav } from "@/layout/hooks/useNav";
 import { useEventListener } from "@vueuse/core";
 import type { FormInstance } from "element-plus";
@@ -135,7 +136,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
 
 const immediateDebounce: any = debounce(
   formRef => onLogin(formRef),
-  1000,
+  getConfig()?.Debounce?.Login ?? 1000,
   true
 );
 

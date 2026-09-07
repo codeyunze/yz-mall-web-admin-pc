@@ -27,6 +27,12 @@
   "TooltipEffect": "light",
   "ResponsiveStorageNameSpace": "responsive-",
   "MenuSearchHistory": 6,
+  "Debounce": {
+    "Add": 1500,
+    "Update": 1000,
+    "Login": 1000,
+    "Search": 300
+  },
   "MapConfigure": {
     "amapKey": "adc139d56406f3844c8f1cf1c6b65c41",
     "options": {

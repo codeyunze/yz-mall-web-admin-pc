@@ -11,6 +11,7 @@ import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h, type Ref } from "vue";
 import type { FormItemProps } from "./types";
 import { deviceDetection, debounce } from "@pureadmin/utils";
+import { getConfig } from "@/config";
 import type {
   LoadingConfig,
   AdaptiveConfig,
@@ -211,7 +212,7 @@ export function useDictionary(tableRef: Ref) {
         }
       });
     },
-    3000,
+    getConfig()?.Debounce?.Add ?? 1500,
     true
   );
 
@@ -230,7 +231,7 @@ export function useDictionary(tableRef: Ref) {
         }
       });
     },
-    3000,
+    getConfig()?.Debounce?.Update ?? 3000,
     true
   );
 

@@ -170,9 +170,9 @@ class PureHttp {
           resolve(response);
           const result = JSON.parse(JSON.stringify(response));
           // if (result.code !== 200 && result.code !== 50001) {
-          if (result.code !== 200) {
-            message(result.msg, { type: "error" });
-          }
+          // if (result.code !== 200) {
+          //   message(result.msg, { type: "error" });
+          // }
 
           // 只在认证相关的错误码时才退出登录，500 是服务器内部错误，不应退出登录
           if (
@@ -185,6 +185,7 @@ class PureHttp {
             result.code === 11015 ||
             result.code === 11016
           ) {
+            message(result.msg, { type: "error" });
             useUserStoreHook().logOut();
           }
         })
