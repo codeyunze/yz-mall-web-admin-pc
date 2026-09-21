@@ -76,7 +76,7 @@ export function useFile(tableRef: Ref) {
       width: 120
     },
     {
-      label: "创建时间",
+      label: "上传时间",
       prop: "createTime",
       width: 180
     },

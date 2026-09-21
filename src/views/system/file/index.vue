@@ -109,10 +109,6 @@ const filterColumns: PlusColumn[] = [
     prop: "fileName"
   },
   {
-    label: "文件类型",
-    prop: "fileType"
-  },
-  {
     label: "存储模式",
     prop: "fileStorageMode",
     valueType: "select",
@@ -136,7 +132,7 @@ const filterColumns: PlusColumn[] = [
     prop: "fileStorageStation"
   },
   {
-    label: "创建时间",
+    label: "上传时间",
     prop: "createTime",
     valueType: "date-picker",
     fieldProps: {
