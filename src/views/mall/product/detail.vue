@@ -51,7 +51,7 @@ function pickDefaultAddress(items: any[] = []) {
 async function loadDefaultAddress() {
   try {
     const res = await pageReceiptInfo({ filter: {} });
-    if (res.code === 200 && res.data?.items?.length) {
+    if (res.code === 0 && res.data?.items?.length) {
       selectedAddress.value = pickDefaultAddress(res.data.items);
     }
   } catch (error) {
@@ -91,12 +91,12 @@ const loadProductDetail = async () => {
   try {
     // 加载商品详情 - 直接使用字符串ID，避免大整数精度丢失
     const productRes = await getProductDetail(productId);
-    if (productRes.code === 200 && productRes.data) {
+    if (productRes.code === 0 && productRes.data) {
       product.value = productRes.data;
 
       // 加载SKU列表 - 直接使用字符串ID，避免大整数精度丢失
       const skuRes = await getSkuListByProductId(productId);
-      if (skuRes.code === 200 && skuRes.data) {
+      if (skuRes.code === 0 && skuRes.data) {
         skuList.value = skuRes.data || [];
         // 默认选择第一个SKU
         if (skuList.value.length > 0) {
@@ -230,7 +230,7 @@ const handleAddToCart = async () => {
       quantity: quantity.value
     };
     const res = await addCart(params);
-    if (res.code === 200) {
+    if (res.code === 0) {
       message("已添加到购物车", { type: "success" });
     }
   } catch (error) {

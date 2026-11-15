@@ -154,7 +154,7 @@ export function useColumns() {
       current: 1,
       filter: {}
     }).then(data => {
-      if (data.code === 200) {
+      if (data.code === 0) {
         productOptions.value = (data.data.items || []).map(item => ({
           label: item.productName,
           // 统一转成字符串，避免与表单中的 productId 类型不一致
@@ -272,13 +272,13 @@ export function useColumns() {
             // 表单规则校验通过
             if (title === "新增") {
               addAttr(submitData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   chores();
                 }
               });
             } else {
               updateAttr(submitData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   chores();
                 }
               });
@@ -314,7 +314,7 @@ export function useColumns() {
    */
   function handleDelete(row) {
     deleteAttr(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了属性名称为 [${row.attrName}] 的这条数据`, {
           type: "success"

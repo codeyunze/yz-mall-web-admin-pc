@@ -157,7 +157,7 @@ export function useOpenClient() {
       loading: true
     });
     switchOpenClientStatus(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         switchLoadMap.value[index] = Object.assign(
           {},
           switchLoadMap.value[index],
@@ -178,7 +178,7 @@ export function useOpenClient() {
   /** 删除 */
   function handleDelete(row) {
     deleteOpenClient(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了客户端 [${row.clientName}] 的这条数据`, {
           type: "success"
@@ -227,7 +227,7 @@ export function useOpenClient() {
           if (valid) {
             if (title === "新增") {
               addOpenClient(curData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   const clientId = res.data?.clientId;
                   if (clientId) {
                     addDialog({
@@ -262,7 +262,7 @@ export function useOpenClient() {
               });
             } else {
               updateOpenClient(curData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   chores();
                 }
               });
@@ -298,7 +298,7 @@ export function useOpenClient() {
         FormRef.validate(valid => {
           if (valid) {
             uploadOpenClientKey(curData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 message(`客户端 [${row.clientName}] 公钥上传成功`, {
                   type: "success"
                 });
@@ -314,7 +314,7 @@ export function useOpenClient() {
   /** 平台生成密钥对 */
   function handleGenerateKey(row) {
     generateOpenClientKey(row.clientId).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         const { publicKey, privateKey } = res.data;
         addDialog({
           title: `密钥对生成结果 - ${row.clientName}`,
@@ -419,7 +419,7 @@ export function useOpenClient() {
           }
 
           Promise.all(tasks).then(results => {
-            if (results.every(r => r.code === 200)) {
+            if (results.every(r => r.code === 0)) {
               message(`客户端 [${row.clientName}] 授权更新成功`, {
                 type: "success"
               });
@@ -434,7 +434,7 @@ export function useOpenClient() {
   /** 详情（公钥摘要 + 授权） */
   function openDetailDialog(row) {
     getOpenClientById(row.id).then(res => {
-      if (res.code !== 200 || !res.data) {
+      if (res.code !== 0 || !res.data) {
         message(res.msg || "加载详情失败", { type: "error" });
         return;
       }
@@ -525,7 +525,7 @@ export function useOpenClient() {
   /** 下载平台服务端公钥 */
   function handleDownloadServerPublicKey() {
     getOpenServerPublicKey().then(res => {
-      if (res.code !== 200 || !res.data?.serverPublicKey) {
+      if (res.code !== 0 || !res.data?.serverPublicKey) {
         message(res.msg || "获取服务端公钥失败", { type: "error" });
         return;
       }

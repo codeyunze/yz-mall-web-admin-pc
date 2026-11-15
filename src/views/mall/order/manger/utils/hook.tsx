@@ -184,7 +184,7 @@ export function useColumns(tableRef: Ref) {
       orderCode
     };
     getOmsInfo(queryFilter).then(data => {
-      if (data.code !== 200) {
+      if (data.code !== 0) {
         return;
       }
       console.log("订单详情数据", data.data);
@@ -230,7 +230,7 @@ export function useColumns(tableRef: Ref) {
    */
   function orderCancelHandle(options, index) {
     omsOrderMgrCancel(options.props.formInline.id).then(result => {
-      if (result.code === 200) {
+      if (result.code === 0) {
         message("订单已取消", { type: "success" });
         onSearch();
         closeDrawer(options, index);

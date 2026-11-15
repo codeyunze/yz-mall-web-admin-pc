@@ -65,7 +65,7 @@ async function addToCart(productId) {
   }
   try {
     const skuRes = await getSkuListByProductId(productId);
-    if (skuRes.code !== 200) {
+    if (skuRes.code !== 0) {
       message(skuRes.msg || "获取商品规格失败", { type: "error" });
       return;
     }
@@ -84,7 +84,7 @@ async function addToCart(productId) {
       skuId: skus[0].id,
       quantity: 1
     });
-    if (res.code === 200) {
+    if (res.code === 0) {
       message("商品加入购物车成功", { type: "success" });
     }
   } catch (e) {

@@ -287,7 +287,7 @@ function loadProductAttrs(productId: number): Promise<void> {
     current: 1,
     filter: { relatedId: productId, attrType: 0 }
   }).then(res => {
-    if (res.code === 200) {
+    if (res.code === 0) {
       const productAttrs = (res.data.items || []).map((attr: any) => ({
         id: attr.id,
         attrName: attr.attrName,
@@ -311,7 +311,7 @@ function getRef() {
 // 加载SKU的属性列表（只加载SKU属性，商品属性需要从商品ID加载）
 function loadSkuAttrs(skuId: number) {
   getAttrListByRelatedId(skuId).then(res => {
-    if (res.code === 200) {
+    if (res.code === 0) {
       const allAttrs = res.data || [];
       // 只保留SKU属性（attrType=1），商品属性从商品ID加载
       const skuOnlyAttrs = allAttrs
@@ -337,7 +337,7 @@ function loadPresetAttrs(productId: number) {
     current: 1,
     filter: { relatedId: productId }
   }).then(res => {
-    if (res.code === 200) {
+    if (res.code === 0) {
       presetAttrs.value = res.data.items || [];
     }
     presetAttrLoading.value = false;
@@ -428,7 +428,7 @@ function handleDeleteAttr(attrId: number, index: number) {
   }
 
   deleteAttr(attrId).then(res => {
-    if (res.code === 200) {
+    if (res.code === 0) {
       message("属性删除成功", { type: "success" });
       loadSkuAttrs(newFormInline.value.id);
     }

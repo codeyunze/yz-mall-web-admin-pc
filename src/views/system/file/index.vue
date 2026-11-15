@@ -12,8 +12,6 @@ import View from "@iconify-icons/ep/view";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { baseUrlApi } from "@/api/utils";
 import { getToken } from "@/utils/auth";
-import axios from "axios";
-import { message } from "@/utils/message";
 
 defineOptions({
   name: "SystemFileManager"
@@ -75,27 +73,9 @@ const handleRowPreview = (row: Record<string, unknown>) => {
     const url =
       baseUrlApi(`/sys/file/preview/${row.id}`) +
       (accessToken ? `?token=${accessToken}` : "");
-
-    // 只请求当前这一张图片，成功后再打开预览
-    axios
-      .get(url, { responseType: "blob" })
-      .then(({ data }) => {
-        const blobUrl = URL.createObjectURL(data);
-        imagePreviewUrls.value = [blobUrl];
-        imagePreviewIndex.value = 0;
-        imagePreviewVisible.value = true;
-      })
-      .catch(error => {
-        console.error("预览图片失败:", error);
-        const status = error?.response?.status;
-        if (status === 403) {
-          message("文件访问被拒绝", { type: "error" });
-        } else {
-          message("预览图片失败，请稍后重试", { type: "error" });
-        }
-        imagePreviewVisible.value = false;
-      });
-
+    imagePreviewUrls.value = [url];
+    imagePreviewIndex.value = 0;
+    imagePreviewVisible.value = true;
     return;
   }
 

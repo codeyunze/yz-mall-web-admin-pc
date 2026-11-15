@@ -143,7 +143,7 @@ export function useColumns(tableRef: Ref) {
   // 加载分类树形数据
   function loadCategoryTree() {
     getCategoryTree().then(data => {
-      if (data.code === 200) {
+      if (data.code === 0) {
         categoryTreeOptions.value = data.data || [];
         // 转换为扁平列表用于下拉选择
         categoryOptions.value = flattenCategoryTree(data.data || []);
@@ -298,14 +298,14 @@ export function useColumns(tableRef: Ref) {
           if (title === "新增") {
             // 实际开发先调用新增接口，再进行下面操作
             addProduct(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
           } else {
             // 实际开发先调用修改接口，再进行下面操作
             updateProductById(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
@@ -321,7 +321,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handlePublish(row) {
     publishProductById(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`商品 [${row.productName}] 上架成功`, {
           type: "success"
         });
@@ -336,7 +336,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelisting(row) {
     delistingProductById(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`商品 [${row.productName}] 下架成功`, {
           type: "success"
         });
@@ -396,7 +396,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelete(row) {
     deleteProduct(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了商品名称为 [${row.username}] 的这条数据`, {
           type: "success"

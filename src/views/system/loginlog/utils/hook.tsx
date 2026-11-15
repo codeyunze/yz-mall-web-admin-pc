@@ -177,7 +177,7 @@ export function useLoginLog() {
       );
 
       const res = await clearLoginLog();
-      if (res.code === 200) {
+      if (res.code === 0) {
         message("清空日志成功", { type: "success" });
         onSearch();
       } else {

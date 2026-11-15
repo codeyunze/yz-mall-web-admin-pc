@@ -148,7 +148,7 @@ export function useColumns() {
   // 加载分类树形数据
   function loadCategoryTree() {
     getCategoryTree().then(data => {
-      if (data.code === 200) {
+      if (data.code === 0) {
         categoryTreeOptions.value = data.data || [];
       }
     });
@@ -224,13 +224,13 @@ export function useColumns() {
           // 表单规则校验通过
           if (title === "新增") {
             addCategory(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
           } else {
             updateCategory(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
@@ -265,7 +265,7 @@ export function useColumns() {
    */
   function handleDelete(row) {
     deleteCategory(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了分类名称为 [${row.categoryName}] 的这条数据`, {
           type: "success"

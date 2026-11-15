@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
-import VuePdfEmbed from "vue-pdf-embed";
+import { computed, ref, watch } from "vue";
 import { baseUrlApi } from "@/api/utils";
 import { getToken } from "@/utils/auth";
-import axios from "axios";
-import { message } from "@/utils/message";
 
 defineOptions({
   name: "FilePreview"
@@ -19,154 +15,48 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { t } = useI18n();
-const pdfRef = ref<any>();
-const pageCount = ref(1);
-const loading = ref(true);
-const currentPage = ref(1);
-const currentRotation = ref(0);
-const showAllPages = ref(false);
-const rotations = [0, 90, 180, 270];
-const previewUrl = ref("");
 const isImage = ref(false);
 const isPdf = ref(false);
 
-// 判断文件类型（兼容后端返回 MIME 类型或扩展名）
+const previewUrl = computed(() => {
+  const token = getToken();
+  const accessToken = token?.accessToken || "";
+  return (
+    baseUrlApi(`/sys/file/preview/${props.fileId}`) +
+    (accessToken ? `?token=${accessToken}` : "")
+  );
+});
+
 const checkFileType = () => {
   const type = (props.fileType || "").toLowerCase();
   const name = (props.fileName || "").toLowerCase();
-
-  // 图片：MIME 以 image/ 开头，或者文件名后缀是常见图片格式
   isImage.value =
     type.startsWith("image/") ||
     type.includes("image") ||
     /\.(png|jpe?g|gif|bmp|webp|svg)$/.test(name);
-
-  // PDF：MIME 含 pdf 或文件名以 .pdf 结尾
   isPdf.value =
     type === "application/pdf" || type.includes("pdf") || name.endsWith(".pdf");
-};
-
-// 获取预览 URL：先请求 /sys/file/preview/{id}?token=...，只在成功时生成可用地址
-const getPreviewUrl = async () => {
-  loading.value = true;
-  try {
-    const token = getToken();
-    const accessToken = token?.accessToken || "";
-
-    const url =
-      baseUrlApi(`/sys/file/preview/${props.fileId}`) +
-      (accessToken ? `?token=${accessToken}` : "");
-
-    const { data } = await axios.get(url, { responseType: "blob" });
-
-    // 如果是图片或 PDF，创建 blob URL；否则可按需降级处理
-    if (isImage.value || isPdf.value) {
-      const blob = new Blob([data], { type: props.fileType });
-      previewUrl.value = URL.createObjectURL(blob);
-    } else {
-      previewUrl.value = "";
-    }
-  } catch (error) {
-    console.error("获取预览地址失败:", error);
-    const status = (error as any)?.response?.status;
-    if (status === 403) {
-      message("文件访问被拒绝", { type: "error" });
-    }
-    previewUrl.value = "";
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleDocumentRender = () => {
-  loading.value = false;
-  if (pdfRef.value?.doc) {
-    pageCount.value = pdfRef.value.doc.numPages;
-  }
-};
-
-const showAllPagesChange = () => {
-  currentPage.value = showAllPages.value ? null : 1;
-};
-
-const onPrint = () => {
-  if (pdfRef.value) {
-    pdfRef.value.print();
-  }
 };
 
 watch(
   () => props.fileId,
   () => {
     checkFileType();
-    getPreviewUrl();
   },
   { immediate: true }
 );
 </script>
 
 <template>
-  <div v-loading="loading" :element-loading-text="t('status.pureLoad')">
-    <!-- PDF 预览 -->
-    <div v-if="isPdf && previewUrl" class="h-[calc(100vh-295px)]">
-      <div class="flex justify-between items-center h-9">
-        <div v-if="showAllPages" class="font-medium ml-1.25 text-xl">
-          共{{ pageCount }}页
-        </div>
-        <div v-else>
-          <el-pagination
-            v-model:current-page="currentPage"
-            background
-            layout="prev, slot, next"
-            :page-size="1"
-            :total="pageCount"
-          >
-            {{ currentPage }} / {{ pageCount }}
-          </el-pagination>
-        </div>
-        <div class="w-[170px] flex-bc">
-          <el-checkbox v-model="showAllPages" @change="showAllPagesChange">
-            显示所有页面
-          </el-checkbox>
-          <IconifyIconOnline
-            v-tippy="{
-              maxWidth: 'none',
-              content: `翻转（当前角度${rotations[currentRotation]}度）`
-            }"
-            icon="ic:baseline-rotate-90-degrees-ccw"
-            class="cursor-pointer outline-transparent"
-            @click="
-              currentRotation === 3
-                ? (currentRotation = 0)
-                : (currentRotation += 1)
-            "
-          />
-          <IconifyIconOnline
-            v-tippy="{
-              maxWidth: 'none',
-              content: '打印'
-            }"
-            icon="ri:printer-line"
-            class="cursor-pointer outline-transparent"
-            @click="onPrint"
-          />
-        </div>
-      </div>
-      <el-scrollbar>
-        <vue-pdf-embed
-          ref="pdfRef"
-          class="h-full container overflow-auto"
-          :rotation="rotations[currentRotation]"
-          :page="currentPage"
-          :source="previewUrl"
-          @rendered="handleDocumentRender"
-        />
-      </el-scrollbar>
+  <div>
+    <div v-if="isPdf" class="h-[calc(100vh-295px)]">
+      <iframe
+        :src="previewUrl"
+        class="w-full h-full border-0"
+        title="文件预览"
+      />
     </div>
-
-    <!-- 图片预览 -->
-    <div v-else-if="isImage && previewUrl" class="h-[calc(100vh-295px)]">
+    <div v-else-if="isImage" class="h-[calc(100vh-295px)]">
       <el-scrollbar>
         <div class="flex justify-center items-center h-full">
           <el-image
@@ -180,8 +70,6 @@ watch(
         </div>
       </el-scrollbar>
     </div>
-
-    <!-- 不支持预览的文件类型 -->
     <div v-else class="flex justify-center items-center h-[calc(100vh-295px)]">
       <el-empty description="该文件类型不支持预览" />
     </div>

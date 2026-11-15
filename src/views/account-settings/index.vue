@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getMine } from "@/api/user";
 import { useRouter } from "vue-router";
 import { ref, onBeforeMount } from "vue";
+import { useUserStoreHook } from "@/store/modules/user";
 import { ReText } from "@/components/ReText";
 import Profile from "./components/Profile.vue";
 import Preferences from "./components/Preferences.vue";
@@ -28,11 +28,7 @@ onBeforeMount(() => {
   useDataThemeChange().dataThemeChange($storage.layout?.overallStyle);
 });
 
-const userInfo = ref({
-  avatar: "",
-  username: "",
-  nickname: ""
-});
+const userStore = useUserStoreHook();
 const panes = [
   {
     key: "profile",
@@ -60,10 +56,6 @@ const panes = [
   }
 ];
 const witchPane = ref("profile");
-
-getMine().then(res => {
-  userInfo.value = res.data;
-});
 </script>
 
 <template>
@@ -84,13 +76,10 @@ getMine().then(res => {
           </div>
         </el-menu-item>
         <div class="flex items-center ml-8 mt-4 mb-4">
-          <el-avatar :size="48" :src="userInfo.avatar" />
+          <el-avatar :size="48" :src="userStore.avatar" />
           <div class="ml-4 flex flex-col max-w-[130px]">
             <ReText class="font-bold !self-baseline">
-              {{ userInfo.nickname }}
-            </ReText>
-            <ReText class="!self-baseline" type="info">
-              {{ userInfo.username }}
+              {{ userStore.username }}
             </ReText>
           </div>
         </div>

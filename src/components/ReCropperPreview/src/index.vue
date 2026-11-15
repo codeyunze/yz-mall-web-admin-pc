@@ -37,8 +37,9 @@ defineExpose({ hidePopover });
     <el-popover
       ref="popoverRef"
       :visible="showPopover"
-      placement="right"
+      placement="right-start"
       width="18vw"
+      popper-class="re-cropper-preview-popper"
     >
       <template #reference>
         <div class="w-[18vw]">
@@ -59,7 +60,8 @@ defineExpose({ hidePopover });
           v-if="cropperImg"
           :src="cropperImg"
           :preview-src-list="Array.of(cropperImg)"
-          fit="cover"
+          fit="contain"
+          class="re-cropper-preview-image"
         />
         <div v-if="infos" class="mt-1">
           <p>
@@ -74,3 +76,24 @@ defineExpose({ hidePopover });
     </el-popover>
   </div>
 </template>
+
+<style scoped>
+.re-cropper-preview-image {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+}
+
+.re-cropper-preview-image :deep(.el-image__inner) {
+  max-height: 240px;
+  object-fit: contain;
+}
+</style>
+
+<style>
+/* 浮层挂在 body 上，高度限制在裁剪区以内，避免盖住对话框底部按钮 */
+.re-cropper-preview-popper {
+  max-height: 320px;
+  overflow: auto;
+}
+</style>

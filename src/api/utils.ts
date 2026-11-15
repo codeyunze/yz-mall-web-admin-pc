@@ -20,9 +20,8 @@ export function parsePreviewFileId(url?: string | null): string {
 }
 
 /**
- * 将后端/历史预览地址统一转为前端可访问的 `/api/sys/file/preview/{id}?token=`
- * <p>
- * 后端 Feign 常返回直连 sys 的绝对地址或无 `/api` 前缀的相对路径，浏览器无法直达，需改走 Vite 代理。
+ * 预览地址转成浏览器可访问的地址。
+ * 对象存储预签名绝对地址原样返回；网关 `/sys/file/preview/{id}` 补上 `/api` 与 token，由接口 302 到签名地址。
  */
 export function toAccessibleFileUrl(
   url?: string | null,

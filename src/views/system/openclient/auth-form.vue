@@ -23,7 +23,7 @@ watch(
 
 onMounted(() => {
   getOpenPermissionOptions().then(res => {
-    if (res.code === 200 && Array.isArray(res.data) && res.data.length > 0) {
+    if (res.code === 0 && Array.isArray(res.data) && res.data.length > 0) {
       permissionOptions.value = res.data;
     } else {
       permissionOptions.value = [

@@ -30,7 +30,7 @@ export const useImageVerify = () => {
       }
 
       // 检查响应码和数据
-      if (res.code === 200 && res.data) {
+      if (res.code === 0 && res.data) {
         if (res.data.captchaId && res.data.image) {
           captchaId.value = res.data.captchaId;
           imageSrc.value = res.data.image;

@@ -23,7 +23,7 @@ const formRef = ref();
 async function loadList() {
   loading.value = true;
   const res = await getTenantDatasourceList(props.tenantId);
-  if (res.code === 200) {
+  if (res.code === 0) {
     datasourceList.value = Array.isArray(res.data) ? res.data : [];
   } else {
     message(res.msg || "查询数据源失败", { type: "error" });
@@ -62,7 +62,7 @@ function openDatasourceForm(title = "新增连接", row?: any) {
       FormRef.validate((valid: boolean) => {
         if (!valid) return;
         saveOrUpdateTenantDatasource(formData).then(res => {
-          if (res.code === 200) {
+          if (res.code === 0) {
             message("数据源保存成功", { type: "success" });
             done();
             loadList();
@@ -77,7 +77,7 @@ function openDatasourceForm(title = "新增连接", row?: any) {
 
 function handleDelete(row: any) {
   deleteTenantDatasource(row.id).then(res => {
-    if (res.code === 200) {
+    if (res.code === 0) {
       message(`已删除服务连接 ${row.serviceCode}`, { type: "success" });
       loadList();
     } else {
@@ -88,7 +88,7 @@ function handleDelete(row: any) {
 
 function handleInitDb(row: any) {
   initTenantDb(props.tenantId, row.serviceCode).then(res => {
-    if (res.code === 200 && res.data) {
+    if (res.code === 0 && res.data) {
       message(`服务 ${row.serviceCode} 建库成功`, { type: "success" });
     } else {
       message(res.msg || `服务 ${row.serviceCode} 建库失败`, { type: "error" });

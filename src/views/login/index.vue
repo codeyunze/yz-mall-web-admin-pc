@@ -112,7 +112,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
 
     if (timeoutId) clearTimeout(timeoutId);
 
-    if (res.code === 200) {
+    if (res.code === 0) {
       // 获取后端路由并跳转
       await initRouter();
       await router.push(getTopMenu(true).path);

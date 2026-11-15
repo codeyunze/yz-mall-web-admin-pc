@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { formUpload } from "@/api/mock";
+import { getUserList, updateUserById } from "@/api/system";
 import { message } from "@/utils/message";
-import { type UserInfo, getMine } from "@/api/user";
+import { userKey, type DataInfo } from "@/utils/auth";
+import { useUserStoreHook } from "@/store/modules/user";
 import type { FormInstance, FormRules } from "element-plus";
 import ReCropperPreview from "@/components/ReCropperPreview";
-import { createFormData, deviceDetection } from "@pureadmin/utils";
+import {
+  createFormData,
+  deviceDetection,
+  storageLocal
+} from "@pureadmin/utils";
 import uploadLine from "@iconify-icons/ri/upload-line";
 
 defineOptions({
@@ -19,16 +25,27 @@ const uploadRef = ref();
 const isShow = ref(false);
 const userInfoFormRef = ref<FormInstance>();
 
+const submitting = ref(false);
 const userInfos = reactive({
+  id: "",
   avatar: "",
-  nickname: "",
+  username: "",
   email: "",
   phone: "",
-  description: ""
+  sex: undefined as number | undefined,
+  status: undefined as number | undefined
 });
 
-const rules = reactive<FormRules<UserInfo>>({
-  nickname: [{ required: true, message: "昵称必填", trigger: "blur" }]
+const rules = reactive<FormRules>({
+  username: [
+    { required: true, message: "昵称必填", trigger: "blur" },
+    { max: 10, message: "昵称不能超过10个字符", trigger: "blur" }
+  ],
+  phone: [
+    { required: true, message: "联系电话必填", trigger: "blur" },
+    { max: 11, message: "联系电话不能超过11个字符", trigger: "blur" }
+  ],
+  email: [{ max: 50, message: "邮箱不能超过50个字符", trigger: "blur" }]
 });
 
 function queryEmail(queryString, callback) {
@@ -86,21 +103,69 @@ const handleSubmitImage = () => {
     });
 };
 
-// 更新信息
-const onSubmit = async (formEl: FormInstance) => {
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      console.log(userInfos);
-      message("更新信息成功", { type: "success" });
-    } else {
-      console.log("error submit!", fields);
-    }
-  });
+const syncLoginName = (username: string) => {
+  const store = useUserStoreHook();
+  store.SET_USERNAME(username);
+  store.SET_NICKNAME(username);
+  const cached = storageLocal().getItem<DataInfo<number>>(userKey);
+  if (cached) {
+    cached.username = username;
+    storageLocal().setItem(userKey, cached);
+  }
 };
 
-getMine().then(res => {
-  Object.assign(userInfos, res.data);
-});
+const loadProfile = async () => {
+  const userId = useUserStoreHook().userId;
+  if (!userId) {
+    message("未获取到当前用户", { type: "error" });
+    return;
+  }
+  const res = await getUserList({
+    current: 1,
+    size: 1,
+    filter: { userIds: [userId] }
+  });
+  const user = res.data?.items?.[0];
+  if (res.code !== 0 || !user) {
+    message(res.msg || "获取个人信息失败", { type: "error" });
+    return;
+  }
+  userInfos.id = user.id;
+  userInfos.avatar = user.avatar || "";
+  userInfos.username = user.username || "";
+  userInfos.email = user.email || "";
+  userInfos.phone = user.phone || "";
+  userInfos.sex = user.sex;
+  userInfos.status = user.status;
+};
+
+const onSubmit = async (formEl?: FormInstance) => {
+  if (!formEl) return;
+  const valid = await formEl.validate().catch(() => false);
+  if (!valid) return;
+  submitting.value = true;
+  try {
+    const res = await updateUserById({
+      id: userInfos.id,
+      username: userInfos.username.trim(),
+      phone: userInfos.phone.trim(),
+      email: userInfos.email.trim(),
+      sex: userInfos.sex,
+      status: userInfos.status
+    });
+    if (res.code === 0) {
+      userInfos.username = userInfos.username.trim();
+      syncLoginName(userInfos.username);
+      message("更新信息成功", { type: "success" });
+      return;
+    }
+    message(res.msg || "更新信息失败", { type: "error" });
+  } finally {
+    submitting.value = false;
+  }
+};
+
+loadProfile();
 </script>
 
 <template>
@@ -134,8 +199,8 @@ getMine().then(res => {
           </el-button>
         </el-upload>
       </el-form-item>
-      <el-form-item label="昵称" prop="nickname">
-        <el-input v-model="userInfos.nickname" placeholder="请输入昵称" />
+      <el-form-item label="昵称" prop="username">
+        <el-input v-model="userInfos.username" placeholder="请输入昵称" />
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
         <el-autocomplete
@@ -147,24 +212,18 @@ getMine().then(res => {
           class="w-full"
         />
       </el-form-item>
-      <el-form-item label="联系电话">
+      <el-form-item label="联系电话" prop="phone">
         <el-input
           v-model="userInfos.phone"
           placeholder="请输入联系电话"
           clearable
         />
       </el-form-item>
-      <el-form-item label="简介">
-        <el-input
-          v-model="userInfos.description"
-          placeholder="请输入简介"
-          type="textarea"
-          :autosize="{ minRows: 6, maxRows: 8 }"
-          maxlength="56"
-          show-word-limit
-        />
-      </el-form-item>
-      <el-button type="primary" @click="onSubmit(userInfoFormRef)">
+      <el-button
+        type="primary"
+        :loading="submitting"
+        @click="onSubmit(userInfoFormRef)"
+      >
         更新信息
       </el-button>
     </el-form>

@@ -192,7 +192,7 @@ export function useColumns() {
     const statusText = newStatus === 1 ? "启用" : "禁用";
     const data = { id: row.id, status: newStatus };
     updateModelStatus(data).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`车型 [${row.modelName}] 已${statusText}`, {
           type: "success"
         });
@@ -204,7 +204,7 @@ export function useColumns() {
   /** 删除车型 */
   function handleDelete(row) {
     deleteModel(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了车型 [${row.modelName}] 的这条数据`, {
           type: "success"

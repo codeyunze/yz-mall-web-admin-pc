@@ -169,7 +169,7 @@ export function useColumns(tableRef: Ref) {
         })
       )
       .then(res => {
-        if (res.code === 200) {
+        if (res.code === 0) {
           message("审核通过", { type: "success" });
           onSearch();
         } else {
@@ -200,7 +200,7 @@ export function useColumns(tableRef: Ref) {
         })
       )
       .then(res => {
-        if (res.code === 200) {
+        if (res.code === 0) {
           message("已拒绝退款", { type: "success" });
           onSearch();
         } else {

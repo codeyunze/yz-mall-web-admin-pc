@@ -307,9 +307,9 @@ export const fileUploadUrl = baseUrlApi("/sys/file/upload");
 export const filePreviewUrl = (fileId?: string | number, token?: string) => {
   return baseUrlApi(`/sys/file/preview/${fileId}?token=${token}`);
 };
-/** 文件下载地址 */
+/** 获取带临时签名的下载地址 */
 export const fileDownloadUrl = (fileId?: string | number) => {
-  return http.request<Result>(
+  return http.request<Result<string>>(
     "get",
     baseUrlApi(`/sys/file/download/${fileId}`)
   );

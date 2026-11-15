@@ -55,7 +55,7 @@ const loadAddressList = async () => {
       filter: {}
     };
     const res = await pageReceiptInfo(params);
-    if (res.code === 200 && res.data) {
+    if (res.code === 0 && res.data) {
       addressList.value = res.data.items || [];
       // 如果有当前地址，尝试匹配并选中；否则预选默认地址
       if (props.currentAddress) {

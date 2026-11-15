@@ -4,14 +4,11 @@ import type {
   PaginationProps
 } from "@pureadmin/table";
 
-import { getFilePage, deleteFileById } from "@/api/system";
-import { baseUrlApi } from "@/api/utils";
+import { getFilePage, deleteFileById, fileDownloadUrl } from "@/api/system";
 import { ref, onMounted, reactive, h, type Ref } from "vue";
 import { message } from "@/utils/message";
-import { downloadByData, deviceDetection } from "@pureadmin/utils";
-import { getToken, formatToken } from "@/utils/auth";
+import { deviceDetection } from "@pureadmin/utils";
 import { addDialog } from "@/components/ReDialog";
-import axios from "axios";
 import Preview from "../components/Preview.vue";
 import type { FormItemProps } from "./types";
 
@@ -237,26 +234,24 @@ export function useFile(tableRef: Ref) {
    * @param row 文件信息
    */
   function handleDownload(row: FormItemProps) {
-    // 使用 axios 直接请求文件，设置 responseType 为 blob
-    const token = getToken();
-    axios
-      .get(baseUrlApi(`/sys/file/download/${row.id}`), {
-        responseType: "blob",
-        headers: {
-          Authorization: token ? formatToken(token.accessToken) : ""
+    fileDownloadUrl(row.id)
+      .then(res => {
+        if (res?.code === 0 && res.data) {
+          const link = document.createElement("a");
+          link.href = res.data;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.click();
+          message(`文件 [${row.fileName}] 下载成功`, { type: "success" });
+          return;
         }
-      })
-      .then(({ data }) => {
-        downloadByData(data, row.fileName);
-        message(`文件 [${row.fileName}] 下载成功`, {
-          type: "success"
+        message(res?.msg || `文件 [${row.fileName}] 下载失败`, {
+          type: "error"
         });
       })
       .catch(error => {
         console.error("下载文件失败:", error);
-        message(`文件 [${row.fileName}] 下载失败`, {
-          type: "error"
-        });
+        message(`文件 [${row.fileName}] 下载失败`, { type: "error" });
       });
   }
 
@@ -266,7 +261,7 @@ export function useFile(tableRef: Ref) {
    */
   function handleDelete(row: FormItemProps) {
     deleteFileById(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`您删除了文件名为 [${row.fileName}] 的这条数据`, {
           type: "success"
         });
@@ -290,7 +285,7 @@ export function useFile(tableRef: Ref) {
     // 批量删除逻辑
     Promise.all(curSelected.map(item => deleteFileById(item.id))).then(
       results => {
-        const successCount = results.filter(res => res.code === 200).length;
+        const successCount = results.filter(res => res.code === 0).length;
         if (successCount === curSelected.length) {
           message(`已删除 ${successCount} 条数据`, {
             type: "success"

@@ -176,7 +176,7 @@ export function useColumns() {
       current: 1,
       filter: {}
     }).then(data => {
-      if (data.code === 200) {
+      if (data.code === 0) {
         productOptions.value = (data.data.items || []).map(item => ({
           label: item.productName,
           value: item.id
@@ -262,7 +262,7 @@ export function useColumns() {
             // 表单规则校验通过
             if (title === "新增") {
               addSku(submitData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   const skuId = res.data;
                   // 如果有待添加的属性，保存SKU后添加属性
                   if (formRef.value.saveAttrs) {
@@ -276,7 +276,7 @@ export function useColumns() {
               });
             } else {
               updateSku(submitData).then(res => {
-                if (res.code === 200) {
+                if (res.code === 0) {
                   // 编辑模式下，如果有待添加的属性，也需要保存
                   if (formRef.value.saveAttrs && formData.id) {
                     formRef.value.saveAttrs(formData.id).then(() => {
@@ -319,7 +319,7 @@ export function useColumns() {
    */
   function handleDelete(row) {
     deleteSku(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了SKU编码为 [${row.skuCode}] 的这条数据`, {
           type: "success"

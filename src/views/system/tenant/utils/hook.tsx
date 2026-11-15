@@ -93,7 +93,7 @@ export function useTenant() {
     let currentRow = row;
     if (title === "修改" && row?.id) {
       const detailRes = await getTenantById(row.id);
-      if (detailRes.code !== 200 || !detailRes.data) {
+      if (detailRes.code !== 0 || !detailRes.data) {
         message(detailRes.msg || "获取租户详情失败", { type: "error" });
         return;
       }
@@ -127,7 +127,7 @@ export function useTenant() {
             const request =
               title === "新增" ? addTenant(formData) : updateTenant(formData);
             request.then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 message(`租户${title}成功`, { type: "success" });
                 done();
                 onSearch();
@@ -160,7 +160,7 @@ export function useTenant() {
 
   function handleDelete(row: FormItemProps) {
     deleteTenant(row.id as string).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`已删除租户 ${row.tenantName}`, { type: "success" });
         onSearch();
       } else {

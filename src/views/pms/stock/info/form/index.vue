@@ -43,7 +43,7 @@ watch(
       newFormInline.value.skuId = 0;
       try {
         const res = await getSkuListByProductId(productId);
-        if (res.code === 200 && res.data) {
+        if (res.code === 0 && res.data) {
           skuOptions.value = (res.data || []).map((sku: any) => ({
             label: `${sku.skuName || sku.skuCode} (${sku.skuCode})`,
             value: sku.id
@@ -80,7 +80,7 @@ watch(
     // 如果有 productId，加载对应的 SKU 列表（仅在编辑模式下）
     if (!newVal.readOnly && newVal.productId && newVal.productId > 0) {
       getSkuListByProductId(newVal.productId).then(res => {
-        if (res.code === 200 && res.data) {
+        if (res.code === 0 && res.data) {
           skuOptions.value = (res.data || []).map((sku: any) => ({
             label: `${sku.skuName || sku.skuCode} (${sku.skuCode})`,
             value: sku.id

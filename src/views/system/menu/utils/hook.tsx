@@ -159,7 +159,7 @@ export function useMenu() {
   const debounceHandleAddMenu: any = debounce(
     (operation, title, done) => {
       addMenu(menuParam.value).then(res => {
-        if (res.code === 200) {
+        if (res.code === 0) {
           message(`您${operation}了菜单名称为 [${title}] 的这条数据`, {
             type: "success"
           });
@@ -185,7 +185,7 @@ export function useMenu() {
   const debounceHandleUpdateMenu: any = debounce(
     (operation, title, done) => {
       updateMenuById(menuParam.value).then(res => {
-        if (res.code === 200) {
+        if (res.code === 0) {
           message(`您${operation}了菜单名称为 [${title}] 的这条数据`, {
             type: "success"
           });
@@ -263,7 +263,7 @@ export function useMenu() {
 
   function handleDelete(row) {
     deleteMenuById(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message(`您删除了菜单名称为${row.title}的这条数据`, {
           type: "success"
         });

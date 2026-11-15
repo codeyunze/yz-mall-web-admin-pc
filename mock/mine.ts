@@ -38,7 +38,7 @@ export default defineFakeRoute([
       // list = list.filter(item => item.email.includes(body?.email));
 
       return {
-        code: 200,
+        code: 0,
         success: true,
         data: {
           items: list,
@@ -53,7 +53,7 @@ export default defineFakeRoute([
     method: "get",
     response: () => {
       return {
-        code: 200,
+        code: 0,
         success: true,
         data: {
           avatar: "https://avatars.githubusercontent.com/u/44761321",
@@ -92,7 +92,7 @@ export default defineFakeRoute([
         }
       ];
       return {
-        code: 200,
+        code: 0,
         success: true,
         data: {
           items: list,

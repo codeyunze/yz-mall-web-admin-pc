@@ -160,7 +160,7 @@ export function useColumns(tableRef: Ref) {
       return;
     }
     getSkuStockByProductId(row.productId).then(res => {
-      if (res.code !== 200) {
+      if (res.code !== 0) {
         message(res.msg || "查询SKU库存失败", { type: "error" });
         return;
       }
@@ -227,13 +227,13 @@ export function useColumns(tableRef: Ref) {
           };
           if (title === "入库") {
             pmsProductStockIn(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
           } else {
             pmsProductStockOut(submitData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
@@ -282,7 +282,7 @@ export function useColumns(tableRef: Ref) {
    */
   function handleDelete(row) {
     deleteProduct(row.id).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         onSearch();
         message(`您删除了商品名称为 [${row.productName}] 的这条数据`, {
           type: "success"

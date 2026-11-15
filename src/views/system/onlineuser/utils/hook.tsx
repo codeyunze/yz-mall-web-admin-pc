@@ -156,7 +156,7 @@ export function useOnlineUser() {
       });
 
       const res = await kickoutOnlineUser(userId);
-      if (res.code === 200) {
+      if (res.code === 0) {
         message("踢下线成功", { type: "success" });
         onSearch();
       } else {

@@ -186,13 +186,13 @@ export function useColumns() {
           }
           if (title === "入库") {
             pmsProductStockIn(curData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
           } else {
             pmsProductStockOut(curData).then(res => {
-              if (res.code === 200) {
+              if (res.code === 0) {
                 chores();
               }
             });
@@ -227,7 +227,7 @@ export function useColumns() {
   // 加载分类树
   function loadCategoryTree() {
     getCategoryTree().then(data => {
-      if (data.code === 200) {
+      if (data.code === 0) {
         categoryOptions.value = flattenCategoryTree(data.data || []);
       }
     });

@@ -197,7 +197,7 @@ export function useColumns(tableRef: Ref) {
       orderCode
     };
     getOmsInfo(queryFilter).then(data => {
-      if (data.code !== 200) {
+      if (data.code !== 0) {
         message(data.msg || "获取订单详情失败", { type: "error" });
         return;
       }
@@ -279,7 +279,7 @@ export function useColumns(tableRef: Ref) {
     )
       .then(() => omsOrderCancel(order.id))
       .then(result => {
-        if (result.code === 200) {
+        if (result.code === 0) {
           message("订单已取消", { type: "success" });
           onSearch();
           closeDrawer(options, index);
@@ -324,7 +324,7 @@ export function useColumns(tableRef: Ref) {
           orderId: order.id,
           reason: String(value).trim()
         }).then(res => {
-          if (res.code === 200) {
+          if (res.code === 0) {
             message("退款申请已提交", { type: "success" });
             closeDrawer(options, index);
             onSearch();
@@ -347,7 +347,7 @@ export function useColumns(tableRef: Ref) {
       payType: 1
     };
     omsPay(pay).then(res => {
-      if (res.code === 200) {
+      if (res.code === 0) {
         message("支付成功", { type: "success" });
         closeDrawer(options, index);
         onSearch();
