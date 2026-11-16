@@ -17,6 +17,7 @@ import {
 import { useMultiTagsStoreHook } from "./multiTags";
 import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
 import { toRaw } from "vue";
+import { message } from "@/utils/message";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -90,6 +91,8 @@ export const useUserStore = defineStore({
         getLogin(data).then(res => {
           if (res?.code === 0) {
             setToken(toRaw(res.data));
+          } else {
+            message(res.msg, { type: "error" });
           }
           resolve(res);
         });

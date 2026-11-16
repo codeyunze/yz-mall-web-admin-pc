@@ -178,12 +178,7 @@ class PureHttp {
           if (
             result.code === 50000 ||
             result.code === 50001 ||
-            result.code === 11011 ||
-            result.code === 11012 ||
-            result.code === 11013 ||
-            result.code === 11014 ||
-            result.code === 11015 ||
-            result.code === 11016
+            result.code === 50002
           ) {
             message(result.msg, { type: "error" });
             useUserStoreHook().logOut();

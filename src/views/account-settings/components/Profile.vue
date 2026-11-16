@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { formUpload } from "@/api/mock";
-import { getUserList, updateUserById } from "@/api/system";
+import { fileUploadUrl, getUserList, updateUserById } from "@/api/system";
+import type { Result } from "@/api/type";
+import { http } from "@/utils/http";
 import { message } from "@/utils/message";
 import { userKey, type DataInfo } from "@/utils/auth";
 import { useUserStoreHook } from "@/store/modules/user";
 import type { FormInstance, FormRules } from "element-plus";
 import ReCropperPreview from "@/components/ReCropperPreview";
-import {
-  createFormData,
-  deviceDetection,
-  storageLocal
-} from "@pureadmin/utils";
+import { deviceDetection, storageLocal } from "@pureadmin/utils";
 import uploadLine from "@iconify-icons/ri/upload-line";
 
 defineOptions({
@@ -26,6 +23,7 @@ const isShow = ref(false);
 const userInfoFormRef = ref<FormInstance>();
 
 const submitting = ref(false);
+const avatarUploading = ref(false);
 const userInfos = reactive({
   id: "",
   avatar: "",
@@ -85,22 +83,57 @@ const handleClose = () => {
 
 const onCropper = ({ blob }) => (cropperBlob.value = blob);
 
-const handleSubmitImage = () => {
-  const formData = createFormData({
-    files: new File([cropperBlob.value], "avatar")
+const syncAvatar = (avatar: string) => {
+  const store = useUserStoreHook();
+  store.SET_AVATAR(avatar);
+  const cached = storageLocal().getItem<DataInfo<number>>(userKey);
+  if (cached) {
+    cached.avatar = avatar;
+    storageLocal().setItem(userKey, cached);
+  }
+};
+
+const handleSubmitImage = async () => {
+  if (!cropperBlob.value || avatarUploading.value) return;
+  const blob = cropperBlob.value as Blob;
+  const file = new File([blob], "avatar.png", {
+    type: blob.type || "image/png"
   });
-  formUpload(formData)
-    .then(({ success, data }) => {
-      if (success) {
-        message("更新头像成功", { type: "success" });
-        handleClose();
-      } else {
-        message("更新头像失败");
-      }
-    })
-    .catch(error => {
-      message(`提交异常 ${error}`, { type: "error" });
+  const formData = new FormData();
+  formData.append("uploadfile", file);
+  avatarUploading.value = true;
+  try {
+    const uploaded = await http.request<Result<string>>(
+      "post",
+      `${fileUploadUrl}?fileStorageMode=cos&publicAccess=1&fileStorageStation=mall`,
+      { data: formData, timeout: 60000 },
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    if (uploaded.code !== 0 || !uploaded.data) {
+      message(uploaded.msg || "头像上传失败", { type: "error" });
+      return;
+    }
+    const res = await updateUserById({
+      id: userInfos.id,
+      username: userInfos.username.trim(),
+      phone: userInfos.phone.trim(),
+      email: userInfos.email.trim(),
+      sex: userInfos.sex,
+      status: userInfos.status,
+      avatarFileId: uploaded.data
     });
+    if (res.code !== 0) {
+      message(res.msg || "更新头像失败", { type: "error" });
+      return;
+    }
+    await loadProfile();
+    message("更新头像成功", { type: "success" });
+    handleClose();
+  } catch (error) {
+    message(`提交异常 ${error}`, { type: "error" });
+  } finally {
+    avatarUploading.value = false;
+  }
 };
 
 const syncLoginName = (username: string) => {
@@ -132,6 +165,7 @@ const loadProfile = async () => {
   }
   userInfos.id = user.id;
   userInfos.avatar = user.avatar || "";
+  syncAvatar(userInfos.avatar);
   userInfos.username = user.username || "";
   userInfos.email = user.email || "";
   userInfos.phone = user.phone || "";
@@ -240,7 +274,13 @@ loadProfile();
       <template #footer>
         <div class="dialog-footer">
           <el-button bg text @click="handleClose">取消</el-button>
-          <el-button bg text type="primary" @click="handleSubmitImage">
+          <el-button
+            bg
+            text
+            type="primary"
+            :loading="avatarUploading"
+            @click="handleSubmitImage"
+          >
             确定
           </el-button>
         </div>
